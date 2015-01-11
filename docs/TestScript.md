@@ -1,6 +1,6 @@
 # Web Apollo Testing Script
 
-111914
+121814
 
 M. Munoz-Torres
 
@@ -38,6 +38,8 @@ Login|Password : demo|demo
 
 4) Clicking on group name link should take you to the corresponding group track in the main window.
 
+5) Test top-level menus.
+
 5.1) Test that you are able to Log out from the upper-right corner, top-level menu.
 
 5.2) In top-level menu, go to Tools -> Manage Users. Create a new user and grant read, write and publish permissions. Logout and log back in as the newly created user. Create some new annotations or modify existing ones.
@@ -64,7 +66,7 @@ Login|Password : demo|demo
 
 -- Tools (see 8.2)
 
--- View: check options to go to "Changes" and "Sequences" (select sequences) page, check the ability to set and clear highlights, show plus/minus strands, show track label, resize quantitative tracks, and color by CDS (also tested in 10).
+-- View: check options to go to "Changes" and "Sequences" (select sequences) page, check the ability to set and clear highlights, show plus/minus strands, show track label, resize quantitative tracks, color by CDS (also tested in 10), and changing the color scheme (dark or light).
 
 -- Help: All links go to a new screen.
 
