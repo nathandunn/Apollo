@@ -7,6 +7,8 @@ import org.bbop.apollo.Organism
  */
 class MultiSequenceProjection extends AbstractProjection {
 
+    Map<Integer,Integer> projectionCache = new HashMap<>()
+
     // if a projection includes multiple sequences, this will include greater than one
     TreeMap<ProjectionSequence, DiscontinuousProjection> sequenceDiscontinuousProjectionMap = new TreeMap<>()
     ProjectionDescription projectionDescription  // description of how this is generated
@@ -60,6 +62,7 @@ class MultiSequenceProjection extends AbstractProjection {
     }
 
     Integer projectValue(Integer input) {
+        if(projectionCache.containsKey(input)) return projectionCache.get(input)
         ProjectionSequence projectionSequence = getProjectionSequence(input)
         if (!projectionSequence) {
             return UNMAPPED_VALUE
@@ -69,7 +72,9 @@ class MultiSequenceProjection extends AbstractProjection {
         if (returnValue == UNMAPPED_VALUE) {
             return UNMAPPED_VALUE
         } else {
-            return returnValue + projectionSequence.offset
+            Integer returnInt = returnValue + projectionSequence.offset
+            projectionCache.put(input,returnInt)
+            return returnInt
         }
     }
 
@@ -86,6 +91,11 @@ class MultiSequenceProjection extends AbstractProjection {
 //    }
 
     Integer projectReverseValue(Integer input) {
+//        if(projectionCache.containsValue(input)) {
+//            // get the key for the value
+//            projectionCache.index
+//            return projectionCache.get(input)
+//        }
         ProjectionSequence projectionSequence = getReverseProjectionSequence(input)
         if (!projectionSequence) return -1
         return sequenceDiscontinuousProjectionMap.get(projectionSequence).projectReverseValue(input - projectionSequence.offset) + projectionSequence.originalOffset
