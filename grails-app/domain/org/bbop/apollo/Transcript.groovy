@@ -4,7 +4,7 @@ package org.bbop.apollo
  * Inherited from here:
  * AbstractSingleLocationBioFeature
  */
-class Transcript extends GeneMemberRegion{
+class Transcript extends SequenceFeature{
 
     static constraints = {
     }
