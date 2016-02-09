@@ -12,7 +12,7 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONException
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.grails.plugins.metrics.groovy.Timed
-
+import org.hibernate.FetchMode
 /**
  * This class is responsible for handling JSON requests from the AnnotationEditorController and routing
  * to the proper service classes.
@@ -44,16 +44,16 @@ class RequestHandlingService {
     def bookmarkService
     def featureProjectionService
 
-    public static List<String> viewableAnnotationFeatureList = [
+    public static final List<String> viewableAnnotationFeatureList = [
             RepeatRegion.class.name,
             TransposableElement.class.name
     ]
-    public static List<String> viewableAnnotationTranscriptParentList = [
+    public static final List<String> viewableAnnotationTranscriptParentList = [
             Gene.class.name,
             Pseudogene.class.name
     ]
 
-    public static List<String> viewableAnnotationTranscriptList = [
+    public static final List<String> viewableAnnotationTranscriptList = [
             Transcript.class.name,
             MRNA.class.name,
             TRNA.class.name,
@@ -64,8 +64,13 @@ class RequestHandlingService {
             MiRNA.class.name,
     ]
 
-    public
-    static List<String> viewableAnnotationList = viewableAnnotationFeatureList + viewableAnnotationTranscriptParentList
+    public static final List<String> viewableAlterations = [
+            Deletion.class.name,
+            Insertion.class.name,
+            Substitution.class.name
+    ]
+
+    public static final List<String> viewableAnnotationList = viewableAnnotationFeatureList + viewableAnnotationTranscriptParentList
 
     private String underscoreToCamelCase(String underscore) {
         if (!underscore || underscore.isAllWhitespace()) {
@@ -139,7 +144,6 @@ class RequestHandlingService {
         return jsonObject
     }
 
-    // is this used?
     def deleteNonPrimaryDbxrefs(JSONObject inputObject) {
         JSONObject updateFeatureContainer = createJSONFeatureContainer();
         JSONArray featuresArray = inputObject.getJSONArray(FeatureStringEnum.FEATURES.value)
@@ -471,6 +475,7 @@ class RequestHandlingService {
     @Timed
     @Transactional
     JSONObject getFeatures(JSONObject inputObject) {
+        long start = System.currentTimeMillis()
 
         List<String> sequenceNameList = permissionService.extractSequenceNamesFromJson(inputObject)
         Bookmark bookmark = permissionService.checkPermissions(inputObject, PermissionEnum.READ)
@@ -483,32 +488,37 @@ class RequestHandlingService {
 
         log.debug "getFeatures for organism -> ${sequenceList.organism.commonName} and ${sequenceList.name}"
 
-        List topLevelTranscripts = Transcript.executeQuery("select distinct f , child , childLocation from Transcript f join f.featureLocations fl join f.parentFeatureRelationships pr join pr.childFeature child join child.featureLocations childLocation where fl.sequence in (:sequences) and f.class in (:viewableAnnotationList)", [sequences: sequenceList, viewableAnnotationList: viewableAnnotationTranscriptList])
-        Map<Transcript, List<Feature>> transcriptMap = new HashMap<>()
-        Map<Transcript, List<FeatureLocation>> featureLocationMap = new HashMap<>()
-        topLevelTranscripts.each {
-            List<Feature> featureList
-            featureList = transcriptMap.containsKey(it[0]) ? transcriptMap.get(it[0]) : new ArrayList<>()
-            featureList.add(it[1])
-            transcriptMap.put(it[0], featureList)
-
-
-            List<FeatureLocation> featureLocationList
-            featureLocationList = featureLocationMap.containsKey(it[0]) ? featureLocationMap.get(it[0]) : new ArrayList<>()
-            featureLocationList.add(it[2])
-            featureLocationMap.put(it[0], featureLocationList)
+        def features = Feature.createCriteria().listDistinct {
+            featureLocations {
+                'in'('sequence',sequenceList)
+            }
+            fetchMode 'owners', FetchMode.JOIN
+            fetchMode 'featureLocations', FetchMode.JOIN
+            fetchMode 'featureLocations.sequence', FetchMode.JOIN
+            fetchMode 'featureProperties', FetchMode.JOIN
+            fetchMode 'featureDBXrefs', FetchMode.JOIN
+            fetchMode 'parentFeatureRelationships', FetchMode.JOIN
+            fetchMode 'childFeatureRelationships', FetchMode.JOIN
+            fetchMode 'childFeatureRelationships.parentFeature', FetchMode.JOIN
+            fetchMode 'childFeatureRelationships.parentFeature.featureLocations', FetchMode.JOIN
+            fetchMode 'childFeatureRelationships.parentFeature.featureLocations.sequence', FetchMode.JOIN
+            fetchMode 'parentFeatureRelationships.parentFeature', FetchMode.JOIN
+            fetchMode 'parentFeatureRelationships.parentFeature.featureLocations', FetchMode.JOIN
+            fetchMode 'parentFeatureRelationships.parentFeature.featureLocations.sequence', FetchMode.JOIN
+            fetchMode 'parentFeatureRelationships.childFeature', FetchMode.JOIN
+            fetchMode 'parentFeatureRelationships.childFeature.parentFeatureRelationships', FetchMode.JOIN
+            fetchMode 'parentFeatureRelationships.childFeature.childFeatureRelationships', FetchMode.JOIN
+            fetchMode 'parentFeatureRelationships.childFeature.featureLocations', FetchMode.JOIN
+            fetchMode 'parentFeatureRelationships.childFeature.featureLocations.sequence', FetchMode.JOIN
+            fetchMode 'parentFeatureRelationships.childFeature.featureProperties', FetchMode.JOIN
+            fetchMode 'parentFeatureRelationships.childFeature.featureDBXrefs', FetchMode.JOIN
+            fetchMode 'parentFeatureRelationships.childFeature.owners', FetchMode.JOIN
+            'in'('class', viewableAnnotationTranscriptList+viewableAnnotationFeatureList)
         }
+
 
         JSONArray jsonFeatures = new JSONArray()
-
-        for (Transcript transcript in transcriptMap.keySet()) {
-            jsonFeatures.put(transcriptService.convertTranscriptToJSON(transcript, transcriptMap.get(transcript), featureLocationMap.get(transcript)))
-        }
-
-
-
-        List<Feature> topLevelFeatures = Feature.executeQuery("select distinct f from Feature f join f.featureLocations fl where fl.sequence in (:sequences) and f.childFeatureRelationships is empty and f.class in (:viewableAnnotationList)", [sequences: sequenceList, viewableAnnotationList: viewableAnnotationFeatureList])
-        topLevelFeatures.each { feature ->
+        features.each { feature ->
             JSONObject jsonObject = featureService.convertFeatureToJSON(feature, false)
             jsonFeatures.put(jsonObject)
         }
@@ -608,6 +618,7 @@ class RequestHandlingService {
         }
 
         List<Transcript> transcriptList = new ArrayList<>()
+        def transcriptJSONList = []
         for (int i = 0; i < featuresArray.size(); i++) {
             JSONObject jsonTranscript = featuresArray.getJSONObject(i)
             jsonTranscript = permissionService.copyUserName(inputObject, jsonTranscript)
@@ -616,24 +627,19 @@ class RequestHandlingService {
             transcript.save(flush: true)
             transcriptList.add(transcript)
 
-            // https://github.com/GMOD/Apollo/issues/453
-            // enforce calculation for ALL created transcripts
-            // checking for overlapping Sequence Alterations
             featureService.setLongestORF(transcript)
             Gene gene = transcriptService.getGene(transcript)
             inputObject.put(FeatureStringEnum.NAME.value, gene.name)
 
             if (!suppressHistory) {
-                featureEventService.addNewFeatureEventWithUser(FeatureOperation.ADD_TRANSCRIPT, transcriptService.getGene(transcript).name, transcript.uniqueName, inputObject, featureService.convertFeatureToJSON(transcript), permissionService.getCurrentUser(inputObject))
+                def json = featureService.convertFeatureToJSON(transcript)
+                featureEventService.addNewFeatureEventWithUser(FeatureOperation.ADD_TRANSCRIPT, transcriptService.getGene(transcript).name, transcript.uniqueName, inputObject, json, permissionService.getCurrentUser(inputObject))
+                transcriptJSONList+=json
             }
         }
 
-        // should this be a call with featuresArray or with the transcriptList converted to featuresArray
-        //JSONArray returnArray = featureProjectionService.projectTrack(featuresArray,bookmark,false)
-        JSONArray transcriptFeaturesArray = transcriptService.convertTranscriptsToJSON(transcriptList)
-        JSONArray returnArray = featureProjectionService.projectTrack(transcriptFeaturesArray, bookmark, false)
-        returnObject.put(FeatureStringEnum.FEATURES.value, returnArray)
 
+        returnObject.put(FeatureStringEnum.FEATURES.value, transcriptJSONList as JSONArray)
 
         if (!suppressEvents) {
             AnnotationEvent annotationEvent = new AnnotationEvent(
@@ -662,6 +668,7 @@ class RequestHandlingService {
         JSONObject transcriptJSONObject = features.getJSONObject(0);
 
         Transcript transcript = Transcript.findByUniqueName(transcriptJSONObject.getString(FeatureStringEnum.UNIQUENAME.value))
+//        Sequence sequence = permissionService.checkPermissions(inputObject, PermissionEnum.WRITE)
 
         boolean setStart = transcriptJSONObject.has(FeatureStringEnum.LOCATION.value);
         if (!setStart) {
@@ -672,9 +679,9 @@ class RequestHandlingService {
             JSONObject jsonCDSLocation = transcriptJSONObject.getJSONObject(FeatureStringEnum.LOCATION.value);
             featureService.setTranslationStart(transcript, jsonCDSLocation.getInt(FeatureStringEnum.FMIN.value), true)
         }
-
+        
         transcript.save()
-
+        
         def transcriptsToUpdate = featureService.handleDynamicIsoformOverlap(transcript)
         if (transcriptsToUpdate.size() > 0) {
             JSONObject updateFeatureContainer = createJSONFeatureContainer()
@@ -1216,6 +1223,26 @@ class RequestHandlingService {
             }
 
             sequenceAlteration.save(flush: true)
+
+            // TODO: Should we make it compulsory for the request object to have comments
+            // TODO: If so, then we should change all of our integration tests for sequence alterations to have comments
+            if (jsonFeature.has(FeatureStringEnum.NON_RESERVED_PROPERTIES.value)) {
+                JSONArray properties = jsonFeature.getJSONArray(FeatureStringEnum.NON_RESERVED_PROPERTIES.value);
+                for (int j = 0; j < properties.length(); ++j) {
+                    JSONObject property = properties.getJSONObject(i);
+                    String tag = property.getString(FeatureStringEnum.TAG.value)
+                    String value = property.getString(FeatureStringEnum.VALUE.value)
+                    FeatureProperty featureProperty = new FeatureProperty(
+                            feature: sequenceAlteration,
+                            value: value,
+                            tag: tag
+                    ).save()
+                    featurePropertyService.addProperty(sequenceAlteration, featureProperty)
+                    sequenceAlteration.save(flush: true)
+                }
+            }
+
+
             for (Feature feature : featureService.getOverlappingFeatures(sequenceAlteration.getFeatureLocation(), false)) {
                 if (feature instanceof Gene) {
                     for (Transcript transcript : transcriptService.getTranscripts((Gene) feature)) {
@@ -2070,8 +2097,11 @@ class RequestHandlingService {
         String transcript1UniqueName = transcript1.uniqueName
         String transcript2UniqueName = transcript2.uniqueName
 
-        JSONObject transcript2JSONObject = transcriptService.convertTranscriptsToJSON([transcript2]).getJSONObject(0)
+        JSONObject transcript2JSONObject = featureService.convertFeatureToJSON(transcript2)
 
+        // calculate longest ORF, to reset any changes made to the CDS, before a merge
+        featureService.setLongestORF(transcript1);
+        featureService.setLongestORF(transcript2);
         // merging transcripts
         transcriptService.mergeTranscripts(transcript1, transcript2)
         featureService.calculateCDS(transcript1)
@@ -2179,10 +2209,9 @@ class RequestHandlingService {
 
         for (int i = 0; i < featuresArray.size(); ++i) {
             JSONObject jsonFeature = featuresArray.getJSONObject(i);
-            boolean confirm = inputObject.containsKey(FeatureStringEnum.CONFIRM.value) ? inputObject.getBoolean(FeatureStringEnum.CONFIRM.value) : false
             int count = inputObject.containsKey(FeatureStringEnum.COUNT.value) ? inputObject.getInt(FeatureStringEnum.COUNT.value) : false
             jsonFeature = permissionService.copyUserName(inputObject, jsonFeature)
-            featureEventService.undo(jsonFeature, count, confirm)
+            featureEventService.undo(jsonFeature, count)
         }
         return new JSONObject()
     }
@@ -2195,10 +2224,9 @@ class RequestHandlingService {
 
         for (int i = 0; i < featuresArray.size(); ++i) {
             JSONObject jsonFeature = featuresArray.getJSONObject(i);
-            boolean confirm = inputObject.containsKey(FeatureStringEnum.CONFIRM.value) ? inputObject.getBoolean(FeatureStringEnum.CONFIRM.value) : false
             int count = inputObject.containsKey(FeatureStringEnum.COUNT.value) ? inputObject.getInt(FeatureStringEnum.COUNT.value) : false
             jsonFeature = permissionService.copyUserName(inputObject, jsonFeature)
-            featureEventService.redo(jsonFeature, count, confirm)
+            featureEventService.redo(jsonFeature, count)
         }
         return new JSONObject()
     }
