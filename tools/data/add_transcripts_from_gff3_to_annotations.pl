@@ -493,6 +493,8 @@ sub process_gene {
         my $type = get_type($subfeature);
         if ($type =~ /$transcript_types_in/) {
             my $transcript = process_transcript($subfeature);
+			my $gene_name = $gene->{name};
+			$transcript->{gene_name} = $gene_name if $transcript;
             push(@{$gene->{children}}, $transcript) if $transcript;
         }   
     }
