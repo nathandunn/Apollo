@@ -8,6 +8,7 @@ public enum FeatureStringEnum {
         FEATURES,
         SUPPRESS_HISTORY,
         SUPPRESS_EVENTS,
+//        USE_EXISTING_NAME,
         FEATURE_PROPERTY,
         ANNOTATION_COUNT,
         PARENT_ID,

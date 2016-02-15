@@ -277,6 +277,7 @@ sub convert_feature {
     };
     if ($name) {
         $json_feature->{name} = $name;
+#        $json_feature->{use_existing_name} = 'true';
     }
     my $json_properties = [];
     foreach my $comment (@{$comments}) {

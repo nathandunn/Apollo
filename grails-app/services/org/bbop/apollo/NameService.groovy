@@ -36,9 +36,16 @@ class NameService {
                 if(!principalName){
                     principalName = ((Gene) thisFeature).name
                 }
-                if(Gene.countByName(principalName.trim())==0){
-                    return principalName
-                }
+//                if(thisFeature.uniqueName){
+//                    if(Gene.countByNameAndUniqueNameNotEqual(principalName.trim(),thisFeature.uniqueName)==0){
+//                        return principalName
+//                    }
+//                }
+//                else{
+                    if(Gene.countByName(principalName.trim())==0){
+                        return principalName
+                    }
+//                }
                   return makeUniqueGeneName(organism,principalName.trim())
 //                return makeUniqueFeatureName(organism,principalName.trim(),new LetterPaddingStrategy())
             }
