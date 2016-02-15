@@ -1676,6 +1676,10 @@ class RequestHandlingService {
 
         boolean suppressHistory = false
         boolean suppressEvents = false
+//        boolean useExistingName = false
+//        if (inputObject.has(FeatureStringEnum.USE_EXISTING_NAME.value)) {
+//            useExistingName = inputObject.getBoolean(FeatureStringEnum.USE_EXISTING_NAME.value)
+//        }
         if (inputObject.has(FeatureStringEnum.SUPPRESS_HISTORY.value)) {
             suppressHistory = inputObject.getBoolean(FeatureStringEnum.SUPPRESS_HISTORY.value)
         }
@@ -1695,6 +1699,7 @@ class RequestHandlingService {
             Feature newFeature = featureService.convertJSONToFeature(jsonFeature, sequence)
             String principalName = newFeature.name
             log.debug "principal name ${principalName}"
+//            if (!suppressHistory || useExistingName) {
             if (!suppressHistory) {
                 newFeature.name = nameService.generateUniqueName(newFeature, newFeature.name)
             }
