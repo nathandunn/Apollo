@@ -182,16 +182,16 @@
         </exec>
     </target>
 
-    <target name="git.clone" description="Clone git repository." unless="jbrowse.git.present">
-        <exec executable="git" failifexecutionfails="false" errorproperty="">
-            <arg value="clone"/>
-            <arg value="--recursive"/>
-            <arg value="${jbrowse.github}"/>
-            <arg value="${jbrowse.download.directory}"/>
-        </exec>
-        <exec executable="git" failifexecutionfails="false" errorproperty="" dir="${jbrowse.download.directory}">
-            <arg value="checkout"/>
-            <!--<arg value="tags/${jbrowse.release.version}"/>-->
+<target name="git.clone" description="Clone git repository." unless="jbrowse.git.present">
+    <exec executable="git" failifexecutionfails="false" errorproperty="">
+        <arg value="clone"/>
+        <arg value="--recursive"/>
+        <arg value="${jbrowse.github}"/>
+        <arg value="${jbrowse.download.directory}"/>
+    </exec>
+    <exec executable="git" failifexecutionfails="false" errorproperty="" dir="${jbrowse.download.directory}">
+        <arg value="checkout"/>
+        <!--<arg value="tags/${jbrowse.release.version}"/>-->
             <!--<arg value="master"/>-->
 <!--            <arg value="multiple_highlights"/>-->
             <!--<arg value="apollo2_build"/>-->

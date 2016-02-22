@@ -94,6 +94,8 @@ grails.project.dependency.resolution = {
         test "org.grails:grails-datastore-test-support:1.0.2-grails-2.4"
         runtime 'org.grails:grails-datastore-gorm:3.1.5.RELEASE'
 
+        compile 'com.google.guava:guava:18.0'
+
 //        test "org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion"
 //        test "org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion"
 //        test "org.seleniumhq.selenium:selenium-htmlunit-driver:$seleniumVersion"

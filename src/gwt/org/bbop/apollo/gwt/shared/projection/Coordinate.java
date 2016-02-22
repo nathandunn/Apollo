@@ -3,15 +3,20 @@ package org.bbop.apollo.gwt.shared.projection;
 /**
  * Created by nathandunn on 2/14/16.
  */
-public class Coordinate implements Comparable<Coordinate>{
-    Integer min;
-    Integer max;
-//    String sequence
+public class Coordinate implements Comparable<Coordinate> {
+    private Integer min;
+    private Integer max;
+    private ProjectionSequence sequence;
 //    String organism
 
-    public Coordinate(Integer min,Integer max){
-        this.min = min ;
-        this.max = max ;
+    public Coordinate(Integer min, Integer max) {
+        this(min, max, null);
+    }
+
+    public Coordinate(Integer min, Integer max, ProjectionSequence sequence) {
+        this.min = min;
+        this.max = max;
+        this.sequence = sequence;
     }
 
 //    @Override
@@ -22,24 +27,28 @@ public class Coordinate implements Comparable<Coordinate>{
 
     @Override
     public int compareTo(Coordinate o) {
-        if(!min.equals(o.min)){
-            return min - o.min ;
+        if (!min.equals(o.min)) {
+            return min - o.min;
         }
-        if(!max.equals(o.max)){
-            return max - o.max ;
+        if (!max.equals(o.max)) {
+            return max - o.max;
         }
-        return 0 ;
+        if (!sequence.equals(o.sequence)) {
+            return sequence.compareTo(o.sequence);
+        }
+        return 0;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this ==o ) return true;
+        if (this == o) return true;
         if (!(o instanceof Coordinate)) return false;
 
         Coordinate that = (Coordinate) o;
 
-        if (max != that.max) return false;
         if (min != that.min) return false;
+        if (max != that.max) return false;
+        if (!sequence.equals(that.sequence)) return false;
 
         return true;
     }
@@ -49,6 +58,7 @@ public class Coordinate implements Comparable<Coordinate>{
         int result;
         result = (min != null ? min.hashCode() : 0);
         result = 31 * result + (max != null ? max.hashCode() : 0);
+        result = 31 * result + (sequence != null ? sequence.hashCode() : 0);
         return result;
     }
 
@@ -58,22 +68,22 @@ public class Coordinate implements Comparable<Coordinate>{
         return "Coordinate{" +
                 "min=" + min +
                 ", max=" + max +
-//                sequence ? ", sequence=" + sequence : "" +
+                ", sequence=" + sequence +
 //                organism ? ", organism=" + organism : "" +
                 '}';
     }
 
     Boolean isValid() {
-        return min>=0 && max>=0;
+        return min >= 0 && max >= 0;
     }
 
-    Integer getLength(){
+    Integer getLength() {
         return Math.abs(max - min);
     }
 
-    void addOffset(Integer offset){
-        min = min+offset;
-        max = max+offset;
+    void addOffset(Integer offset) {
+        min = min + offset;
+        max = max + offset;
     }
 
     public Integer getMin() {
@@ -82,5 +92,9 @@ public class Coordinate implements Comparable<Coordinate>{
 
     public Integer getMax() {
         return max;
+    }
+
+    public ProjectionSequence getSequence() {
+        return sequence;
     }
 }
