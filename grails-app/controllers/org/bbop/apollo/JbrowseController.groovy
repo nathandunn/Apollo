@@ -27,9 +27,9 @@ class JbrowseController {
     def permissionService
     def preferenceService
     def servletContext
-    def projectionService
+//    def projectionService
     def trackService
-    def refSeqProjectorService
+//    def refSeqProjectorService
 
     def chooseOrganismForJbrowse() {
         [organisms: Organism.findAllByPublicMode(true, [sort: 'commonName', order: 'asc']), flash: [message: params.error]]
@@ -143,7 +143,7 @@ class JbrowseController {
     
     def getSeqBoundaries() {
         try {
-            Organism currentOrganism = preferenceService.currentOrganismForCurrentUser
+//            Organism currentOrganism = preferenceService.currentOrganismForCurrentUser
             String dataDirectory = getJBrowseDirectoryForSession()
             String dataFileName = dataDirectory + "/seq/refSeqs.json"
             String referer = request.getHeader("Referer")
@@ -160,12 +160,11 @@ class JbrowseController {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
-            JSONArray refSeqJsonObject = new JSONArray(file.text)
-            
-            MultiSequenceProjection projection = projectionService.getProjection(refererLoc, currentOrganism)
-            
-            String results = refSeqProjectorService.projectTrack(refSeqJsonObject, projection, currentOrganism, refererLoc)
-            def resultObject = JSON.parse(results)
+//            JSONArray refSeqJsonObject = new JSONArray(file.text)
+//            MultiSequenceProjection projection = projectionService.getProjection(refererLoc, currentOrganism)
+
+//            String results = refSeqProjectorService.projectTrack(refSeqJsonObject, projection, currentOrganism, refererLoc)
+//            def resultObject = JSON.parse(results)
             def refererLocObject = JSON.parse(refererLoc)
             def sequenceList = refererLocObject.sequenceList
             def sequenceAndTheirLengths = new JSONArray()
@@ -174,7 +173,8 @@ class JbrowseController {
                 for (int i = 0; i < sequenceList.size()-1; i++) {
                     JSONObject thisSeq = sequenceList.get(i)
                     JSONObject nextSeq = sequenceList.get(i+1)
-                    pos+=projection.findProjectSequenceLength(thisSeq.name)
+                    pos += Sequence.findByName(thisSeq.name)
+//                    pos+=projection.findProjectSequenceLength(thisSeq.name)
                     sequenceAndTheirLengths.add(i, [label: thisSeq.name, rlabel: nextSeq.name, start: pos, end: pos+1, ref: refererLoc,color:'black'] as JSONObject)
                 }
             }
@@ -189,59 +189,59 @@ class JbrowseController {
      * Handles data directory serving for jbrowse
      */
     def data() {
-        Organism currentOrganism = preferenceService.currentOrganismForCurrentUser
+//        Organism currentOrganism = preferenceService.currentOrganismForCurrentUser
         String dataDirectory = getJBrowseDirectoryForSession()
         String dataFileName = dataDirectory + "/" + params.path
         String fileName = FilenameUtils.getName(params.path)
-        String referer = request.getHeader("Referer")
-        String refererLoc = trackService.extractLocation(referer)
-        if (dataFileName.contains("projection")) {
-            if (fileName.endsWith("trackData.json") || fileName.startsWith("lf-")) {
-                String putativeSequencePathName = trackService.getSequencePathName(dataFileName)
-                println "putative sequence path name ${dataFileName} -> ${putativeSequencePathName} "
-
-                JSONObject projectionSequenceObject = (JSONObject) JSON.parse(putativeSequencePathName)
-                JSONArray sequenceArray = projectionSequenceObject.getJSONArray(FeatureStringEnum.SEQUENCE_LIST.value)
-                List<String> sequenceStrings = new ArrayList<>()
-                for (int i = 0; i < sequenceArray.size(); i++) {
-                    JSONObject sequenceObject = sequenceArray.getJSONObject(i)
-                    sequenceStrings.add(sequenceObject.name)
-                }
-
-                if (fileName.endsWith("trackData.json")) {
-                    JSONObject trackObject = trackService.projectTrackData(sequenceStrings, dataFileName, refererLoc, currentOrganism)
-                    if (trackObject.getJSONObject(FeatureStringEnum.INTERVALS.value).getJSONArray(FeatureStringEnum.NCLIST.value).size() == 0) {
-                        response.setStatus(HttpServletResponse.SC_NOT_FOUND)
-                    }
-                    else {
-                        response.outputStream << trackObject.toString()
-                    }
-                    return
-                } else if (fileName.startsWith("lf-")) {
-                    String trackName = projectionService.getTrackName(dataFileName)
-                    JSONArray trackArray = trackService.projectTrackChunk(fileName, dataFileName, refererLoc, currentOrganism, trackName)
-                    if (trackArray.size() == 0) {
-                        response.setStatus(HttpServletResponse.SC_NOT_FOUND)
-                    }
-                    else {
-                        response.outputStream << trackArray.toString()
-                    }
-                    return
-                }
-
-
-            } else
-            if (fileName.endsWith(".txt") && params.path.toString().startsWith("seq")) {
-
-
-                String returnSequence = refSeqProjectorService.projectSequence(dataFileName,currentOrganism)
-                // output the string the response
-                // TODO: optimize this to not store in memory?
-                response.setContentLength((int) returnSequence.bytes.length);
-                response.outputStream << returnSequence
-                response.outputStream.close()
-            }
-        }
+//        String referer = request.getHeader("Referer")
+//        String refererLoc = trackService.extractLocation(referer)
+//        if (dataFileName.contains("projection")) {
+//            if (fileName.endsWith("trackData.json") || fileName.startsWith("lf-")) {
+//                String putativeSequencePathName = trackService.getSequencePathName(dataFileName)
+//                println "putative sequence path name ${dataFileName} -> ${putativeSequencePathName} "
+//
+//                JSONObject projectionSequenceObject = (JSONObject) JSON.parse(putativeSequencePathName)
+//                JSONArray sequenceArray = projectionSequenceObject.getJSONArray(FeatureStringEnum.SEQUENCE_LIST.value)
+//                List<String> sequenceStrings = new ArrayList<>()
+//                for (int i = 0; i < sequenceArray.size(); i++) {
+//                    JSONObject sequenceObject = sequenceArray.getJSONObject(i)
+//                    sequenceStrings.add(sequenceObject.name)
+//                }
+//
+//                if (fileName.endsWith("trackData.json")) {
+//                    JSONObject trackObject = trackService.projectTrackData(sequenceStrings, dataFileName, refererLoc, currentOrganism)
+//                    if (trackObject.getJSONObject(FeatureStringEnum.INTERVALS.value).getJSONArray(FeatureStringEnum.NCLIST.value).size() == 0) {
+//                        response.setStatus(HttpServletResponse.SC_NOT_FOUND)
+//                    }
+//                    else {
+//                        response.outputStream << trackObject.toString()
+//                    }
+//                    return
+//                } else if (fileName.startsWith("lf-")) {
+//                    String trackName = projectionService.getTrackName(dataFileName)
+//                    JSONArray trackArray = trackService.projectTrackChunk(fileName, dataFileName, refererLoc, currentOrganism, trackName)
+//                    if (trackArray.size() == 0) {
+//                        response.setStatus(HttpServletResponse.SC_NOT_FOUND)
+//                    }
+//                    else {
+//                        response.outputStream << trackArray.toString()
+//                    }
+//                    return
+//                }
+//
+//
+//            } else
+//            if (fileName.endsWith(".txt") && params.path.toString().startsWith("seq")) {
+//
+//
+//                String returnSequence = refSeqProjectorService.projectSequence(dataFileName,currentOrganism)
+//                // output the string the response
+//                // TODO: optimize this to not store in memory?
+//                response.setContentLength((int) returnSequence.bytes.length);
+//                response.outputStream << returnSequence
+//                response.outputStream.close()
+//            }
+//        }
         File file = new File(dataFileName);
 
         if (!file.exists()) {
@@ -343,11 +343,12 @@ class JbrowseController {
 //                    if (projectionService.hasProjection(preferenceService.currentOrganismForCurrentUser,projectionService.getTrackName(file.absolutePath))) {
                     println "refseq size ${refSeqJsonObject.size()}"
 
-                    MultiSequenceProjection projection = projectionService.getProjection(refererLoc, currentOrganism)
+//                    MultiSequenceProjection projection = projectionService.getProjection(refererLoc, currentOrganism)
 
                     // returns projection to a string of some sort
-                    String results = refSeqProjectorService.projectTrack(refSeqJsonObject, projection, currentOrganism, refererLoc)
-                    response.outputStream << results
+//                    String results = refSeqProjectorService.projectTrack(refSeqJsonObject, projection, currentOrganism, refererLoc)
+//                    response.outputStream << results
+                    response.outputStream << refSeqJsonObject.toString()
                 } else {
                     // Set content size
                     response.setContentLength((int) file.length());

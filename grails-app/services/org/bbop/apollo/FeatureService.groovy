@@ -34,9 +34,9 @@ class FeatureService {
     def sequenceService
     def permissionService
     def overlapperService
-    def sessionFactory
+//    def sessionFactory
     def bookmarkService
-    def projectionService
+//    def projectionService
 
     /**
      * We assume that the jsonLocation must be reverse-projected . . . and then associated with the appropriate sequence
@@ -50,7 +50,7 @@ class FeatureService {
     @Transactional
     public FeatureLocation convertJSONToFeatureLocation(JSONObject jsonLocation, Bookmark bookmark,Boolean projected = false ) throws JSONException {
 
-        MultiSequenceProjection multiSequenceProjection = projectionService.getProjection(bookmark)
+//        MultiSequenceProjection multiSequenceProjection = projectionService.getProjection(bookmark)
 
         Integer min = jsonLocation.getInt(FeatureStringEnum.FMIN.value)
         Integer max = jsonLocation.getInt(FeatureStringEnum.FMAX.value)
@@ -61,23 +61,34 @@ class FeatureService {
             sequence = Sequence.findByNameAndOrganism(sequenceString,organism)
         }
         else{
-            ProjectionSequence projectionSequence = multiSequenceProjection.getReverseProjectionSequence(min)
-            ProjectionSequence projectionSequence2 = multiSequenceProjection.getReverseProjectionSequence(max)
-            assert projectionSequence==projectionSequence2
-            sequence = Sequence.findByNameAndOrganism(projectionSequence.name,organism)
+//            List<Sequence> sequences= bookmarkService.getSequencesFromBookmark(bookmark)
+            // this will just grab the first sequence for right now:
+//            JSONArray sequenceArray = JSON.parse(bookmark.sequenceList) as JSONArray
+//            String sequenceName = ""
+//            for (int i = 0; i < sequenceArray.size(); i++) {
+//                sequenceName = sequenceArray.getJSONObject(i).name
+//            }
+//
+////            ProjectionSequence projectionSequence = multiSequenceProjection.getReverseProjectionSequence(min)
+////            ProjectionSequence projectionSequence2 = multiSequenceProjection.getReverseProjectionSequence(max)
+////            assert projectionSequence==projectionSequence2
+////            sequence = Sequence.findByNameAndOrganism(projectionSequence.name,organism)
+//            sequence = Sequence.findByNameAndOrganism(sequenceName,organism)
+//            sequence = sequences?.first()
+            sequence = bookmarkService.getSequenceFromBookmarkAndLocation(bookmark,min)
         }
 
         FeatureLocation gsolLocation = new FeatureLocation();
 
-        if(projected) {
-            Coordinate coordinate = multiSequenceProjection.projectReverseCoordinate(min,max)
-            gsolLocation.setFmin(coordinate.min);
-            gsolLocation.setFmax(coordinate.max);
-        }
-        else{
+//        if(projected) {
+//            Coordinate coordinate = multiSequenceProjection.projectReverseCoordinate(min,max)
+//            gsolLocation.setFmin(coordinate.min);
+//            gsolLocation.setFmax(coordinate.max);
+//        }
+//        else{
             gsolLocation.setFmin(min);
             gsolLocation.setFmax(max);
-        }
+//        }
 
         if (jsonLocation.has(FeatureStringEnum.ID.value)) {
             gsolLocation.setId(jsonLocation.getLong(FeatureStringEnum.ID.value));
@@ -158,16 +169,17 @@ class FeatureService {
         gsolFeature.setIsAnalysis(false);
         gsolFeature.setIsObsolete(false);
         if (bookmark) {
-            MultiSequenceProjection multiSequenceProjection = projectionService.getProjection(bookmark)
+//            MultiSequenceProjection multiSequenceProjection = projectionService.getProjection(bookmark)
+//            List<Sequence> sequences= bookmarkService.getSequencesFromBookmark(bookmark)
 
             Organism organism
             gsolFeature.featureLocations.each(){
                 // if its set . . . don't reset!
                 if(!it.sequence){
-                    ProjectionSequence projectionSequence = multiSequenceProjection.getReverseProjectionSequence(it.fmin)
-                    String sequenceName = projectionSequence.name
-                    organism = organism ?: Organism.findByCommonName(projectionSequence.organism)
-                    it.sequence = Sequence.findByNameAndOrganism(sequenceName,organism)
+//                    ProjectionSequence projectionSequence = multiSequenceProjection.getReverseProjectionSequence(it.fmin)
+//                    String sequenceName = projectionSequence.name
+//                    organism = organism ?: Organism.findByCommonName(projectionSequence.organism)
+                    it.sequence = bookmarkService.getSequenceFromBookmarkAndLocation(bookmark,it.fmin)
                 }
             }
         }

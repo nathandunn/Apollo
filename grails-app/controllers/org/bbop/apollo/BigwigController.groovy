@@ -16,7 +16,7 @@ class BigwigController {
     def permissionService
     def preferenceService
     def sequenceService
-    def projectionService
+//    def projectionService
     def bookmarkService
     def trackService
     def bigwigService
@@ -59,13 +59,13 @@ class BigwigController {
             // TODO: should cache these if open
             bigWigFileReader = new BigWigFileReader(path)
 
-            MultiSequenceProjection projection = projectionService.getProjection(refererLoc, currentOrganism)
-
-            if (projection) {
-                bigwigService.processProjection(featuresArray, projection, bigWigFileReader, start, end)
-            } else {
+//            MultiSequenceProjection projection = projectionService.getProjection(refererLoc, currentOrganism)
+//
+//            if (projection) {
+//                bigwigService.processProjection(featuresArray, projection, bigWigFileReader, start, end)
+//            } else {
                 bigwigService.processSequence(featuresArray, sequenceName, bigWigFileReader, start, end)
-            }
+//            }
             println "end array ${featuresArray.size()}"
         } catch (e) {
             println "baddness ${e} -> ${path}"

@@ -12,7 +12,7 @@ class BookmarkController {
 
     def permissionService
     def preferenceService
-    def projectionService
+//    def projectionService
     def bookmarkService
 
     def list() {
@@ -38,7 +38,7 @@ class BookmarkController {
 
         // creates a projection based on the Bookmarks and caches them
         bookmarkObject.organism = organism.commonName
-        projectionService.getProjection(bookmarkObject)
+//        projectionService.getProjection(bookmarkObject)
 
         render bookmarkObject as JSON
     }

@@ -39,6 +39,17 @@ class BookmarkService {
         return sequences ? generateBookmarkForSequence(user,sequences) : null
     }
 
+    Sequence getSequenceFromBookmarkAndLocation(Bookmark bookmark,Integer fmin) {
+        int counter = 0
+        for(Sequence sequence in getSequencesFromBookmark(bookmark)){
+            if(fmin >= counter && fmin <=sequence.length){
+                return sequence
+            }
+            counter += sequence.length
+        }
+        return null
+    }
+
     List<Sequence> getSequencesFromBookmark(Bookmark bookmark) {
         JSONArray sequeneArray = JSON.parse(bookmark.sequenceList) as JSONArray
 //        List<String> sequenceNames = []

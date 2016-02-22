@@ -16,8 +16,9 @@ class FeatureProjectionService {
     def bookmarkService
 
     JSONArray projectTrack(JSONArray inputFeaturesArray, Bookmark bookmark, Boolean reverseProjection = false) {
-        MultiSequenceProjection projection = projectionService.getProjection(bookmark)
-        return projectTrack(inputFeaturesArray, projection, reverseProjection)
+        return inputFeaturesArray
+//        MultiSequenceProjection projection = projectionService.getProjection(bookmark)
+//        return projectTrack(inputFeaturesArray, projection, reverseProjection)
     }
 
     JSONArray projectTrack(JSONArray inputFeaturesArray, MultiSequenceProjection projection,Boolean reverseProjection = false) {

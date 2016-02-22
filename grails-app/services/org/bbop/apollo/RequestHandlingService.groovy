@@ -40,7 +40,7 @@ class RequestHandlingService {
     def featurePropertyService
     def featureEventService
     def brokerMessagingTemplate
-    def projectionService
+//    def projectionService
     def bookmarkService
     def featureProjectionService
 
@@ -525,7 +525,7 @@ class RequestHandlingService {
 
 //        featureProjectionService.projectTrack(sequence,"",jsonFeatures,false)
         // this will have all of the necessary projection criteria
-        jsonFeatures = featureProjectionService.projectTrack(jsonFeatures, bookmark, false)
+//        jsonFeatures = featureProjectionService.projectTrack(jsonFeatures, bookmark, false)
 //        MultiSequenceProjection projection = projectionService.getProjection(inputObject, organism)
 //        featureProject.projectTrack(jsonFeatures,projection,organism,inputObject)
 

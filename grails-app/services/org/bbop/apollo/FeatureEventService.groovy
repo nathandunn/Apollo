@@ -21,7 +21,7 @@ class FeatureEventService {
     def transcriptService
     def featureService
     def requestHandlingService
-    def featureProjectionService
+//    def featureProjectionService
     def bookmarkService
 
     /**

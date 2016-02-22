@@ -223,20 +223,20 @@ class TrackService {
         File file = new File(path)
         String inputText = file.text
         JSONArray coordinateJsonArray = new JSONArray(inputText)
-        String sequenceName = projectionService.getSequenceName(file.absolutePath)
+//        String sequenceName = projectionService.getSequenceName(file.absolutePath)
         // get the track from the json object
 
         // TODO: it should look up the OGS track either default or variable
-        MultiSequenceProjection projection = projectionService.getProjection(refererLoc, currentOrganism)
+//        MultiSequenceProjection projection = projectionService.getProjection(refererLoc, currentOrganism)
 
-        if (projection && projection.containsSequence(sequenceName, currentOrganism)) {
-            ProjectionSequence projectionSequence = projection.getProjectionSequence(sequenceName, currentOrganism)
-            println "found a projection ${projection.size()}"
-            for (int i = 0; i < coordinateJsonArray.size(); i++) {
-                JSONArray coordinate = coordinateJsonArray.getJSONArray(i)
-                projectJsonArray(projection, coordinate, offset, projectionSequence, trackName)
-            }
-        }
+//        if (projection && projection.containsSequence(sequenceName, currentOrganism)) {
+//            ProjectionSequence projectionSequence = projection.getProjectionSequence(sequenceName, currentOrganism)
+//            println "found a projection ${projection.size()}"
+//            for (int i = 0; i < coordinateJsonArray.size(); i++) {
+//                JSONArray coordinate = coordinateJsonArray.getJSONArray(i)
+//                projectJsonArray(projection, coordinate, offset, projectionSequence, trackName)
+//            }
+//        }
         // at this point do a sanity check on the projected coordinateJsonArray
         sanitizeCoordinateArray(coordinateJsonArray, currentOrganism, trackName)
 
@@ -247,31 +247,31 @@ class TrackService {
         File file = new File(path)
         String inputText = file.text
         JSONObject trackDataJsonObject = new JSONObject(inputText)
-        String sequenceName = projectionService.getSequenceName(file.absolutePath)
+//        String sequenceName = projectionService.getSequenceName(file.absolutePath)
         // get the track from the json object
 
         // TODO: it should look up the OGS track either default or variable
-        MultiSequenceProjection projection = projectionService.getProjection(refererLoc, currentOrganism)
-        ProjectionSequence projectionSequence = projection.getProjectionSequence(sequenceName, currentOrganism)
+//        MultiSequenceProjection projection = projectionService.getProjection(refererLoc, currentOrganism)
+//        ProjectionSequence projectionSequence = projection.getProjectionSequence(sequenceName, currentOrganism)
 
-        if (projection && projectionSequence) {
-            println "found a projection ${projection.size()}"
-            JSONObject intervalsJsonArray = trackDataJsonObject.getJSONObject(FeatureStringEnum.INTERVALS.value)
-
-            // get track for service
-            JSONArray trackClassesArray = intervalsJsonArray.getJSONArray("classes")
-            String trackName = projectionService.getTrackName(file.absolutePath)
-            trackMapperService.storeTrack(currentOrganism.commonName, trackName, trackClassesArray)
-
-            JSONArray coordinateJsonArray = intervalsJsonArray.getJSONArray(FeatureStringEnum.NCLIST.value)
-            for (int i = 0; i < coordinateJsonArray.size(); i++) {
-                JSONArray coordinate = coordinateJsonArray.getJSONArray(i)
-                projectJsonArray(projection, coordinate, 0, projectionSequence, trackName)
-            }
-            // at this point do a sanity check on the projected coordinateJsonArray
-            sanitizeCoordinateArray(coordinateJsonArray, currentOrganism, trackName)
-
-        }
+//        if (projection && projectionSequence) {
+//            println "found a projection ${projection.size()}"
+//            JSONObject intervalsJsonArray = trackDataJsonObject.getJSONObject(FeatureStringEnum.INTERVALS.value)
+//
+//            // get track for service
+//            JSONArray trackClassesArray = intervalsJsonArray.getJSONArray("classes")
+//            String trackName = projectionService.getTrackName(file.absolutePath)
+//            trackMapperService.storeTrack(currentOrganism.commonName, trackName, trackClassesArray)
+//
+//            JSONArray coordinateJsonArray = intervalsJsonArray.getJSONArray(FeatureStringEnum.NCLIST.value)
+//            for (int i = 0; i < coordinateJsonArray.size(); i++) {
+//                JSONArray coordinate = coordinateJsonArray.getJSONArray(i)
+//                projectJsonArray(projection, coordinate, 0, projectionSequence, trackName)
+//            }
+//            // at this point do a sanity check on the projected coordinateJsonArray
+//            sanitizeCoordinateArray(coordinateJsonArray, currentOrganism, trackName)
+//
+//        }
 
         return trackDataJsonObject
     }
