@@ -194,7 +194,8 @@
             <!--<arg value="tags/${jbrowse.release.version}"/>-->
             <!--<arg value="master"/>-->
 <!--            <arg value="multiple_highlights"/>-->
-            <arg value="apollo2_build"/>
+            <!--<arg value="apollo2_build"/>-->
+            <arg value="projection_v1"/>
         </exec>
     </target>
 
