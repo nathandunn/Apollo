@@ -1,16 +1,10 @@
 package org.bbop.apollo.gwt.client.dto.bookmark;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.*;
-import com.google.gwt.user.client.Window;
-import org.bbop.apollo.gwt.shared.BookmarkKeyEnum;
 import org.bbop.apollo.gwt.shared.FeatureStringEnum;
 
-import java.awt.print.Book;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by nathandunn on 10/1/15.
@@ -51,7 +45,7 @@ public class BookmarkInfoConverter {
         if(jsonObject.containsKey(FeatureStringEnum.ID.getValue())){
             bookmarkInfo.setId((long) jsonObject.get(FeatureStringEnum.ID.getValue()).isNumber().doubleValue());
         }
-        bookmarkInfo.setPadding( (int) jsonObject.get("padding").isNumber().doubleValue());
+//        bookmarkInfo.setPadding( (int) jsonObject.get("padding").isNumber().doubleValue());
         if(jsonObject.containsKey("payload")) {
             bookmarkInfo.setPayload(jsonObject.get("payload").isObject());
         }

@@ -168,4 +168,19 @@ public class BookmarkInfo implements Comparable<BookmarkInfo> {
     public void setEnd(Integer end) {
         this.end = end;
     }
+
+    @Override
+    public String toString() {
+        GWT.log("converting to string");
+        return "BookmarkInfo{" +
+                "sequenceList=" + sequenceList +
+                ", type='" + type + '\'' +
+                ", padding=" + padding +
+                ", payload=" + payload +
+                ", id=" + id +
+                ", organismName='" + organismName + '\'' +
+                ", start=" + start +
+                ", end=" + end +
+                '}';
+    }
 }
