@@ -34,7 +34,7 @@ class FeatureService {
     def sequenceService
     def permissionService
     def overlapperService
-//    def sessionFactory
+    def sessionFactory
     def bookmarkService
 //    def projectionService
 
