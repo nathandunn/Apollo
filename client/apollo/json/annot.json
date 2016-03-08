@@ -4,6 +4,11 @@
          "location" : "./plugins/WebApollo",
          "name" : "WebApollo"
       }
+      ,
+      {
+        "location" : "./plugins/MyVariantViewer",
+        "name" : "MyVariantViewer"
+      }
    ],
     "share_link" : 0,
     "tracks" : [
