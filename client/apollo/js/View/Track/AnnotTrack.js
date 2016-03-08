@@ -998,11 +998,10 @@ define([
                         }
                         featureToAdd.get("subfeatures").push(dragfeat);
                     });
-                    featureToAdd.set("start", fmin);
-                    featureToAdd.set("end", fmax);
                     if(!subfeatures.length) {
-                        featureToAdd = new SimpleFeature({data: {strand: strand, start: featureToAdd.get('start'), end: featureToAdd.get('end'),subfeatures:[featureToAdd]}});
+                        featureToAdd = new SimpleFeature({data: {strand: strand, start: featureToAdd.get('start'), end: featureToAdd.get('end'), subfeatures: [featureToAdd]}});
                     }
+
                     if(fmin) featureToAdd.set("start", fmin);
                     if(fmax) featureToAdd.set("end", fmax);
                     var afeat = JSONUtils.createApolloFeature(featureToAdd, "mRNA", true);
