@@ -34,10 +34,10 @@ function deploy_message(){
 }
 
 function check_node(){
-    node_executable=$(which node)
+    node_executable=$(which nodeasdf)
     if ! [ -x "$node_executable" ] ; then
         nodejs_executable=$(which nodejs)
-        if ! [ -x "$node_executable" ] ; then
+        if ! [ -x "$nodejs_executable" ] ; then
             echo "You must install 'Node JS' to do a release of Apollo."
             exit 1 ;
         else
