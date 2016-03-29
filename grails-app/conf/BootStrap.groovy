@@ -1,14 +1,6 @@
-import grails.converters.JSON
 import grails.util.Environment
 import org.bbop.apollo.FeatureType
-import org.bbop.apollo.Gene
-import org.bbop.apollo.MRNA
-import org.bbop.apollo.SnRNA
-import org.bbop.apollo.Organism
-import org.bbop.apollo.Pseudogene
 import org.bbop.apollo.Role
-import org.bbop.apollo.Transcript
-import org.bbop.apollo.User
 import org.bbop.apollo.UserService
 import org.bbop.apollo.sequence.SequenceTranslationHandler
 
@@ -31,11 +23,11 @@ class BootStrap {
         SequenceTranslationHandler.spliceDonorSites.addAll(configWrapperService.spliceDonorSites)
         SequenceTranslationHandler.spliceAcceptorSites.addAll(configWrapperService.spliceAcceptorSites)
 
-        if(FeatureType.count==0){
+        if (FeatureType.count == 0) {
             featureTypeService.stubDefaultFeatureTypes()
         }
 
-        if(Role.count==0){
+        if (Role.count == 0) {
             def userRole = new Role(name: UserService.USER).save()
             userRole.addToPermissions("*:*")
             userRole.removeFromPermissions("cannedComments:*")
@@ -52,8 +44,7 @@ class BootStrap {
 //                Class.forName(grailsApplication.config.apollo.bootstrapClass).newInstance().invoke(grailsApplication.config.apollo.bootstrapMethod);
 //
 //            }
-        }
-        else{
+        } else {
             log.debug "NOT attempting to bootstrap the data "
 
         }
