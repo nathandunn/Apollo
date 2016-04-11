@@ -88,13 +88,13 @@ grails.web.disable.multipart = false
 grails.exceptionresolver.params.exclude = ['password']
 
 // configure auto-caching of queries by default (if false you can cache individual queries with 'cache: true')
-grails.hibernate.cache.queries = false
+//grails.hibernate.cache.queries = false
 
 // configure passing transaction's read-only attribute to Hibernate session, queries and criterias
 // set "singleSession = false" OSIV mode in hibernate configuration after enabling
-grails.hibernate.pass.readonly = false
+//grails.hibernate.pass.readonly = false
 // configure passing read-only to OSIV session by default, requires "singleSession = false" OSIV mode
-grails.hibernate.osiv.readonly = false
+//grails.hibernate.osiv.readonly = false
 
 grails.cache.config = {
     // avoid ehcache naming conflict to run multiple WA instances

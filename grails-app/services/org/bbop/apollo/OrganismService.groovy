@@ -1,8 +1,6 @@
 package org.bbop.apollo
 
 import grails.transaction.Transactional
-import org.hibernate.Hibernate
-import org.hibernate.Session
 
 @Transactional
 class OrganismService {

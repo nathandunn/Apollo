@@ -7,4 +7,6 @@ class Comment extends FeatureProperty implements Ontological{
 
     static String cvTerm = "Comment"
     static String ontologyId = "Comment" // TODO: not in the SO
+
+    static mapWith = "neo4j"
 }

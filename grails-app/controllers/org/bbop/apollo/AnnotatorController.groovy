@@ -17,7 +17,6 @@ import org.restapidoc.annotation.RestApiParams
 import org.restapidoc.pojo.RestApiParamType
 import org.restapidoc.pojo.RestApiVerb
 import org.springframework.http.HttpStatus
-import org.hibernate.FetchMode
 
 /**
  * This is server-side code supporting the high-level functionality of the GWT AnnotatorPanel class.
@@ -309,20 +308,20 @@ class AnnotatorController {
                 if(sort=="date") {
                     order('lastUpdated', sortorder)
                 }
-                fetchMode 'owners', FetchMode.JOIN
-                fetchMode 'featureLocations', FetchMode.JOIN
-                fetchMode 'featureLocations.sequence', FetchMode.JOIN
-                fetchMode 'parentFeatureRelationships', FetchMode.JOIN
-                fetchMode 'parentFeatureRelationships.childFeature', FetchMode.JOIN
-                fetchMode 'parentFeatureRelationships.parentFeature', FetchMode.JOIN
-                fetchMode 'parentFeatureRelationships.childFeature.parentFeatureRelationships', FetchMode.JOIN
-                fetchMode 'parentFeatureRelationships.childFeature.parentFeatureRelationships.childFeature', FetchMode.JOIN
-                fetchMode 'parentFeatureRelationships.childFeature.parentFeatureRelationships.childFeature.featureLocations', FetchMode.JOIN
-                fetchMode 'parentFeatureRelationships.childFeature.parentFeatureRelationships.childFeature.featureLocations.sequence', FetchMode.JOIN
-                fetchMode 'parentFeatureRelationships.childFeature.childFeatureRelationships', FetchMode.JOIN
-                fetchMode 'parentFeatureRelationships.childFeature.featureLocations', FetchMode.JOIN
-                fetchMode 'parentFeatureRelationships.childFeature.featureLocations.sequence', FetchMode.JOIN
-                fetchMode 'parentFeatureRelationships.childFeature.owners', FetchMode.JOIN
+//                fetchMode 'owners', FetchMode.JOIN
+//                fetchMode 'featureLocations', FetchMode.JOIN
+//                fetchMode 'featureLocations.sequence', FetchMode.JOIN
+//                fetchMode 'parentFeatureRelationships', FetchMode.JOIN
+//                fetchMode 'parentFeatureRelationships.childFeature', FetchMode.JOIN
+//                fetchMode 'parentFeatureRelationships.parentFeature', FetchMode.JOIN
+//                fetchMode 'parentFeatureRelationships.childFeature.parentFeatureRelationships', FetchMode.JOIN
+//                fetchMode 'parentFeatureRelationships.childFeature.parentFeatureRelationships.childFeature', FetchMode.JOIN
+//                fetchMode 'parentFeatureRelationships.childFeature.parentFeatureRelationships.childFeature.featureLocations', FetchMode.JOIN
+//                fetchMode 'parentFeatureRelationships.childFeature.parentFeatureRelationships.childFeature.featureLocations.sequence', FetchMode.JOIN
+//                fetchMode 'parentFeatureRelationships.childFeature.childFeatureRelationships', FetchMode.JOIN
+//                fetchMode 'parentFeatureRelationships.childFeature.featureLocations', FetchMode.JOIN
+//                fetchMode 'parentFeatureRelationships.childFeature.featureLocations.sequence', FetchMode.JOIN
+//                fetchMode 'parentFeatureRelationships.childFeature.owners', FetchMode.JOIN
             }
             long durationInMilliseconds = System.currentTimeMillis() - start;
             log.debug "criteria query ${durationInMilliseconds}"

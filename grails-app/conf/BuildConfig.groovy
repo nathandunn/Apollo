@@ -72,7 +72,7 @@ grails.project.dependency.resolution = {
         compile 'commons-collections:commons-collections:3.2.1'
 
         compile 'org.json:json:20140107'
-        compile 'org.hibernate:hibernate-tools:3.2.0.ga'
+//        compile 'org.hibernate:hibernate-tools:3.2.0.ga'
         //compile 'com.sleepycat:je:5.0.73'
         //compile 'org.spiffyui:spiffyuitasks:1.5'
         //compile 'org.spiffyui:spiffyui:1.5'
@@ -98,6 +98,7 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
+        compile "org.grails.plugins:neo4j:5.0.4.RELEASE"
         // plugins for the build system only
         build ':tomcat:7.0.55.2'
 
@@ -122,7 +123,7 @@ grails.project.dependency.resolution = {
 
         // plugins needed at runtime but not for compilation
 //        runtime ":hibernate4:4.3.5.5" // or ":hibernate:3.6.10.17"
-        runtime ':hibernate4:4.3.8.1' // or ':hibernate:3.6.10.19'
+//        runtime ':hibernate4:4.3.8.1' // or ':hibernate:3.6.10.19'
         runtime ":database-migration:1.4.1"
         runtime ":jquery-ui:1.10.4"
         runtime ":jquery:1.11.1"
