@@ -9,11 +9,13 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 class AnnotatorService {
 
     def permissionService
+    def preferenceService
     def requestHandlingService
 
     def getAppState(String token) {
         JSONObject appStateObject = new JSONObject()
         try {
+            appStateObject.preferences = preferenceService.getPreferences()
             def organismList = permissionService.getOrganismsForCurrentUser()
             UserOrganismPreference userOrganismPreference = UserOrganismPreference.findByUserAndCurrentOrganismAndClientToken(permissionService.currentUser, true,token)
             println "found organism preference: ${userOrganismPreference} for token ${token}"
