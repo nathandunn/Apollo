@@ -1,11 +1,69 @@
 package org.bbop.apollo
 
+import grails.converters.JSON
 import grails.transaction.Transactional
+import org.codehaus.groovy.grails.web.json.JSONArray
+import org.codehaus.groovy.grails.web.json.JSONObject
 
 @Transactional
 class PreferenceService {
 
     def permissionService
+
+    JSONObject getPreferences(){
+        JSONObject permissionsObject = new JSONObject()
+        JSONArray organisms = new JSONArray()
+        permissionsObject.organisms = organisms
+        if(permissionService.currentUser){
+            UserOrganismPreference.findAllByUser(permissionService.currentUser).each { pref ->
+                JSONObject organismPermission = JSON.parse( (pref as JSON).toString()) as JSONObject
+                organisms.add(organismPermission)
+            }
+        }
+        return  permissionsObject
+//        return getCurrentOrganism(permissionService.currentUser, clientToken)
+    }
+
+    JSONObject setPreferences(String preferenceString){
+        JSONObject permissionsObject = JSON.parse(preferenceString)
+        JSONArray organisms = permissionsObject.organisms
+
+
+        Map<String,UserOrganismPreference> preferenceMap = UserOrganismPreference.findAllByUser(permissionService.currentUser).collectEntries(){
+            [ (it.organism.commonName) : it]
+        }
+
+        // we add or update only .. no need to delete
+        for(int i = 0 ; i < organisms.size() ; i++){
+            JSONObject organismPreference = organisms.getJSONObject(i)
+            UserOrganismPreference userOrganismPreference = preferenceMap.get(organismPreference.commonName)
+            if(!userOrganismPreference){
+                userOrganismPreference = new UserOrganismPreference()
+            }
+            userOrganismPreference.currentOrganism = organismPreference.currentOrganism
+            // TODO: do only if different
+            userOrganismPreference.organism = Organism.findById(organismPreference.organismId)
+            userOrganismPreference.nativeTrackList = organismPreference.nativeTrackList
+            userOrganismPreference.sequence = Sequence.findById(organismPreference.sequenceId)
+            userOrganismPreference.startbp = organismPreference.startbp
+            userOrganismPreference.endbp = organismPreference.endbp
+            // TOdO: double-check that it is the right type of user
+            userOrganismPreference.user = User.findById(organismPreference.userId)
+            assert userOrganismPreference.user == permissionService.currentUser
+            userOrganismPreference.name = organismPreference.name
+            userOrganismPreference.preferencesString = organismPreference.preferenceString
+            if(i==organisms.size()-1){
+                userOrganismPreference.save(flush: true)
+            }
+            else{
+                userOrganismPreference.save()
+            }
+        }
+
+
+        return  permissionsObject
+//        return getCurrentOrganism(permissionService.currentUser, clientToken)
+    }
 
     Organism getCurrentOrganismForCurrentUser(String clientToken) {
         println "PS: getCurrentOrganismForCurrentUser ${clientToken}"
