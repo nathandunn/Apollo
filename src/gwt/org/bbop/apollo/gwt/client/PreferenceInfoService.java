@@ -23,15 +23,16 @@ public class PreferenceInfoService {
 
 
     private PreferenceInfoService(){
-        Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
-            @Override
-            public boolean execute() {
-                if(eventsInQueue){
-                    savePreferences();
-                }
-                return false;
-            }
-        },30000);
+        // TODO: activate
+//        Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
+//            @Override
+//            public boolean execute() {
+//                if(eventsInQueue){
+//                    savePreferences();
+//                }
+//                return false;
+//            }
+//        },30000);
     }
 
     public static PreferenceInfoService getInstance(){

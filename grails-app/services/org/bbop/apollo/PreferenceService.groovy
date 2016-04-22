@@ -28,6 +28,10 @@ class PreferenceService {
 //        return getCurrentOrganism(permissionService.currentUser, clientToken)
     }
 
+    JSONObject setOrganismPreference(Organism organism){
+
+    }
+
     JSONObject setPreferences(String preferenceString) {
         JSONObject permissionsObject = JSON.parse(preferenceString)
         JSONArray organisms = permissionsObject.organisms

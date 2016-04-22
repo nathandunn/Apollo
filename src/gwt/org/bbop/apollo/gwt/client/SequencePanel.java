@@ -202,20 +202,23 @@ public class SequencePanel extends Composite {
                 if (sequenceInfoSet.size() == 1) {
                     final SequenceInfo sequenceInfo = sequenceInfoSet.iterator().next();
 
-                    RequestCallback requestCallback = new RequestCallback() {
-                        @Override
-                        public void onResponseReceived(Request request, Response response) {
-                            if (sequenceInfo != null) {
-                                OrganismRestService.switchSequenceById(sequenceInfo.getId().toString());
-                            }
-                        }
+                    MainPanel.getInstance().changeSequence(sequenceInfo);
 
-                        @Override
-                        public void onError(Request request, Throwable exception) {
-                            Bootbox.alert("Error setting current sequence: " + exception);
-                        }
-                    };
-                    SequenceRestService.setCurrentSequence(requestCallback, sequenceInfo);
+//                    RequestCallback requestCallback = new RequestCallback() {
+//                        @Override
+//                        public void onResponseReceived(Request request, Response response) {
+//                            Window.alert("response of setting sequence: "+response.getText());
+//                            if (sequenceInfo != null) {
+//                                OrganismRestService.switchSequenceById(sequenceInfo.getId().toString());
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void onError(Request request, Throwable exception) {
+//                            Bootbox.alert("Error setting current sequence: " + exception);
+//                        }
+//                    };
+//                    SequenceRestService.setCurrentSequence(requestCallback, sequenceInfo);
 
                 }
             }

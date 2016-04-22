@@ -15,7 +15,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.ListBox;
 import org.bbop.apollo.gwt.client.dto.*;
@@ -35,6 +34,7 @@ import org.gwtbootstrap3.client.ui.SuggestBox;
 import org.gwtbootstrap3.client.ui.constants.AlertType;
 import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.gwtbootstrap3.extras.bootbox.client.Bootbox;
+import org.gwtbootstrap3.extras.typeahead.client.base.Suggestion;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,6 +45,7 @@ import java.util.Map;
  * Created by ndunn on 12/18/14.
  */
 public class MainPanel extends Composite {
+
 
 
     interface MainPanelUiBinder extends UiBinder<Widget, MainPanel> {
@@ -62,8 +63,6 @@ public class MainPanel extends Composite {
     private static UserInfo currentUser;
     private static OrganismInfo currentOrganism;
     private static SequenceInfo currentSequence;
-    private static Integer currentStartBp; // list of organisms for user
-    private static Integer currentEndBp; // list of organisms for user
     public static boolean useNativeTracklist; // list of organisms for user
     private static List<OrganismInfo> organismInfoList = new ArrayList<>(); // list of organisms for user
 
@@ -185,7 +184,16 @@ public class MainPanel extends Composite {
         sequenceSuggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
             @Override
             public void onSelection(SelectionEvent<SuggestOracle.Suggestion> event) {
-                setCurrentSequence(sequenceSuggestBox.getText().trim(), null, null, true, false);
+                SuggestOracle.Suggestion suggestion = event.getSelectedItem();
+                sequenceSuggestBox.setText(suggestion.getDisplayString());
+                // change the sequence and update the sequence prefernce (we have to reload anyway)
+                currentSequence.setId(Long.parseLong(suggestion.getReplacementString()));
+                currentSequence.setName(suggestion.getDisplayString());
+                updateGenomicViewer();
+
+
+//                setCurrentSequence(sequenceSuggestBox.getText().trim(), null, null, true, false);
+//                setCurrentSequence(sequenceSuggestBox.getText().trim(), null, null, true, false);
             }
         });
 
@@ -253,6 +261,8 @@ public class MainPanel extends Composite {
     }
 
     private static void setCurrentSequence(String sequenceNameString, final Integer start, final Integer end, final boolean updateViewer, final boolean blocking) {
+
+        sequenceSuggestBox.setText(sequenceNameString);
 
         final LoadingDialog loadingDialog = new LoadingDialog(false);
         if (blocking) {
@@ -429,8 +439,10 @@ public class MainPanel extends Composite {
             }
         }
 
-        currentStartBp = minRegion;
-        currentEndBp = maxRegion;
+        currentSequence.setStart(minRegion);
+        currentSequence.setEnd(maxRegion);
+//        currentStartBp = minRegion;
+//        currentEndBp = maxRegion;
 
 
         String trackListString = Annotator.getRootUrl() ;
@@ -463,8 +475,11 @@ public class MainPanel extends Composite {
         organismInfoList = appStateInfo.getOrganismList();
         currentSequence = appStateInfo.getCurrentSequence();
         currentOrganism = appStateInfo.getCurrentOrganism();
-        currentStartBp = appStateInfo.getCurrentStartBp();
-        currentEndBp = appStateInfo.getCurrentEndBp();
+        PreferenceInfoService.getInstance().setPreferenceInfo(appStateInfo.getPreferenceInfo());
+//        currentSequence.setStart(appStateInfo.getCurrentSequence().getStart());
+//        currentSequence.setEnd(appStateInfo.getCurrentSequence().getEnd());
+//        currentStartBp = appStateInfo.getCurrentStartBp();
+//        currentEndBp = appStateInfo.getCurrentEndBp();
 
         if (currentSequence != null) {
             sequenceSuggestBox.setText(currentSequence.getName());
@@ -510,7 +525,6 @@ public class MainPanel extends Composite {
                     loadingDialog.hide();
                 } else {
                     loadingDialog.hide();
-                    Window.alert("input json: "+obj.toString());
                     AppStateInfo appStateInfo = AppInfoConverter.convertFromJson(obj);
                     PreferenceInfoService.getInstance().setPreferenceInfo(appStateInfo.getPreferenceInfo());
                     setAppState(appStateInfo);
@@ -941,6 +955,17 @@ public class MainPanel extends Composite {
 
     public void setCurrentOrganism(OrganismInfo currentOrganism) {
         this.currentOrganism = currentOrganism;
+    }
+
+    public void setCurrentSequence(SequenceInfo sequenceInfo) {
+        this.currentSequence = sequenceInfo;
+    }
+
+    public void changeSequence(SequenceInfo sequenceInfo) {
+        // if the sequence exists then set it as a default
+        setCurrentSequence(sequenceInfo);
+        updateGenomicViewer();
+        sequenceSuggestBox.setText(sequenceInfo.getName());
     }
 
     public List<OrganismInfo> getOrganismInfoList() {

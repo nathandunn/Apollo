@@ -15,4 +15,8 @@ class Preference {
     String token   // this is a general purpose token or JSON string
     Date dateCreated
     Date lastUpdated
+
+    static mapping = {
+        preferenceString type: 'text'
+    }
 }

@@ -124,11 +124,12 @@ public class OrganismRestService extends RestService{
         sendRequest(requestCallback,"annotator/setCurrentOrganism/"+newOrganismId);
     }
 
-    public static void switchSequenceById(String newSequenceId) {
+    public static void switchSequenceById(final String newSequenceId) {
         RequestCallback requestCallback = new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
                 JSONObject returnValue = JSONParser.parseStrict(response.getText()).isObject();
+//                Window.alert("switching sequence "+newSequenceId + " switthing via "+returnValue);
                 MainPanel.getInstance().setAppState(AppInfoConverter.convertFromJson(returnValue));
 
                 OrganismChangeEvent organismChangeEvent = new OrganismChangeEvent(OrganismChangeEvent.Action.LOADED_ORGANISMS);

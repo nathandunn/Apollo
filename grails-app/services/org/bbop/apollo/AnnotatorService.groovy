@@ -20,11 +20,12 @@ class AnnotatorService {
 
             JSONObject defaultJsonOrganism = appStateObject.preferences.organism
             Organism currentOrganism = null
-            if (defaultJsonOrganism) {
+            currentOrganism = token ? preferenceService.getOrganismByClientToken(token) : null
+            if (!currentOrganism && defaultJsonOrganism) {
                 currentOrganism = Organism.findById(defaultJsonOrganism.id as Long)
             }
             // if the is no default organism just choose the first one
-            else if (!defaultJsonOrganism && organismList) {
+            if (!currentOrganism && !defaultJsonOrganism && organismList) {
                 currentOrganism = organismList.first()
             }
 
@@ -57,7 +58,6 @@ class AnnotatorService {
             }
             appStateObject.preferences.organism = currentOrganism
 
-
             if (!appStateObject.preferences.sequence) {
                 Sequence sequence = Sequence.findByOrganism(currentOrganism)
                 appStateObject.preferences.sequence = sequence
@@ -65,9 +65,20 @@ class AnnotatorService {
 //                    currentUserOrganismPreference.save()
             }
 //                appStateObject.preferences.sequence = currentUserOrganismPreference.sequence)
+            appStateObject.preferences.sequence.start = appStateObject.preferences.sequence.start ?: -1
+            appStateObject.preferences.sequence.end = appStateObject.preferences.sequence.end ?: -1
 
-            appStateObject.preferences.startBp = appStateObject.preferences.startBp ?: -1
-            appStateObject.preferences.endBp = appStateObject.preferences.endBp ?: 0
+            def userPreference = UserPreference.findByUser(permissionService.currentUser)
+            if(!userPreference){
+                userPreference = new UserPreference(
+                        user: permissionService.currentUser
+                ).save(insert: true)
+            }
+
+            println "preferences count ${UserOrganismPreference.countByUser(permissionService.currentUser)}"
+            userPreference.preferenceString = appStateObject.toString()
+            userPreference.save(flush:true)
+
         }
         catch (PermissionException e) {
             def error = [error: "Error: " + e]

@@ -81,8 +81,9 @@ class SequenceController {
 //        }
 //        preferenceService.setOtherCurrentOrganismsFalse(userOrganismPreference, currentUser)
 
-        Session session = SecurityUtils.subject.getSession(false)
-        preferenceService.setCurrentSequence(session, sequenceInstance)
+//        Session session = SecurityUtils.subject.getSession(false)
+        preferenceService.setCurrentSequence(request.getSession(true), sequenceInstance)
+
 
         render sequenceInstance.name as String
     }
@@ -137,10 +138,11 @@ class SequenceController {
 
     def lookupSequenceByName(String q, String organism) {
         Organism currentOrganism = preferenceService.getOrganismByClientToken(organism)
-        def sequences = Sequence.findAllByNameIlikeAndOrganism(q + "%", currentOrganism, ["sort": "name", "order": "asc", "max": 20]).collect() {
-            it.name
+        Map<String,Long> sequenceMap = new HashMap<>()
+        Sequence.findAllByNameIlikeAndOrganism(q + "%", currentOrganism, ["sort": "name", "order": "asc", "max": 20]).each {
+            sequenceMap.put(it.name , it.id)
         }
-        render sequences as JSON
+        render sequenceMap as JSON
     }
 
     def lookupSequenceByNameAndOrganism() {

@@ -475,7 +475,7 @@ class AnnotationEditorController extends AbstractApolloController implements Ann
     ] )
     @Timed
     def getSequenceAlterations() {
-        JSONObject returnObject = (request.JSON ?: JSON.parse(params.data)) as JSONObject
+        JSONObject returnObject = permissionService.handleInput(request,params)
 
         Sequence sequence = permissionService.checkPermissions(returnObject, PermissionEnum.READ)
 

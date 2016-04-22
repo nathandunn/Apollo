@@ -5,6 +5,7 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle;
@@ -16,15 +17,15 @@ import java.util.List;
 /**
  * Created by ndunn on 4/24/15.
  */
-public class ReferenceSequenceOracle extends MultiWordSuggestOracle{
+public class ReferenceSequenceOracle extends MultiWordSuggestOracle {
 
     private final String rootUrl = Annotator.getRootUrl() + "sequence/lookupSequenceByName/?q=";
 
     @Override
     public void requestSuggestions(final SuggestOracle.Request suggestRequest, final Callback suggestCallback) {
 
-        String url = rootUrl+ suggestRequest.getQuery();
-        url += "&organism="+ Annotator.getClientToken();
+        String url = rootUrl + suggestRequest.getQuery();
+        url += "&organism=" + Annotator.getClientToken();
         RequestBuilder rb = new RequestBuilder(RequestBuilder.GET, url);
 //        rb.setHeader("Content-type", "application/x-www-form-urlencoded");
 
@@ -33,22 +34,24 @@ public class ReferenceSequenceOracle extends MultiWordSuggestOracle{
                 @Override
                 public void onResponseReceived(com.google.gwt.http.client.Request request, com.google.gwt.http.client.Response response) {
                     GWT.log(response.getText());
-                    JSONArray jsonArray = JSONParser.parse(response.getText()).isArray();
+                    JSONObject jsonArray = JSONParser.parseStrict(response.getText()).isObject();
                     createSuggestion(response.getText(), response.getText());
                     List<Suggestion> suggestionList = new ArrayList<>();
 
 
-                    for(int i = 0 ; i < jsonArray.size() ; i++){
-                        final String value = jsonArray.get(i).isString().stringValue();
+//                    for(int i = 0 ; i < jsonArray.size() ; i++){
+                    for (final String name : jsonArray.keySet()) {
+                        final String sequenceId = jsonArray.get(name).toString();
+//                        final String value = jsonArray.get(i).isString().stringValue();
                         Suggestion suggestion = new Suggestion() {
                             @Override
                             public String getDisplayString() {
-                                return value ;
+                                return name ;
                             }
 
                             @Override
                             public String getReplacementString() {
-                                return value ;
+                                return sequenceId ;
                             }
                         };
                         suggestionList.add(suggestion);
@@ -56,12 +59,12 @@ public class ReferenceSequenceOracle extends MultiWordSuggestOracle{
 
                     SuggestOracle.Response r = new SuggestOracle.Response();
                     r.setSuggestions(suggestionList);
-                    suggestCallback.onSuggestionsReady(suggestRequest,r);
+                    suggestCallback.onSuggestionsReady(suggestRequest, r);
                 }
 
                 @Override
                 public void onError(com.google.gwt.http.client.Request request, Throwable exception) {
-                    Bootbox.alert("Error: "+exception);
+                    Bootbox.alert("Error: " + exception);
                 }
             });
         } catch (RequestException e) {

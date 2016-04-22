@@ -381,6 +381,7 @@ class AnnotatorController {
      */
     @Transactional
     def setCurrentOrganism(Organism organismInstance) {
+        println "setting current organism: ${params} . .  ${organismInstance}"
         // set the current organism
         preferenceService.setOrganismPreferencesForSession(request.getSession(true), organismInstance)
 //        preferenceService.setCurrentOrganism(permissionService.currentUser, organismInstance,params[FeatureStringEnum.ORGANISM.value])
@@ -392,7 +393,8 @@ class AnnotatorController {
             return
         }
 
-        render annotatorService.getAppState(params[FeatureStringEnum.ORGANISM.value].toString()) as JSON
+//        render annotatorService.getAppState(params[FeatureStringEnum.ORGANISM.value].toString()) as JSON
+        render annotatorService.getAppState(organismInstance.id.toString()) as JSON
     }
 
     /**
@@ -408,7 +410,7 @@ class AnnotatorController {
 //        preferenceService.setCurrentSequence(permissionService.currentUser, sequenceInstance,params[FeatureStringEnum.ORGANISM.value])
         session.setAttribute(FeatureStringEnum.ORGANISM_JBROWSE_DIRECTORY.value, sequenceInstance.organism.directory)
 
-        render annotatorService.getAppState(params[FeatureStringEnum.ORGANISM.value]) as JSON
+        render annotatorService.getAppState(sequenceInstance.organism.id.toString()) as JSON
     }
 
     def notAuthorized() {
