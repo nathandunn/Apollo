@@ -20,12 +20,11 @@ import java.util.List;
 /**
  * Created by ndunn on 1/14/15.
  */
-public class OrganismRestService {
+public class OrganismRestService extends RestService{
 
     public static void loadOrganisms(RequestCallback requestCallback) {
-        RestService.sendRequest(requestCallback, "organism/findAllOrganisms");
+        sendRequest(requestCallback, "organism/findAllOrganisms");
     }
-
 
     public static void loadOrganisms(final List<OrganismInfo> organismInfoList) {
         RequestCallback requestCallback = new RequestCallback() {
@@ -69,7 +68,7 @@ public class OrganismRestService {
                 Bootbox.alert("error updating organism info: "+exception);
             }
         };
-        RestService.sendRequest(requestCallback, "organism/updateOrganismInfo", "data=" + organismInfoObject.toString());
+        sendRequest(requestCallback, "organism/updateOrganismInfo", "data=" + organismInfoObject.toString());
     }
 
     public static void changeOrganism(String newOrganismId) {
@@ -93,16 +92,16 @@ public class OrganismRestService {
         };
         String payload = "data={organismId:'"+newOrganismId+"'}";
 
-        RestService.sendRequest(requestCallback, "organism/changeOrganism", payload);
+        sendRequest(requestCallback, "organism/changeOrganism", payload);
 
     }
 
     public static void createOrganism(RequestCallback requestCallback, OrganismInfo organismInfo) {
-        RestService.sendRequest(requestCallback,"organism/addOrganism", OrganismInfoConverter.convertOrganismInfoToJSONObject(organismInfo));
+        sendRequest(requestCallback,"organism/addOrganism", OrganismInfoConverter.convertOrganismInfoToJSONObject(organismInfo));
     }
 
     public static void deleteOrganism(RequestCallback requestCallback, OrganismInfo organismInfo) {
-        RestService.sendRequest(requestCallback,"organism/deleteOrganism", OrganismInfoConverter.convertOrganismInfoToJSONObject(organismInfo));
+        sendRequest(requestCallback,"organism/deleteOrganism", OrganismInfoConverter.convertOrganismInfoToJSONObject(organismInfo));
     }
 
     public static void switchOrganismById(String newOrganismId) {
@@ -122,7 +121,7 @@ public class OrganismRestService {
             }
         };
 
-        RestService.sendRequest(requestCallback,"annotator/setCurrentOrganism/"+newOrganismId);
+        sendRequest(requestCallback,"annotator/setCurrentOrganism/"+newOrganismId);
     }
 
     public static void switchSequenceById(String newSequenceId) {
@@ -142,6 +141,6 @@ public class OrganismRestService {
             }
         };
 
-        RestService.sendRequest(requestCallback,"annotator/setCurrentSequence/"+ newSequenceId);
+        sendRequest(requestCallback,"annotator/setCurrentSequence/"+ newSequenceId);
     }
 }

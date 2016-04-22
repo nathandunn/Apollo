@@ -534,7 +534,7 @@ class RequestHandlingService {
         Sequence sequence = permissionService.checkPermissions(inputObject, PermissionEnum.READ)
         if (sequenceName != sequence.name) {
             sequence = Sequence.findByNameAndOrganism(sequenceName, sequence.organism)
-            preferenceService.setCurrentSequence(permissionService.getCurrentUser(inputObject), sequence,inputObject.getString(FeatureStringEnum.CLIENT_TOKEN.value))
+            preferenceService.setCurrentSequence(permissionService.getCurrentUser(inputObject), sequence,inputObject.getString(FeatureStringEnum.ORGANISM.value))
         }
         log.debug "getFeatures for organism -> ${sequence.organism.commonName} and ${sequence.name}"
 

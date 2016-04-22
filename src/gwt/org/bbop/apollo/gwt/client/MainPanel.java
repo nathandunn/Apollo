@@ -15,7 +15,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.ListBox;
 import org.bbop.apollo.gwt.client.dto.*;
@@ -334,7 +333,7 @@ public class MainPanel extends Composite {
 
     private void loginUser() {
         String url = Annotator.getRootUrl() + "user/checkLogin";
-        url += "?clientToken=" + Annotator.getClientToken();
+        url += "?organism=" + Annotator.getClientToken();
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(url));
         builder.setHeader("Content-type", "application/x-www-form-urlencoded");
         RequestCallback requestCallback = new RequestCallback() {
@@ -487,7 +486,7 @@ public class MainPanel extends Composite {
 
     public void getAppState() {
         String url = Annotator.getRootUrl() + "annotator/getAppState";
-        url += "?"+FeatureStringEnum.CLIENT_TOKEN.getValue() + "=" + Annotator.getClientToken();
+        url += "?"+FeatureStringEnum.ORGANISM.getValue() + "=" + Annotator.getClientToken();
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(url));
         builder.setHeader("Content-type", "application/x-www-form-urlencoded");
         final LoadingDialog loadingDialog = new LoadingDialog();

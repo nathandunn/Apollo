@@ -3,7 +3,6 @@ package org.bbop.apollo
 import org.bbop.apollo.gwt.shared.FeatureStringEnum
 import org.apache.shiro.SecurityUtils
 import org.bbop.apollo.gwt.shared.PermissionEnum
-import org.bbop.apollo.sequence.SequenceTranslationHandler
 import org.bbop.apollo.sequence.TranslationTable
 import org.grails.plugins.metrics.groovy.Timed
 import org.restapidoc.annotation.RestApi
@@ -17,7 +16,7 @@ import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.security.Principal
-import java.text.DateFormat
+
 import static grails.async.Promises.*
 import grails.converters.JSON
 import org.bbop.apollo.event.AnnotationEvent
@@ -70,20 +69,22 @@ class AnnotationEditorController extends AbstractApolloController implements Ann
      */
     @Timed
     def getUserPermission() {
-        log.debug "getUserPermission ${params.data}"
-        JSONObject returnObject = permissionService.handleInput(request,params)
-//        JSONObject returnObject = (JSONObject) JSON.parse(params.data)
-
         String username = SecurityUtils.subject.principal
         if (username) {
+            log.debug "getUserPermission ${params.data}"
+            JSONObject returnObject = permissionService.handleInput(request,params)
+            Organism organism = preferenceService.getOrganismByClientToken(returnObject)
+//        JSONObject returnObject = (JSONObject) JSON.parse(params.data)
+
             int permission = PermissionEnum.NONE.value
 
             User user = User.findByUsername(username)
             println "getting user permission for ${user}, returnOBject"
-            Organism organism = preferenceService.getCurrentOrganism(user,returnObject.getString(FeatureStringEnum.CLIENT_TOKEN.value))
-            if (!organism) {
-                log.error "somehow no organism shown, getting for all"
-            }
+//            Organism organism = preferenceService.getCurrentOrganism(user,returnObject.getString(FeatureStringEnum.ORGANISM.value))
+//            Organism organism = preferenceService.getCurrentOrganism(user,returnObject.getString(FeatureStringEnum.ORGANISM.value))
+//            if (!organism) {
+//                log.error "somehow no organism shown, getting for all"
+//            }
             Map<String, Integer> permissions
             List<PermissionEnum> permissionEnumList = permissionService.getOrganismPermissionsForUser(organism, user)
             permission = permissionService.findHighestEnumValue(permissionEnumList)
@@ -491,14 +492,14 @@ class AnnotationEditorController extends AbstractApolloController implements Ann
     }
 
 
-    def getOrganism() {
-        Organism organism = preferenceService.getCurrentOrganismForCurrentUser()
-        if (organism) {
-            render organism as JSON
-        } else {
-            render new JSONObject()
-        }
-    }
+//    def getOrganism() {
+//        Organism organism = preferenceService.getCurrentOrganismForCurrentUser()
+//        if (organism) {
+//            render organism as JSON
+//        } else {
+//            render new JSONObject()
+//        }
+//    }
 
     def getAnnotationInfoEditorConfiguration() {
         JSONObject annotationInfoEditorConfigContainer = new JSONObject();
@@ -934,15 +935,17 @@ class AnnotationEditorController extends AbstractApolloController implements Ann
             @RestApiParam(name="username", type="email", paramType = RestApiParamType.QUERY)
             ,@RestApiParam(name="password", type="password", paramType = RestApiParamType.QUERY)
             ,@RestApiParam(name="search", type="JSONObject", paramType = RestApiParamType.QUERY,description = "{'key':'blat','residues':'ATACTAGAGATAC':'database_id':'abc123'}")
+            ,@RestApiParam(name="organism", type="string", paramType = RestApiParamType.QUERY,description = "Organism ID or commonName.")
     ] )
     def searchSequence() {
+        JSONObject inputObject = permissionService.handleInput(request,params)
         log.debug "sequenceSearch ${params.data}"
-        JSONObject inputObject = (request.JSON ?: JSON.parse(params.data)) as JSONObject
+//        JSONObject inputObject = (request.JSON ?: JSON.parse(params.data)) as JSONObject
         if (!permissionService.hasPermissions(inputObject, PermissionEnum.READ)) {
             render status: HttpStatus.UNAUTHORIZED
             return
         }
-        Organism organism = preferenceService.getCurrentOrganismForCurrentUser()
+        Organism organism = preferenceService.getOrganismByClientToken(inputObject.getString(FeatureStringEnum.ORGANISM.value))
         log.debug "Organism to string:  ${organism as JSON}"
         render sequenceSearchService.searchSequence(inputObject, organism.getBlatdb())
     }

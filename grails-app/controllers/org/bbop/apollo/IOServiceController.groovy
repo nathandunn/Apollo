@@ -1,7 +1,6 @@
 package org.bbop.apollo
 
 import grails.converters.JSON
-import org.apache.commons.lang.RandomStringUtils
 import org.bbop.apollo.gwt.shared.FeatureStringEnum
 import org.bbop.apollo.gwt.shared.PermissionEnum
 import org.bbop.apollo.sequence.DownloadFile
@@ -80,7 +79,7 @@ class IOServiceController extends AbstractApolloController {
             String output = dataObject.output
             String format = dataObject.format
             def sequences = dataObject.sequences // can be array or string
-            Organism organism = dataObject.organism ? Organism.findByCommonName(dataObject.organism) : preferenceService.getCurrentOrganismForCurrentUser(dataObject.getString(FeatureStringEnum.CLIENT_TOKEN.value))
+            Organism organism = dataObject.organism ? Organism.findByCommonName(dataObject.organism) : preferenceService.getOrganismByClientToken(dataObject.getString(FeatureStringEnum.ORGANISM.value),request)
 
 
             def st = System.currentTimeMillis()

@@ -150,7 +150,7 @@ class UserController {
             UserOrganismPreference userOrganismPreference
             try {
                 // sets it by default
-                userOrganismPreference = permissionService.getCurrentOrganismPreference(params[FeatureStringEnum.CLIENT_TOKEN.value])
+                userOrganismPreference = permissionService.getCurrentOrganismPreference(params[FeatureStringEnum.ORGANISM.value])
             } catch (e) {
                 log.error(e)
             }
@@ -183,7 +183,7 @@ class UserController {
             }
             log.info "updateTrackListPreference"
 
-            UserOrganismPreference uop = permissionService.getCurrentOrganismPreference(dataObject.getString(FeatureStringEnum.CLIENT_TOKEN.value))
+            UserOrganismPreference uop = permissionService.getCurrentOrganismPreference(dataObject.getString(FeatureStringEnum.ORGANISM.value))
 
             uop.nativeTrackList = dataObject.get("tracklist")
             uop.save(flush: true)

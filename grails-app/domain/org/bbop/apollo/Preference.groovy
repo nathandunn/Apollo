@@ -6,7 +6,7 @@ class Preference {
         name nullable: true ,blank: false
         domain nullable: true ,blank: false
         preferenceString nullable: true, blank: false
-        clientToken nullable: false, blank: false
+//        clientToken nullable: false, blank: false
         token nullable: true, blank: false
     }
 

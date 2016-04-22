@@ -1,20 +1,18 @@
 package org.bbop.apollo.gwt.client;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.uibinder.client.UiBinder;
-import org.bbop.apollo.gwt.client.dto.AnnotationInfo;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.http.client.*;
-import com.google.gwt.i18n.client.Dictionary;
-import com.google.gwt.json.client.*;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Widget;
+import org.bbop.apollo.gwt.client.dto.AnnotationInfo;
+import org.bbop.apollo.gwt.client.dto.AnnotationInfoConverter;
 import org.bbop.apollo.gwt.client.event.AnnotationInfoChangeEvent;
-import org.bbop.apollo.gwt.client.rest.AnnotationRestService;
-import org.gwtbootstrap3.client.ui.*;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.extras.bootbox.client.Bootbox;
 
@@ -68,7 +66,7 @@ public class RepeatRegionDetailPanel extends Composite {
         RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, URL.encode(url));
         builder.setHeader("Content-type", "application/x-www-form-urlencoded");
         StringBuilder sb = new StringBuilder();
-        sb.append("data=" + AnnotationRestService.convertAnnotationInfoToJSONObject(this.internalAnnotationInfo).toString());
+        sb.append("data=" + AnnotationInfoConverter.convertAnnotationInfoToJSONObject(this.internalAnnotationInfo).toString());
         final AnnotationInfo updatedInfo = this.internalAnnotationInfo;
         builder.setRequestData(sb.toString());
         enableFields(false);

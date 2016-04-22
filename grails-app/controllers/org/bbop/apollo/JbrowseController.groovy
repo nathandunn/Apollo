@@ -4,13 +4,14 @@ import grails.converters.JSON
 import liquibase.util.file.FilenameUtils
 import org.bbop.apollo.gwt.shared.FeatureStringEnum
 import org.bbop.apollo.sequence.Range
-import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.grails.web.json.JSONArray
+import org.codehaus.groovy.grails.web.json.JSONObject
 
 import javax.servlet.http.HttpServletResponse
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import static org.springframework.http.HttpStatus.*
+
+import static org.springframework.http.HttpStatus.NOT_FOUND
 
 //@CompileStatic
 class JbrowseController {
@@ -35,7 +36,7 @@ class JbrowseController {
         println "request path: ${request.requestURL}"
 
         def paramList = []
-        String clientToken = params[FeatureStringEnum.CLIENT_TOKEN.value]
+        String clientToken = params[FeatureStringEnum.ORGANISM.value]
         params.each { entry ->
             if (entry.key != "action" && entry.key != "controller" && entry.key != "organism") {
                 paramList.add(entry.key + "=" + entry.value)
@@ -43,17 +44,7 @@ class JbrowseController {
         }
         // case 3 - validated login (just read from preferences, then
         if (permissionService.currentUser && clientToken) {
-            Organism organism = Organism.findByCommonNameIlike(clientToken)
-            if (!organism && clientToken.isInteger()) {
-                organism = Organism.findById(clientToken.toInteger())
-            }
-            // if there is no organism
-            if(!organism){
-                organism = preferenceService.getCurrentOrganism(permissionService.currentUser,clientToken)
-            }
-            else{
-                preferenceService.setCurrentOrganism(permissionService.currentUser, organism, clientToken)
-            }
+            Organism organism = preferenceService.getOrganismByClientToken(clientToken, request)
         }
 
         if (permissionService.currentUser) {
@@ -65,26 +56,20 @@ class JbrowseController {
         else {
             log.debug "organism ID specified: ${clientToken}"
 
-            if(clientToken){
-                Organism organism = Organism.findByCommonNameIlike(clientToken)
-                if (!organism && clientToken?.isLong()) {
-                    organism = Organism.findById(clientToken.toLong())
-                }
+            if (clientToken) {
+                Organism organism = preferenceService.getOrganismByClientToken(clientToken)
+//                Organism organism = Organism.findByCommonNameIlike(clientToken)
                 if (!organism) {
                     String urlString = "/jbrowse/index.html?${paramList.join("&")}"
                     forward(controller: "jbrowse", action: "chooseOrganismForJbrowse", params: [urlString: urlString, error: "Unable to find organism for '${clientToken}'"])
                     return
                 }
-                def session = request.getSession(true)
-                session.setAttribute(FeatureStringEnum.ORGANISM_JBROWSE_DIRECTORY.value, organism.directory)
-                session.setAttribute(FeatureStringEnum.ORGANISM_ID.value, organism.id)
-                session.setAttribute(FeatureStringEnum.ORGANISM_NAME.value, organism.commonName)
+                setOrganismPreferencesForSession(request, organism, clientToken)
                 // create an anonymous login
                 File file = new File(servletContext.getRealPath("/jbrowse/index.html") as String)
                 render file.text
                 return
             }
-
 
 
         }
@@ -98,73 +83,61 @@ class JbrowseController {
 
     private String getJBrowseDirectoryForSession(String clientToken) {
         println "current user? ${permissionService.currentUser}"
-        if (!permissionService.currentUser) {
-            println "returning something not set clearly"
-            String directory = request.session.getAttribute(FeatureStringEnum.ORGANISM_JBROWSE_DIRECTORY.value)
-            if (!directory) {
-                Organism organism = Organism.findByCommonNameIlike(clientToken)
-                if (organism) {
-                    def session = request.getSession(true)
-                    session.setAttribute(FeatureStringEnum.ORGANISM_JBROWSE_DIRECTORY.value, organism.directory)
-                    session.setAttribute(FeatureStringEnum.ORGANISM_ID.value, organism.id)
-                    session.setAttribute(FeatureStringEnum.ORGANISM_NAME.value, organism.commonName)
-                    return organism.directory
-                }
-                organism = Organism.findById(clientToken as Long)
-                if (organism) {
-                    def session = request.getSession(true)
-                    session.setAttribute(FeatureStringEnum.ORGANISM_JBROWSE_DIRECTORY.value, organism.directory)
-                    session.setAttribute(FeatureStringEnum.ORGANISM_ID.value, organism.id)
-                    session.setAttribute(FeatureStringEnum.ORGANISM_NAME.value, organism.commonName)
-                    return organism.directory
-                }
-            }
+        // if the user is not a valid user
+//        if (!permissionService.currentUser) {
+        println "returning something not set clearly"
+        String directory = request.session.getAttribute(FeatureStringEnum.ORGANISM_JBROWSE_DIRECTORY.value)
+        if (!directory) {
+            Organism organism = getOrganismByClientToken(clientToken)
+            directory = organism.directory
         }
-        println "getting organism for client token ${clientToken}"
-        Organism currentOrganism = preferenceService.getCurrentOrganismForCurrentUser(clientToken)
-        println "got organism ${currentOrganism} for client token ${clientToken}"
-        String organismJBrowseDirectory = currentOrganism.directory
-        if (!organismJBrowseDirectory) {
-            for (Organism organism in Organism.all) {
-                // load if not
-                if (!organism.sequences) {
-                    sequenceService.loadRefSeqs(organism)
-                }
-
-                if (organism.sequences) {
-                    User user = permissionService.currentUser
-                    UserOrganismPreference userOrganismPreference = UserOrganismPreference.findByUserAndOrganism(user, organism)
-                    Sequence sequence = organism?.sequences?.first()
-                    if (userOrganismPreference == null) {
-                        userOrganismPreference = new UserOrganismPreference(
-                                user: user
-                                , organism: organism
-                                , sequence: sequence
-                                , currentOrganism: true
-                        ).save(insert: true, flush: true)
-                    } else {
-                        userOrganismPreference.sequence = sequence
-                        userOrganismPreference.currentOrganism = true
-                        userOrganismPreference.save()
-                    }
-
-                    organismJBrowseDirectory = organism.directory
-                    session.setAttribute(FeatureStringEnum.ORGANISM_JBROWSE_DIRECTORY.value, organismJBrowseDirectory)
-                    session.setAttribute(FeatureStringEnum.SEQUENCE_NAME.value, sequence.name)
-                    session.setAttribute(FeatureStringEnum.ORGANISM_ID.value, sequence.organismId)
-                    session.setAttribute(FeatureStringEnum.ORGANISM.value, sequence.organism.commonName)
-                    return organismJBrowseDirectory
-                }
-            }
-        }
-        return organismJBrowseDirectory
+        return directory
+//        }
+//        println "getting organism for client token ${clientToken}"
+//        Organism currentOrganism = preferenceService.getCurrentOrganismForCurrentUser(clientToken)
+//        println "got organism ${currentOrganism} for client token ${clientToken}"
+//        String organismJBrowseDirectory = currentOrganism.directory
+//        if (!organismJBrowseDirectory) {
+//            for (Organism organism in Organism.all) {
+//                // load if not
+//                if (!organism.sequences) {
+//                    sequenceService.loadRefSeqs(organism)
+//                }
+//
+//                if (organism.sequences) {
+//                    User user = permissionService.currentUser
+//                    UserOrganismPreference userOrganismPreference = UserOrganismPreference.findByUserAndOrganism(user, organism)
+//                    Sequence sequence = organism?.sequences?.first()
+//                    if (userOrganismPreference == null) {
+//                        userOrganismPreference = new UserOrganismPreference(
+//                                user: user
+//                                , organism: organism
+//                                , sequence: sequence
+//                                , currentOrganism: true
+//                        ).save(insert: true, flush: true)
+//                    } else {
+//                        userOrganismPreference.sequence = sequence
+//                        userOrganismPreference.currentOrganism = true
+//                        userOrganismPreference.save()
+//                    }
+//
+//                    organismJBrowseDirectory = organism.directory
+//                    session.setAttribute(FeatureStringEnum.ORGANISM_JBROWSE_DIRECTORY.value, organismJBrowseDirectory)
+//                    session.setAttribute(FeatureStringEnum.SEQUENCE_NAME.value, sequence.name)
+//                    session.setAttribute(FeatureStringEnum.ORGANISM_ID.value, sequence.organismId)
+//                    session.setAttribute(FeatureStringEnum.ORGANISM.value, sequence.organism.commonName)
+//                    return organismJBrowseDirectory
+//                }
+//            }
+//        }
+//        return organismJBrowseDirectory
     }
 
     /**
      * Handles data directory serving for jbrowse
      */
     def data() {
-        String dataDirectory = getJBrowseDirectoryForSession(params.get(FeatureStringEnum.CLIENT_TOKEN.value).toString())
+        String dataDirectory = getJBrowseDirectoryForSession(params.get(FeatureStringEnum.ORGANISM.value).toString())
         println "data directory: ${dataDirectory}"
         String dataFileName = dataDirectory + "/" + params.path
         String fileName = FilenameUtils.getName(params.path)
@@ -316,7 +289,7 @@ class JbrowseController {
     }
 
     def trackList() {
-        String clientToken = params.get(FeatureStringEnum.CLIENT_TOKEN.value)
+        String clientToken = params.get(FeatureStringEnum.ORGANISM.value)
         println "track list client token: ${clientToken}"
         String dataDirectory = getJBrowseDirectoryForSession(clientToken)
         println "got data directory of . . . ? ${dataDirectory}"
@@ -335,13 +308,14 @@ class JbrowseController {
 
         // add datasets to the configuration
         JSONObject jsonObject = JSON.parse(file.text) as JSONObject
-        Organism currentOrganism = preferenceService.getCurrentOrganismForCurrentUser(clientToken)
+//        Organism currentOrganism = preferenceService.getCurrentOrganismForCurrentUser(clientToken)
+        Organism currentOrganism = preferenceService.getOrganismByClientToken(clientToken)
         if (currentOrganism != null) {
             jsonObject.put("dataset_id", currentOrganism.id)
-        }
-        else {
-            id=request.session.getAttribute(FeatureStringEnum.ORGANISM_ID.value);
-            jsonObject.put("dataset_id",id);
+            id = currentOrganism.id
+        } else {
+            id = request.session.getAttribute(FeatureStringEnum.ORGANISM_ID.value);
+            jsonObject.put("dataset_id", id);
         }
         List<Organism> list = permissionService.getOrganismsForCurrentUser()
         JSONObject organismObjectContainer = new JSONObject()
@@ -366,7 +340,9 @@ class JbrowseController {
 
         jsonObject.put("datasets", organismObjectContainer)
 
-        if (jsonObject.include == null) jsonObject.put("include", new JSONArray())
+        if (jsonObject.include == null) {
+            jsonObject.put("include", new JSONArray())
+        }
         jsonObject.include.add("../plugins/WebApollo/json/annot.json")
 
         def plugins = grailsApplication.config.jbrowse?.plugins

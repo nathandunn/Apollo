@@ -7,14 +7,11 @@ import org.bbop.apollo.report.OrganismSummary
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.restapidoc.annotation.RestApi
-import org.restapidoc.annotation.RestApiBodyObject
 import org.restapidoc.annotation.RestApiMethod
 import org.restapidoc.annotation.RestApiParam
 import org.restapidoc.annotation.RestApiParams
-import org.restapidoc.annotation.RestApiResponseObject
 import org.restapidoc.pojo.RestApiParamType
 import org.restapidoc.pojo.RestApiVerb
-import org.springframework.http.HttpStatus
 
 import static org.springframework.http.HttpStatus.*
 import grails.transaction.Transactional
@@ -128,7 +125,7 @@ class OrganismController {
     @Transactional
     def addOrganism() {
         JSONObject organismJson = permissionService.handleInput(request,params)
-        String clientToken = organismJson.getString(FeatureStringEnum.CLIENT_TOKEN.value)
+        String clientToken = organismJson.getString(FeatureStringEnum.ORGANISM.value)
         try {
             if (permissionService.isUserAdmin(permissionService.getCurrentUser(organismJson))) {
                 if (organismJson.get("commonName") == "" || organismJson.get("directory") == "") {
@@ -149,7 +146,7 @@ class OrganismController {
                 if (checkOrganism(organism)) {
                     organism.save(failOnError: true, flush: true, insert: true)
                 }
-                preferenceService.setCurrentOrganism(permissionService.getCurrentUser(organismJson), organism,clientToken)
+//                preferenceService.setCurrentOrganism(permissionService.getCurrentUser(organismJson), organism,clientToken)
                 sequenceService.loadRefSeqs(organism)
                 render findAllOrganisms()
             } else {

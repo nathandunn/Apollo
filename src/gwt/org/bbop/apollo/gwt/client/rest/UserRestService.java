@@ -26,16 +26,16 @@ import java.util.TreeMap;
 /**
  * Created by ndunn on 1/14/15.
  */
-public class UserRestService {
+public class UserRestService extends RestService{
 
 
     public static void login(RequestCallback requestCallback, JSONObject data) {
-        RestService.sendRequest(requestCallback, "Login", data.toString());
+        sendRequest(requestCallback, "Login", data.toString());
     }
 
 
     public static void registerAdmin(RequestCallback requestCallback, JSONObject data) {
-        RestService.sendRequest(requestCallback, "login/registerAdmin", data);
+        sendRequest(requestCallback, "login/registerAdmin", data);
     }
 
     public static void login(String username, String password, Boolean rememberMe, final LoginDialog loginDialog) {
@@ -66,7 +66,7 @@ public class UserRestService {
     }
 
     public static void loadUsers(RequestCallback requestCallback) {
-        RestService.sendRequest(requestCallback, "user/loadUsers/");
+        sendRequest(requestCallback, "user/loadUsers/");
     }
 
     public static void loadUsers(final List<UserInfo> userInfoList) {
@@ -115,18 +115,18 @@ public class UserRestService {
                 Bootbox.alert("Error logging out " + exception);
             }
         };
-        RestService.sendRequest(requestCallback, "Login?operation=logout");
+        sendRequest(requestCallback, "Login?operation=logout");
     }
 
     public static void updateUser(RequestCallback requestCallback, UserInfo selectedUserInfo) {
         JSONObject jsonObject = selectedUserInfo.toJSON();
-        RestService.sendRequest(requestCallback, "user/updateUser", "data=" + jsonObject.toString());
+        sendRequest(requestCallback, "user/updateUser", "data=" + jsonObject.toString());
     }
 
     public static void updateUserTrackPanelPreference(RequestCallback requestCallback, boolean tracklist) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("tracklist", JSONBoolean.getInstance(tracklist));
-        RestService.sendRequest(requestCallback, "user/updateTrackListPreference", "data=" + jsonObject.toString());
+        sendRequest(requestCallback, "user/updateTrackListPreference", "data=" + jsonObject.toString());
     }
 
 
@@ -150,7 +150,7 @@ public class UserRestService {
             }
         };
         JSONObject jsonObject = selectedUserInfo.toJSON();
-        RestService.sendRequest(requestCallback, "user/deleteUser", "data=" + jsonObject.toString());
+        sendRequest(requestCallback, "user/deleteUser", "data=" + jsonObject.toString());
     }
 
     public static void createUser(final List<UserInfo> userInfoList, UserInfo selectedUserInfo) {
@@ -173,7 +173,7 @@ public class UserRestService {
             }
         };
         JSONObject jsonObject = selectedUserInfo.toJSON();
-        RestService.sendRequest(requestCallback, "user/createUser", "data=" + jsonObject.toString());
+        sendRequest(requestCallback, "user/createUser", "data=" + jsonObject.toString());
 
     }
 
@@ -193,7 +193,7 @@ public class UserRestService {
         };
         JSONObject jsonObject = selectedUserInfo.toJSON();
         jsonObject.put("group", new JSONString(groupName));
-        RestService.sendRequest(requestCallback, "user/removeUserFromGroup", "data=" + jsonObject.toString());
+        sendRequest(requestCallback, "user/removeUserFromGroup", "data=" + jsonObject.toString());
     }
 
     public static void addUserToGroup(final String groupName, final UserInfo selectedUserInfo) {
@@ -212,7 +212,7 @@ public class UserRestService {
         };
         JSONObject jsonObject = selectedUserInfo.toJSON();
         jsonObject.put("group", new JSONString(groupName));
-        RestService.sendRequest(requestCallback, "user/addUserToGroup", "data=" + jsonObject.toString());
+        sendRequest(requestCallback, "user/addUserToGroup", "data=" + jsonObject.toString());
     }
 
     public static void updateOrganismPermission(UserOrganismPermissionInfo object) {
@@ -227,7 +227,7 @@ public class UserRestService {
                 Bootbox.alert("Error updating permissions: " + exception);
             }
         };
-        RestService.sendRequest(requestCallback, "user/updateOrganismPermission", "data=" + object.toJSON().toString());
+        sendRequest(requestCallback, "user/updateOrganismPermission", "data=" + object.toJSON().toString());
     }
 
 

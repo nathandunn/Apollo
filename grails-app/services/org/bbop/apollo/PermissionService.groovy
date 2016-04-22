@@ -312,20 +312,20 @@ class PermissionService {
         User user = getCurrentUser(inputObject)
         organism = getOrganismFromInput(inputObject)
         if(!organism) {
-            organism = preferenceService.getOrganismFromPreferences(user,trackName,inputObject.getString(FeatureStringEnum.CLIENT_TOKEN.value))
+//            organism = preferenceService.getOrganismFromPreferences(user,trackName,inputObject.getString(FeatureStringEnum.ORGANISM.value))
+            organism = preferenceService.getOrganismByClientToken(inputObject.getString(FeatureStringEnum.ORGANISM.value))
         }
 
-        Sequence sequence
-        if(!trackName){
-            sequence = UserOrganismPreference.findByClientTokenAndOrganism(trackName,organism)?.sequence
-        }
-        else{
-            sequence = Sequence.findByNameAndOrganism(trackName,organism)
-        }
-
-        if(!sequence && organism){
-            sequence = Sequence.findByOrganism(organism,[max:1,sort:"end",order:"desc"])
-        }
+//        Sequence sequence
+//        if(!trackName){
+//            sequence = UserOrganismPreference.findByClientTokenAndOrganism(trackName,organism)?.sequence
+//        }
+//        else{
+//        }
+//
+//        if(!sequence && organism){
+//            sequence = Sequence.findByOrganism(organism,[max:1,sort:"end",order:"desc"])
+//        }
 
         List<PermissionEnum> permissionEnums = getOrganismPermissionsForUser(organism, user)
         PermissionEnum highestValue = isUserAdmin(user) ? PermissionEnum.ADMINISTRATE : findHighestEnum(permissionEnums)
@@ -337,7 +337,8 @@ class PermissionService {
             log.debug "permission display ${requiredPermissionEnum.display}"
             throw new AnnotationException("You have insufficient permissions [${highestValue.display} < ${requiredPermissionEnum.display}] to perform this operation")
         }
-        return sequence
+
+        return Sequence.findByNameAndOrganism(trackName,organism)
     }
 
     Boolean checkPermissions(PermissionEnum requiredPermissionEnum) {
@@ -399,7 +400,7 @@ class PermissionService {
     Boolean hasPermissions(JSONObject jsonObject, PermissionEnum permissionEnum) {
         // not sure if permissions with translate through or not
         Session session = SecurityUtils.subject.getSession(false)
-        String clientToken = jsonObject.getString(FeatureStringEnum.CLIENT_TOKEN.value)
+        String clientToken = jsonObject.getString(FeatureStringEnum.ORGANISM.value)
         if (!session) {
             // login with jsonObject tokens
             log.debug "creating session with found json object ${jsonObject.username}, ${jsonObject.password as String}"
@@ -445,7 +446,7 @@ class PermissionService {
                 organism = thisOrganism
             }
             log.debug "final organism ${organism.commonName}"
-            preferenceService.setCurrentOrganism(getCurrentUser(), organism,clientToken)
+//            preferenceService.setCurrentOrganism(getCurrentUser(), organism,clientToken)
         }
 
         return checkPermissions(jsonObject,organism,permissionEnum)
@@ -481,7 +482,7 @@ class PermissionService {
                 user: currentUser
                 , currentOrganism: true
                 , organism: organism
-                , clientToken: token
+//                , clientToken: token
         ).save(insert: true, flush: true)
         return userOrganismPreference
     }
@@ -571,13 +572,13 @@ class PermissionService {
 
     @NotTransactional
     String handleToken(GrailsParameterMap params, JSONObject dataObject) {
-        if(params.containsKey(FeatureStringEnum.CLIENT_TOKEN.value)){
-            dataObject.put(FeatureStringEnum.CLIENT_TOKEN.value,params.get(FeatureStringEnum.CLIENT_TOKEN.value))
+        if(params.containsKey(FeatureStringEnum.ORGANISM.value)){
+            dataObject.put(FeatureStringEnum.ORGANISM.value,params.get(FeatureStringEnum.ORGANISM.value))
         }
         else{
-            dataObject.put(FeatureStringEnum.CLIENT_TOKEN.value,RandomStringUtils.random(20))
+            dataObject.put(FeatureStringEnum.ORGANISM.value,RandomStringUtils.random(20))
         }
-        return dataObject.get(FeatureStringEnum.CLIENT_TOKEN.value)
+        return dataObject.get(FeatureStringEnum.ORGANISM.value)
     }
 
     @NotTransactional

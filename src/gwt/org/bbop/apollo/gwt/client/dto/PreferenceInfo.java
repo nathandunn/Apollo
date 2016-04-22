@@ -1,11 +1,11 @@
 package org.bbop.apollo.gwt.client.dto;
 
-import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
-//import org.bbop.apollo.Organism;
 import org.bbop.apollo.gwt.shared.FeatureStringEnum;
 
 import java.util.Map;
+
+//import org.bbop.apollo.Organism;
 
 /**
  * Created by ndunn on 4/21/16.

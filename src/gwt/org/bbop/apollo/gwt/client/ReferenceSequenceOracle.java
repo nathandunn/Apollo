@@ -24,7 +24,7 @@ public class ReferenceSequenceOracle extends MultiWordSuggestOracle{
     public void requestSuggestions(final SuggestOracle.Request suggestRequest, final Callback suggestCallback) {
 
         String url = rootUrl+ suggestRequest.getQuery();
-        url += "&clientToken="+ Annotator.getClientToken();
+        url += "&organism="+ Annotator.getClientToken();
         RequestBuilder rb = new RequestBuilder(RequestBuilder.GET, url);
 //        rb.setHeader("Content-type", "application/x-www-form-urlencoded");
 

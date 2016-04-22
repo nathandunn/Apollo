@@ -19,10 +19,10 @@ import org.gwtbootstrap3.extras.bootbox.client.Bootbox;
 /**
  * Created by ndunn on 1/14/15.
  */
-public class SequenceRestService {
+public class SequenceRestService extends RestService{
 
     public static void setCurrentSequence(RequestCallback requestCallback, SequenceInfo sequenceInfo) {
-        RestService.sendRequest(requestCallback, "sequence/setCurrentSequence/" + sequenceInfo.getId());
+        sendRequest(requestCallback, "sequence/setCurrentSequence/" + sequenceInfo.getId());
     }
 
 
@@ -84,10 +84,10 @@ public class SequenceRestService {
         };
 
         if (type.equals(FeatureStringEnum.TYPE_CHADO.getValue())) {
-            RestService.sendRequest(requestCallbackForChadoExport, "IOService/write", "data=" + jsonObject.toString());
+            sendRequest(requestCallbackForChadoExport, "IOService/write", "data=" + jsonObject.toString());
         }
         else {
-            RestService.sendRequest(requestCallback, "IOService/write", "data=" + jsonObject.toString());
+            sendRequest(requestCallback, "IOService/write", "data=" + jsonObject.toString());
         }
     }
 
@@ -101,7 +101,7 @@ public class SequenceRestService {
             url += "&suppressOutput=true";
         }
 
-        RestService.sendRequest(requestCallback, url);
+        sendRequest(requestCallback, url);
     }
 
     public static void getSequenceForOffsetAndMax(RequestCallback requestCallback, String text, int start, int length, String sortBy,Boolean sortNameAscending, String minFeatureLengthText, String maxFeatureLengthText) {
@@ -119,7 +119,7 @@ public class SequenceRestService {
         } catch (NumberFormatException nfe) {
             //
         }
-        RestService.sendRequest(requestCallback, searchString);
+        sendRequest(requestCallback, searchString);
     }
 
     public static void getChadoExportStatus(final SequencePanel sequencePanel) {
@@ -136,7 +136,7 @@ public class SequenceRestService {
                 sequencePanel.setChadoExportStatus("false");
             }
         };
-        RestService.sendRequest(requestCallback, requestUrl);
+        sendRequest(requestCallback, requestUrl);
     }
 
 }

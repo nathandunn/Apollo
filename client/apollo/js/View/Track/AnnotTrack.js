@@ -216,7 +216,7 @@ define([
                     track.createAnnotationChangeListener(0);
 
                     var query = {
-                        "clientToken": track.getClientToken(),
+                        //"clientToken": track.getClientToken(),
                         "track": track.getUniqueTrackName(),
                         "operation": "get_features",
                         "organism": track.webapollo.organism
@@ -278,16 +278,16 @@ define([
                     return token ;
                 }
                 else{
-                    var returnItem = window.sessionStorage.getItem("clientToken");
+                    var returnItem = window.sessionStorage.getItem("organism");
                     if (!returnItem) {
                         var randomNumber = this.generateRandomNumber(20);
                         //alert('AnnotTrack generating and storing random number: '+randomNumber);
-                        window.sessionStorage.setItem("clientToken", randomNumber);
+                        window.sessionStorage.setItem("organism", randomNumber);
                     }
                     //else{
                     //    alert("AnnotTrack found client token: "+returnItem);
                     //}
-                    return window.sessionStorage.getItem("clientToken");
+                    return window.sessionStorage.getItem("organism");
                 }
             },
 
@@ -4672,7 +4672,7 @@ define([
                 var success = true;
                 dojo.xhrPost({
                     sync: true,
-                    postData: '{ "track": "' + thisB.getUniqueTrackName() + '", "operation": "get_user_permission" ,"clientToken":' + thisB.getClientToken() + '}',
+                    postData: '{ "track": "' + thisB.getUniqueTrackName() + '", "operation": "get_user_permission" ,"organism":' + thisB.getClientToken() + '}',
                     url: context_path + "/AnnotationEditorService",
                     handleAs: "json",
                     timeout: 5 * 1000, // Time in milliseconds
@@ -5489,7 +5489,7 @@ define([
             },
 
             executeUpdateOperation: function (postData, loadCallback) {
-                if(postData.search('clientToken')<0){
+                if(postData.search('organism')<0){
                     var postObject = JSON.parse(postData);
                     postObject.clientToken = this.getClientToken();
                     postData = JSON.stringify(postObject);

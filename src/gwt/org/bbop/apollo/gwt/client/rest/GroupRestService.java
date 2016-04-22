@@ -23,7 +23,7 @@ import java.util.TreeMap;
 /**
  * Created by ndunn on 3/30/15.
  */
-public class GroupRestService {
+public class GroupRestService extends RestService{
 
 
     public static void loadGroups(final List<GroupInfo> groupInfoList) {
@@ -111,7 +111,7 @@ public class GroupRestService {
             }
         };
 
-        RestService.sendRequest(requestCallback, "group/loadGroups/");
+        sendRequest(requestCallback, "group/loadGroups/");
     }
 
     public static void updateGroup(final GroupInfo selectedGroupInfo) {
@@ -126,7 +126,7 @@ public class GroupRestService {
                 Bootbox.alert("error updating group " + selectedGroupInfo.getName() + " " + exception);
             }
         };
-        RestService.sendRequest(requestCallback, "group/updateGroup/", "data=" + selectedGroupInfo.toJSON().toString());
+        sendRequest(requestCallback, "group/updateGroup/", "data=" + selectedGroupInfo.toJSON().toString());
     }
 
     public static void deleteGroup(final GroupInfo selectedGroupInfo) {
@@ -141,7 +141,7 @@ public class GroupRestService {
                 Bootbox.alert("error updating group " + selectedGroupInfo.getName() + " " + exception);
             }
         };
-        RestService.sendRequest(requestCallback, "group/deleteGroup/", "data=" + selectedGroupInfo.toJSON().toString());
+        sendRequest(requestCallback, "group/deleteGroup/", "data=" + selectedGroupInfo.toJSON().toString());
     }
 
     public static void addNewGroup(final GroupInfo selectedGroupInfo) {
@@ -156,7 +156,7 @@ public class GroupRestService {
                 Bootbox.alert("error updating group " + selectedGroupInfo.getName() + " " + exception);
             }
         };
-        RestService.sendRequest(requestCallback, "group/createGroup/", "data=" + selectedGroupInfo.toJSON().toString());
+        sendRequest(requestCallback, "group/createGroup/", "data=" + selectedGroupInfo.toJSON().toString());
     }
 
     public static void updateOrganismPermission(GroupOrganismPermissionInfo object) {
@@ -172,11 +172,11 @@ public class GroupRestService {
                 Bootbox.alert("Error updating permissions: " + exception);
             }
         };
-        RestService.sendRequest(requestCallback, "group/updateOrganismPermission", "data=" + object.toJSON());
+        sendRequest(requestCallback, "group/updateOrganismPermission", "data=" + object.toJSON());
     }
 
     public static void updateUserGroups(RequestCallback requestCallback, GroupInfo selectedGroupInfo, List<String> selectedValues) {
-//        RestService.sendRequest(requestCallback, "group/updateMembership", "data=" + object.toJSON());
+//        sendRequest(requestCallback, "group/updateMembership", "data=" + object.toJSON());
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("groupId", new JSONNumber(selectedGroupInfo.getId()));
         JSONArray userArray = new JSONArray();
@@ -187,6 +187,6 @@ public class GroupRestService {
         }
         jsonObject.put("users", userArray);
 
-        RestService.sendRequest(requestCallback, "group/updateMembership", "data=" + jsonObject);
+        sendRequest(requestCallback, "group/updateMembership", "data=" + jsonObject);
     }
 }

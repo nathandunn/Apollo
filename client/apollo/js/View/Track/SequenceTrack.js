@@ -219,8 +219,8 @@ var SequenceTrack = declare( "SequenceTrack", DraggableFeatureTrack,
         var query={
             "track": track.annotTrack.getUniqueTrackName(),
             "operation": "get_sequence_alterations",
-            "organism": track.webapollo.organism,
-            "clientToken": track.getAnnotTrack().getClientToken()
+            "organism": track.webapollo.organism
+            //"clientToken": track.getAnnotTrack().getClientToken()
         };
 
         return dojo.xhrPost( {

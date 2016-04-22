@@ -38,10 +38,10 @@ public class Annotator implements EntryPoint {
         rp.add(mainPanel);
 
         Dictionary optionsDictionary = Dictionary.getDictionary("Options");
-        if(optionsDictionary.keySet().contains(FeatureStringEnum.CLIENT_TOKEN.getValue())){
-            String clientToken = optionsDictionary.get(FeatureStringEnum.CLIENT_TOKEN.getValue());
+        if(optionsDictionary.keySet().contains(FeatureStringEnum.ORGANISM.getValue())){
+            String clientToken = optionsDictionary.get(FeatureStringEnum.ORGANISM.getValue());
             if(ClientTokenGenerator.isValidToken(clientToken)){
-                setPreference(FeatureStringEnum.CLIENT_TOKEN.getValue(),clientToken);
+                setPreference(FeatureStringEnum.ORGANISM.getValue(),clientToken);
             }
         }
         Double height = 100d;
@@ -93,12 +93,12 @@ public class Annotator implements EntryPoint {
     }
 
     public static String getClientToken() {
-        String token = getPreference(FeatureStringEnum.CLIENT_TOKEN.getValue());
+        String token = getPreference(FeatureStringEnum.ORGANISM.getValue());
         if (!ClientTokenGenerator.isValidToken(token)) {
             token = ClientTokenGenerator.generateRandomString();
-            setPreference(FeatureStringEnum.CLIENT_TOKEN.getValue(), token);
+            setPreference(FeatureStringEnum.ORGANISM.getValue(), token);
         }
-        token = getPreference(FeatureStringEnum.CLIENT_TOKEN.getValue());
+        token = getPreference(FeatureStringEnum.ORGANISM.getValue());
         return token ;
 
     }

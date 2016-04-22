@@ -1,10 +1,7 @@
 package org.bbop.apollo.gwt.client.rest;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.*;
-import com.google.gwt.i18n.client.Dictionary;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.user.client.Window;
 import org.bbop.apollo.gwt.client.Annotator;
 import org.bbop.apollo.gwt.shared.FeatureStringEnum;
 import org.gwtbootstrap3.extras.bootbox.client.Bootbox;
@@ -29,9 +26,9 @@ public class RestService {
             url = rootUrl+url;
         }
         // add the clientToken parameter if not exists
-        if(!url.contains(FeatureStringEnum.CLIENT_TOKEN.getValue())){
+        if(!url.contains(FeatureStringEnum.ORGANISM.getValue())){
             url += url.contains("?") ? "&" : "?";
-            url += FeatureStringEnum.CLIENT_TOKEN.getValue();
+            url += FeatureStringEnum.ORGANISM.getValue();
             url += "=";
             url += Annotator.getClientToken();
         }

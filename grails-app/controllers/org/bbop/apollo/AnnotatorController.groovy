@@ -3,7 +3,6 @@ package org.bbop.apollo
 import grails.converters.JSON
 import grails.transaction.Transactional
 import org.bbop.apollo.event.AnnotationEvent
-import org.bbop.apollo.gwt.shared.ClientTokenGenerator
 import org.bbop.apollo.gwt.shared.FeatureStringEnum
 import org.bbop.apollo.gwt.shared.PermissionEnum
 import org.bbop.apollo.report.AnnotatorSummary
@@ -41,16 +40,19 @@ class AnnotatorController {
     def loadLink() {
         String clientToken
         try {
-            if(params.containsKey(FeatureStringEnum.CLIENT_TOKEN.value)){
-                clientToken = params[FeatureStringEnum.CLIENT_TOKEN.value]
-            }
-            else{
-                clientToken = ClientTokenGenerator.generateRandomString()
-                println 'generating client token on the backend: '+clientToken
-            }
+//            if(params.containsKey(FeatureStringEnum.ORGANISM.value)){
+//                clientToken = params[FeatureStringEnum.ORGANISM.value]
+//            }
+//            else{
+                clientToken = params[FeatureStringEnum.ORGANISM.value]
+//            }
+
+//                clientToken = ClientTokenGenerator.generateRandomString()
+//                println 'generating client token on the backend: '+clientToken
+//            }
             Organism organism = Organism.findById(params.organism as Long)
             log.debug "loading organism: ${organism}"
-            preferenceService.setCurrentOrganism(permissionService.currentUser, organism,clientToken)
+//            preferenceService.setCurrentOrganism(permissionService.currentUser, organism,clientToken)
             if (params.loc) {
                 String location = params.loc
                 String[] splitString = location.split(":")
@@ -70,15 +72,14 @@ class AnnotatorController {
                     fmax = sequence.end
                 }
                 log.debug "fmin ${fmin} . . fmax ${fmax} . . ${sequence}"
-
-                preferenceService.setCurrentSequenceLocation(sequence.name, fmin, fmax,clientToken)
+//                preferenceService.setCurrentSequenceLocation(sequence.name, fmin, fmax,clientToken)
             }
 
         } catch (e) {
             log.error "problem parsing the string ${e}"
         }
 
-        redirect uri: "/annotator/index?clientToken="+clientToken
+        redirect uri: "/annotator/index?organism="+clientToken
     }
 
     /**
@@ -90,7 +91,7 @@ class AnnotatorController {
         Organism.all.each {
             log.info it.commonName
         }
-        String clientToken = params.containsKey(FeatureStringEnum.CLIENT_TOKEN.value) ? params.get(FeatureStringEnum.CLIENT_TOKEN.value) : null
+        String clientToken = params.containsKey(FeatureStringEnum.ORGANISM.value) ? params.get(FeatureStringEnum.ORGANISM.value) : null
         [userKey: uuid,clientToken:clientToken]
     }
 
@@ -371,7 +372,7 @@ class AnnotatorController {
      */
     @Transactional
     def getAppState() {
-        render annotatorService.getAppState(params.get(FeatureStringEnum.CLIENT_TOKEN.value).toString()) as JSON
+        render annotatorService.getAppState(params.get(FeatureStringEnum.ORGANISM.value).toString()) as JSON
     }
 
     /**
@@ -379,8 +380,9 @@ class AnnotatorController {
     @Transactional
     def setCurrentOrganism(Organism organismInstance) {
         // set the current organism
-        preferenceService.setCurrentOrganism(permissionService.currentUser, organismInstance,params[FeatureStringEnum.CLIENT_TOKEN.value])
-        session.setAttribute(FeatureStringEnum.ORGANISM_JBROWSE_DIRECTORY.value, organismInstance.directory)
+        preferenceService.setOrganismPreferencesForSession(request.getSession(true), organismInstance)
+//        preferenceService.setCurrentOrganism(permissionService.currentUser, organismInstance,params[FeatureStringEnum.ORGANISM.value])
+//        session.setAttribute(FeatureStringEnum.ORGANISM_JBROWSE_DIRECTORY.value, organismInstance.directory)
 
         if (!permissionService.checkPermissions(PermissionEnum.READ)) {
             flash.message = permissionService.getInsufficientPermissionMessage(PermissionEnum.READ)
@@ -388,7 +390,7 @@ class AnnotatorController {
             return
         }
 
-        render annotatorService.getAppState(params[FeatureStringEnum.CLIENT_TOKEN.value]) as JSON
+        render annotatorService.getAppState(params[FeatureStringEnum.ORGANISM.value].toString()) as JSON
     }
 
     /**
@@ -401,10 +403,10 @@ class AnnotatorController {
             return
         }
         // set the current organism and sequence Id (if both)
-        preferenceService.setCurrentSequence(permissionService.currentUser, sequenceInstance,params[FeatureStringEnum.CLIENT_TOKEN.value])
+//        preferenceService.setCurrentSequence(permissionService.currentUser, sequenceInstance,params[FeatureStringEnum.ORGANISM.value])
         session.setAttribute(FeatureStringEnum.ORGANISM_JBROWSE_DIRECTORY.value, sequenceInstance.organism.directory)
 
-        render annotatorService.getAppState(params[FeatureStringEnum.CLIENT_TOKEN.value]) as JSON
+        render annotatorService.getAppState(params[FeatureStringEnum.ORGANISM.value]) as JSON
     }
 
     def notAuthorized() {
