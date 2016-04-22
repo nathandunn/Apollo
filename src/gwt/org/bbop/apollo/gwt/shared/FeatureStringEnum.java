@@ -60,12 +60,13 @@ public enum FeatureStringEnum {
         VALUE,
         CV,
         SEQUENCE,
+        SEQUENCES,
         TRACK,
         DB,
         DBXREFS,
         CLIENT_TOKEN("clientToken"),
         PREFERENCE,
-        ACCESSION,
+        ENDACCESSION,
         CDS_SUFFIX("-CDS"),
         MINUS1FRAMESHIFT("Minus1Frameshift"),
         MINUS2FRAMESHIFT("Minus2Frameshift"),
@@ -123,6 +124,8 @@ public enum FeatureStringEnum {
         HISTORY,
         DOCK_OPEN("dockOpen"),
         DOCK_WIDTH("dockWidth"),
+        START_BP("startBp"),
+        END_BP("endBp"),
         ;
 
 

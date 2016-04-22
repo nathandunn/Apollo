@@ -53,6 +53,8 @@ public class MainPanel extends Composite {
     private static MainPanelUiBinder ourUiBinder = GWT.create(MainPanelUiBinder.class);
 
     private boolean toggleOpen = true;
+
+    // These make callback into AnotTrack functions
     public static Map<String, JavaScriptObject> annotrackFunctionMap = new HashMap<>();
 
     // state info
@@ -500,6 +502,7 @@ public class MainPanel extends Composite {
                 } else {
                     loadingDialog.hide();
                     AppStateInfo appStateInfo = AppInfoConverter.convertFromJson(obj);
+                    Annotator.getInstance().setPreferenceInfo(appStateInfo.getPreferenceInfo());
                     setAppState(appStateInfo);
                 }
             }

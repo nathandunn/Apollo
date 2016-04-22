@@ -16,6 +16,7 @@ public class AppStateInfo implements HasJSON{
     private SequenceInfo currentSequence ;
     private Integer currentStartBp;
     private Integer currentEndBp;
+    private PreferenceInfo preferenceInfo;
 
     public OrganismInfo getCurrentOrganism() {
         return currentOrganism;
@@ -91,5 +92,13 @@ public class AppStateInfo implements HasJSON{
 
     public void setCurrentEndBp(Integer currentEndBp) {
         this.currentEndBp = currentEndBp;
+    }
+
+    public PreferenceInfo getPreferenceInfo() {
+        return preferenceInfo;
+    }
+
+    public void setPreferenceInfo(PreferenceInfo preferenceInfo) {
+        this.preferenceInfo = preferenceInfo;
     }
 }

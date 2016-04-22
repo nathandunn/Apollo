@@ -8,6 +8,7 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.i18n.client.Dictionary;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import org.bbop.apollo.gwt.client.dto.PreferenceInfo;
 import org.bbop.apollo.gwt.shared.ClientTokenGenerator;
 import org.bbop.apollo.gwt.shared.FeatureStringEnum;
 
@@ -16,9 +17,18 @@ import org.bbop.apollo.gwt.shared.FeatureStringEnum;
  */
 public class Annotator implements EntryPoint {
 
+    private static Annotator instance ;
+
+    public static Annotator getInstance(){
+        if(instance==null){
+            instance = new Annotator() ;
+        }
+        return instance;
+    }
+
     public static EventBus eventBus = GWT.create(SimpleEventBus.class);
     private static Storage preferenceStore = Storage.getSessionStorageIfSupported();
-
+    private PreferenceInfo preferenceInfo;
     /**
      * This is the entry point method.
      */
@@ -91,5 +101,18 @@ public class Annotator implements EntryPoint {
         token = getPreference(FeatureStringEnum.CLIENT_TOKEN.getValue());
         return token ;
 
+    }
+
+    public PreferenceInfo getPreferenceInfo() {
+        return preferenceInfo;
+    }
+
+    public void setPreferenceInfo(PreferenceInfo preferenceInfo) {
+        setPreferenceInfo(preferenceInfo,false);
+    }
+    public void setPreferenceInfo(PreferenceInfo preferenceInfo,Boolean saveLocal) {
+        this.preferenceInfo = preferenceInfo;
+//        setPreference("preference",this.preferenceInfo.toJSON());
+        setPreference(FeatureStringEnum.PREFERENCE.getValue(),this.preferenceInfo.toJSON().toString());
     }
 }
