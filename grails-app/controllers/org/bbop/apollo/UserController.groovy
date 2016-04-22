@@ -147,22 +147,16 @@ class UserController {
         def currentUser = permissionService.currentUser
         if (currentUser) {
 
-            UserOrganismPreference userOrganismPreference
-            try {
-                // sets it by default
-                userOrganismPreference = permissionService.getCurrentOrganismPreference(params[FeatureStringEnum.ORGANISM.value])
-            } catch (e) {
-                log.error(e)
-            }
-
-
             def userObject = userService.convertUserToJson(currentUser)
 
-            if ((!userOrganismPreference || !permissionService.hasAnyPermissions(currentUser)) && !permissionService.isUserAdmin(currentUser)) {
+            if ((!permissionService.hasAnyPermissions(currentUser)) && !permissionService.isUserAdmin(currentUser)) {
                 userObject.put(FeatureStringEnum.ERROR.value, "You do not have access to any organism on this server.  Please contact your administrator.")
-            } else if (userOrganismPreference) {
-                userObject.put("tracklist", userOrganismPreference.nativeTrackList)
             }
+//            else
+//            if (userOrganismPreference) {
+            // TODO: do I need ot activate this . . still stored in getAppState?
+//                userObject.put("tracklist", userOrganismPreference.nativeTrackList)
+//            }
 
             render userObject as JSON
         } else {
@@ -175,6 +169,7 @@ class UserController {
 
     @Transactional
     def updateTrackListPreference() {
+        log.error("This preference should be saved from the top")
         try {
             JSONObject dataObject = permissionService.handleInput(request, params)
             if (!permissionService.hasPermissions(dataObject, PermissionEnum.READ)) {
@@ -182,12 +177,6 @@ class UserController {
                 return
             }
             log.info "updateTrackListPreference"
-
-            UserOrganismPreference uop = permissionService.getCurrentOrganismPreference(dataObject.getString(FeatureStringEnum.ORGANISM.value))
-
-            uop.nativeTrackList = dataObject.get("tracklist")
-            uop.save(flush: true)
-            log.info "Added userOrganismPreference ${uop.nativeTrackList}"
             render new JSONObject() as JSON
         }
         catch (Exception e) {

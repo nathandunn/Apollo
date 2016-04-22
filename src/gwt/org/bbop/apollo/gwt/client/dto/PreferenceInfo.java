@@ -33,12 +33,15 @@ public class PreferenceInfo {
 
     public JSONObject toJSON() {
         JSONObject jsonObject = new JSONObject();
+        jsonObject.put(FeatureStringEnum.ORGANISM.getValue(),currentOrganism.toJSON());
 
         // each organism will have multiple sequence preferences
         JSONObject sequenceArrayObject = new JSONObject();
-        for(OrganismInfo organismInfo : organismPreferenceInfos.keySet()){
-            for(SequencePreferenceInfo sequencePreferenceInfo : organismPreferenceInfos.get(organismInfo).getSequencePreferenceInfoList()){
-                sequenceArrayObject.put(sequencePreferenceInfo.getName(),sequencePreferenceInfo.toJSON());
+        if(organismPreferenceInfos!=null){
+            for(OrganismInfo organismInfo : organismPreferenceInfos.keySet()){
+                for(SequenceInfo sequencePreferenceInfo : organismPreferenceInfos.get(organismInfo).getSequenceInfoList()){
+                    sequenceArrayObject.put(sequencePreferenceInfo.getName(),sequencePreferenceInfo.toJSON());
+                }
             }
         }
         jsonObject.put(FeatureStringEnum.SEQUENCES.getValue(),sequenceArrayObject);

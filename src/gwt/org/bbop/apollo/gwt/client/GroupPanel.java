@@ -180,10 +180,10 @@ public class GroupPanel extends Composite {
         });
 
         // TODO: not sure why this is not being set or if it matters
-//        if (MainPanel.getInstance().getCurrentUser() != null) {
+        if (MainPanel.getInstance().getCurrentUser() != null) {
             GroupRestService.loadGroups(groupInfoList);
             UserRestService.loadUsers(allUsersList);
-//        }
+        }
     }
 
     @UiHandler("updateUsers")

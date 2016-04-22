@@ -34,23 +34,23 @@ class AnnotatorController {
      * This is a public method, but is really used only internally.
      *
      * Loads the shared link and moves over:
-     * http://localhost:8080/apollo/annotator/loadLink?loc=chrII:302089..337445&organism=23357&highlight=0&tracklist=0&tracks=Reference%20sequence,User-created%20Annotations&clientToken=12312321
+     * http://localhost:8080/apollo/annotator/loadLink?loc=chrII:302089..337445&organism=23357&highlight=0&tracklist=0&tracks=Reference%20sequence,User-created%20Annotations&organism=Honeybee
      * @return
      */
     def loadLink() {
-        String clientToken
+        String organismString = params[FeatureStringEnum.ORGANISM.value]
         try {
 //            if(params.containsKey(FeatureStringEnum.ORGANISM.value)){
 //                clientToken = params[FeatureStringEnum.ORGANISM.value]
 //            }
 //            else{
-                clientToken = params[FeatureStringEnum.ORGANISM.value]
 //            }
 
 //                clientToken = ClientTokenGenerator.generateRandomString()
 //                println 'generating client token on the backend: '+clientToken
 //            }
-            Organism organism = Organism.findById(params.organism as Long)
+//            Organism organism = Organism.findById(params.organism as Long)
+            Organism organism = preferenceService.getOrganismByClientToken(organismString)
             log.debug "loading organism: ${organism}"
 //            preferenceService.setCurrentOrganism(permissionService.currentUser, organism,clientToken)
             if (params.loc) {
@@ -79,7 +79,7 @@ class AnnotatorController {
             log.error "problem parsing the string ${e}"
         }
 
-        redirect uri: "/annotator/index?organism="+clientToken
+        redirect uri: "/annotator/index?organism="+organismString
     }
 
     /**
@@ -91,8 +91,8 @@ class AnnotatorController {
         Organism.all.each {
             log.info it.commonName
         }
-        String clientToken = params.containsKey(FeatureStringEnum.ORGANISM.value) ? params.get(FeatureStringEnum.ORGANISM.value) : null
-        [userKey: uuid,clientToken:clientToken]
+        String organism = params.containsKey(FeatureStringEnum.ORGANISM.value) ? params.get(FeatureStringEnum.ORGANISM.value) : null
+        [userKey: uuid,organism:organism]
     }
 
 
@@ -227,18 +227,20 @@ class AnnotatorController {
      * @param sort
      * @return
      */
-    def findAnnotationsForSequence(String sequenceName, String request, String annotationName, String type, String user, Integer offset, Integer max, String sortorder, String sort,String clientToken) {
+    def findAnnotationsForSequence(String sequenceName, String request, String annotationName, String type, String user, Integer offset, Integer max, String sortorder, String sort,String organism) {
         try {
             JSONObject returnObject = createJSONFeatureContainer()
-            returnObject.clientToken = clientToken
+            returnObject.organism = organism
             if (sequenceName && !Sequence.countByName(sequenceName)) return
 
             if (sequenceName) {
                 returnObject.track = sequenceName
             }
+            println "sequence ${sequenceName}"
+
+            Organism currentOrganism = preferenceService.getOrganismByClientToken(organism)
 
             Sequence sequenceObj = permissionService.checkPermissions(returnObject, PermissionEnum.READ)
-            Organism organism = sequenceObj.organism
             Integer index = Integer.parseInt(request)
 
             List<String> viewableTypes
@@ -279,7 +281,7 @@ class AnnotatorController {
                         if(sort=="sequence") {
                             order('name',sortorder)
                         }
-                        eq('organism', organism)
+                        eq('organism', currentOrganism)
                     }
                 }
                 if(sort=="name") {

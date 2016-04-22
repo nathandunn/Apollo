@@ -73,7 +73,7 @@ class AnnotationEditorController extends AbstractApolloController implements Ann
         if (username) {
             log.debug "getUserPermission ${params.data}"
             JSONObject returnObject = permissionService.handleInput(request,params)
-            Organism organism = preferenceService.getOrganismByClientToken(returnObject)
+            Organism organism = preferenceService.getOrganismByClientToken(returnObject.getString(FeatureStringEnum.ORGANISM.value))
 //        JSONObject returnObject = (JSONObject) JSON.parse(params.data)
 
             int permission = PermissionEnum.NONE.value
@@ -416,7 +416,7 @@ class AnnotationEditorController extends AbstractApolloController implements Ann
             ,@RestApiParam(name="organism", type="string", paramType = RestApiParamType.QUERY,description = "(optional) Organism ID or common name")
     ] )
     def getFeatures() {
-        JSONObject returnObject = (request.JSON ?: JSON.parse(params.data)) as JSONObject
+        JSONObject returnObject = permissionService.handleInput(request,params)
         try {
             permissionService.checkPermissions(returnObject, PermissionEnum.READ)
             render requestHandlingService.getFeatures(returnObject)

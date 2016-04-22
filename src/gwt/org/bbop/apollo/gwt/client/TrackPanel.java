@@ -364,6 +364,7 @@ public class TrackPanel extends Composite {
             }
         };
         MainPanel.useNativeTracklist=trackListToggle.getValue();
-        UserRestService.updateUserTrackPanelPreference(requestCallback, trackListToggle.getValue());
+        Annotator.setPreference(FeatureStringEnum.NATIVE_TRACK_LIST.getValue(),trackListToggle.getValue());
+//        UserRestService.updateUserTrackPanelPreference(requestCallback, trackListToggle.getValue());
     }
 }

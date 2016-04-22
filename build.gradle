@@ -200,7 +200,7 @@ task installJBrowsePlugins(dependsOn: copyApolloPlugin) << {
                     if (plugin.value.tag) {
                         checkoutBranch(new File(path),"tags/${plugin.value.tag}")
                     } else if (plugin.value.branch) {
-                        checkoutBranch(new File(path),plugin.value.branch)
+                       checkoutBranch(new File(path),plugin.value.branch)
                     }
 
                     if (plugin.value.alwaysPull) {
@@ -411,7 +411,15 @@ def fetchTags(File file) {
 
 
 def checkoutBranch(File file, String branch) {
-    println "checkout out branch ${branch}"
+    println "checkout out branch ${branch} to ${file.absolutePath}"
+    println "File exists: ${file.exists()}"
+    assert file.exists()
+    File gitFile = new File(file.absolutePath+".git")
+    if(!gitFile.exists() && !gitFile.canRead()){
+        println "No git file.  Can not checkout branch"
+        return
+    }
+
     def processBuilder = new ProcessBuilder()
     processBuilder.redirectErrorStream(true)
     processBuilder.directory(file)

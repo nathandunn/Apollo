@@ -158,7 +158,7 @@ public class SequencePanel extends Composite {
                     public void onResponseReceived(Request request, Response response) {
                         JSONArray jsonArray = JSONParser.parseLenient(response.getText()).isArray();
                         Integer sequenceCount = 0;
-                        if (jsonArray!=null && jsonArray.size() > 0) {
+                        if (jsonArray != null && jsonArray.size() > 0) {
                             JSONObject jsonObject = jsonArray.get(0).isObject();
                             sequenceCount = (int) jsonObject.get("sequenceCount").isNumber().doubleValue();
                         }
@@ -174,7 +174,7 @@ public class SequencePanel extends Composite {
 
 
                 ColumnSortList.ColumnSortInfo nameSortInfo = sortList.get(0);
-                if (nameSortInfo.getColumn().isSortable()) {
+                if (nameSortInfo.getColumn().isSortable() && Annotator.getClientToken() != null) {
                     Column<SequenceInfo, ?> sortColumn = (Column<SequenceInfo, ?>) sortList.get(0).getColumn();
                     Integer columnIndex = dataGrid.getColumnIndex(sortColumn);
                     String searchColumnString = columnIndex == 0 ? "name" : columnIndex == 1 ? "length" : "count";
@@ -301,7 +301,7 @@ public class SequencePanel extends Composite {
         dataGrid.setVisibleRangeAndClearData(dataGrid.getVisibleRange(), true);
     }
 
-    @UiHandler(value = {"exportGff3Button", "exportFastaButton","exportChadoButton"})
+    @UiHandler(value = {"exportGff3Button", "exportFastaButton", "exportChadoButton"})
     public void handleExportTypeChanged(ClickEvent clickEvent) {
         exportGff3Button.setType(ButtonType.DEFAULT);
         exportFastaButton.setType(ButtonType.DEFAULT);
@@ -357,16 +357,14 @@ public class SequencePanel extends Composite {
         String type = null;
         if (exportGff3Button.getType().equals(ButtonType.DANGER.PRIMARY)) {
             type = exportGff3Button.getText();
-        }
-        else if (exportFastaButton.getType().equals(ButtonType.DANGER.PRIMARY)) {
+        } else if (exportFastaButton.getType().equals(ButtonType.DANGER.PRIMARY)) {
             type = exportFastaButton.getText();
-        }
-        else if (exportChadoButton.getType().equals(ButtonType.DANGER.PRIMARY)) {
+        } else if (exportChadoButton.getType().equals(ButtonType.DANGER.PRIMARY)) {
             type = exportChadoButton.getText();
         }
 //        GWT.log("Type selected is " + type);
 
-        ExportPanel exportPanel = new ExportPanel(organismInfo,type,exportAll,sequenceInfoList);
+        ExportPanel exportPanel = new ExportPanel(organismInfo, type, exportAll, sequenceInfoList);
         exportPanel.show();
     }
 

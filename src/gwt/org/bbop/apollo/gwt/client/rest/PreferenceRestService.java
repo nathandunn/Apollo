@@ -10,11 +10,13 @@ public class PreferenceRestService extends RestService{
 
     /**
      * Saves preferences for current user
-     * @param preferenceInfo
+     * @param preferencesString
      */
-    public static PreferenceInfo savePreferences(PreferenceInfo preferenceInfo){
-        GWT.log("Saving preferences: "+preferenceInfo.toJSON().toString());
-        return preferenceInfo ;
+    public static String savePreferences(String preferencesString){
+        GWT.log("Saving preferences: "+ preferencesString);
+//        GWT.log("Saving preferences: "+preferenceInfo.toJSON().toString());
+//        return preferenceInfo ;
+        return preferencesString;
     }
 
     /**

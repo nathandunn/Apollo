@@ -6,13 +6,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.i18n.client.Dictionary;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import org.bbop.apollo.gwt.client.dto.OrganismInfo;
-import org.bbop.apollo.gwt.client.dto.PreferenceInfo;
-import org.bbop.apollo.gwt.client.rest.PreferenceRestService;
-import org.bbop.apollo.gwt.shared.ClientTokenGenerator;
-import org.bbop.apollo.gwt.shared.FeatureStringEnum;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -20,6 +14,8 @@ import org.bbop.apollo.gwt.shared.FeatureStringEnum;
 public class Annotator implements EntryPoint {
 
     private static Annotator instance;
+    public static EventBus eventBus = GWT.create(SimpleEventBus.class);
+    private PreferenceInfoService preferenceInfoService  = PreferenceInfoService.getInstance();
 
     public static Annotator getInstance() {
         if (instance == null) {
@@ -28,9 +24,6 @@ public class Annotator implements EntryPoint {
         return instance;
     }
 
-    public static EventBus eventBus = GWT.create(SimpleEventBus.class);
-    private static Storage preferenceStore = Storage.getSessionStorageIfSupported();
-    private static PreferenceInfo preferenceInfo;
 
     /**
      * This is the entry point method.
@@ -41,12 +34,6 @@ public class Annotator implements EntryPoint {
         rp.add(mainPanel);
 
         Dictionary optionsDictionary = Dictionary.getDictionary("Options");
-//        if (optionsDictionary.keySet().contains(FeatureStringEnum.ORGANISM.getValue())) {
-//            String clientToken = optionsDictionary.get(FeatureStringEnum.ORGANISM.getValue());
-////            if (ClientTokenGenerator.isValidToken(clientToken)) {
-//            setPreference(FeatureStringEnum.ORGANISM.getValue(), clientToken);
-////            }
-//        }
         Double height = 100d;
         Style.Unit heightUnit = Style.Unit.PCT;
         Double top = 0d;
@@ -76,17 +63,11 @@ public class Annotator implements EntryPoint {
     }-*/;
 
     public static void setPreference(String key, Object value) {
-        if (preferenceStore != null) {
-            preferenceStore.setItem(key, value.toString());
-        }
+        PreferenceInfoService.getInstance().setPreference(key,value);
     }
 
     public static String getPreference(String key) {
-        if (preferenceStore != null) {
-            String returnValue = preferenceStore.getItem(key);
-            return returnValue;
-        }
-        return null;
+        return PreferenceInfoService.getInstance().getPreference(key);
     }
 
 
@@ -96,7 +77,10 @@ public class Annotator implements EntryPoint {
     }
 
     public static String getClientToken() {
-        return MainPanel.getInstance().getCurrentOrganism().getId();
+        if(MainPanel.getInstance().getCurrentOrganism()!=null){
+            return MainPanel.getInstance().getCurrentOrganism().getId();
+        }
+        return null ;
 //        String token = getPreference(FeatureStringEnum.ORGANISM.getValue());
 ////        if (!ClientTokenGenerator.isValidToken(token)) {
 //        if (preferenceInfo.getCurrentOrganism() != null) {
@@ -114,20 +98,4 @@ public class Annotator implements EntryPoint {
 
     }
 
-    public static PreferenceInfo getPreferenceInfo() {
-        return preferenceInfo;
-    }
-
-    public static void setPreferenceInfo(PreferenceInfo preferenceInfo) {
-        setPreferenceInfo(preferenceInfo, false);
-    }
-
-    public static void setPreferenceInfo(PreferenceInfo preferenceInfo, Boolean saveLocal) {
-        preferenceInfo = preferenceInfo;
-//        setPreference("preference",this.preferenceInfo.toJSON());
-        setPreference(FeatureStringEnum.PREFERENCE.getValue(), preferenceInfo.toJSON().toString());
-        if (saveLocal) {
-            PreferenceRestService.savePreferences(preferenceInfo);
-        }
-    }
 }

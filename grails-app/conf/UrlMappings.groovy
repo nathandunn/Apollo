@@ -15,31 +15,31 @@ class UrlMappings {
 
         // set this routing here
         "/jbrowse/"(controller: "jbrowse", action: "indexRouter", params:params)
-        "/${clientToken}/jbrowse/"(controller: "jbrowse", action: "indexRouter", params:params)
-        "/${clientToken}/jbrowse/index.html"(controller: "jbrowse", action: "indexRouter", params:params)
-        "/${clientToken}/jbrowse/${path}**" {
+        "/${organism}/jbrowse/"(controller: "jbrowse", action: "indexRouter", params:params)
+        "/${organism}/jbrowse/index.html"(controller: "jbrowse", action: "indexRouter", params:params)
+        "/${organism}/jbrowse/${path}**" {
             controller= "jbrowse"
             action= "passthrough"
             prefix= "jbrowse"
 //            permanent = true
         }
-        "/${clientToken}/stomp/${path}**" {
+        "/${organism}/stomp/${path}**" {
             controller= "jbrowse"
             action= "passthrough"
             prefix= "stomp"
 //            permanent = true
         }
 
-        "/${clientToken}/jbrowse/data/${path}"(controller: "jbrowse", action: "data")
-        "/${clientToken}/jbrowse/data/${path}**"(controller: "jbrowse", action: "data")
-        "/${clientToken}/jbrowse/data/trackList.json"(controller:"jbrowse", action: "trackList")
+        "/${organism}/jbrowse/data/${path}"(controller: "jbrowse", action: "data")
+        "/${organism}/jbrowse/data/${path}**"(controller: "jbrowse", action: "data")
+        "/${organism}/jbrowse/data/trackList.json"(controller:"jbrowse", action: "trackList")
         "/jbrowse/data/${path}"(controller: "jbrowse", action: "data")
         "/jbrowse/data/${path}**"(controller: "jbrowse", action: "data")
         "/jbrowse/data/trackList.json"(controller:"jbrowse", action: "trackList")
         "/proxy/request/${url}"(controller:"proxy", action: "request")
 
 
-        "/${clientToken}/AnnotationEditorService"(controller:"annotationEditor",action: "handleOperation",params:params)
+        "/${organism}/AnnotationEditorService"(controller:"annotationEditor",action: "handleOperation",params:params)
         "/Login"(controller:"login",action: "handleOperation",params:params)
         "/ProxyService"(controller:"ncbiProxyService",action: "index",params:params)
         "/IOService"(controller:"IOService",action: "handleOperation",params:params)

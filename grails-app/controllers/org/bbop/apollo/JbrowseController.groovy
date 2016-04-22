@@ -85,10 +85,10 @@ class JbrowseController {
         println "current user? ${permissionService.currentUser}"
         // if the user is not a valid user
 //        if (!permissionService.currentUser) {
-        println "returning something not set clearly"
+        println "returning something not set clearly ${clientToken}"
         String directory = request.session.getAttribute(FeatureStringEnum.ORGANISM_JBROWSE_DIRECTORY.value)
         if (!directory) {
-            Organism organism = getOrganismByClientToken(clientToken)
+            Organism organism = preferenceService.getOrganismByClientToken(clientToken)
             directory = organism.directory
         }
         return directory
@@ -290,7 +290,7 @@ class JbrowseController {
 
     def trackList() {
         String clientToken = params.get(FeatureStringEnum.ORGANISM.value)
-        println "track list client token: ${clientToken}"
+        println "track list client token: ${clientToken} from ${params}"
         String dataDirectory = getJBrowseDirectoryForSession(clientToken)
         println "got data directory of . . . ? ${dataDirectory}"
         String absoluteFilePath = dataDirectory + "/trackList.json"

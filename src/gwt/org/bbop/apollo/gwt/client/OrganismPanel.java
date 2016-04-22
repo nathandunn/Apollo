@@ -253,9 +253,11 @@ public class OrganismPanel extends Composite {
                 Annotator.eventBus.fireEvent(organismChangeEvent);
 
                 // in the case where we just add one . . .we should refresh the app state
-                if (organismInfoList.size() == 1) {
-                    MainPanel.getInstance().getAppState();
-                }
+
+                // TODO: update preferences object
+//                if (organismInfoList.size() == 1) {
+//                    MainPanel.getInstance().getAppState();
+//                }
             }
             if (savingNewOrganism) {
                 savingNewOrganism = false;

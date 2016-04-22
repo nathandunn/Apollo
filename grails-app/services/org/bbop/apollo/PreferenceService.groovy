@@ -248,15 +248,6 @@ class PreferenceService {
         session.setAttribute(FeatureStringEnum.ORGANISM.value, organism.id)
     }
 
-    Organism getOrganismByClientToken(JSONObject inputObject) {
-        return getOrganismByClientToken(inputObject, null)
-    }
-
-    Organism getOrganismByClientToken(JSONObject inputObject, HttpServletRequest request) {
-        String clientToken = inputObject.getString(FeatureStringEnum.ORGANISM.value)
-        return clientToken ? getOrganismByClientToken(clientToken, request) : null
-    }
-
     Organism getOrganismByClientToken(String clientToken) {
         getOrganismByClientToken(clientToken, null)
     }

@@ -2,6 +2,7 @@ package org.bbop.apollo.gwt.client.dto;
 
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.Window;
+import org.bbop.apollo.gwt.shared.FeatureStringEnum;
 
 import java.util.List;
 
@@ -13,20 +14,21 @@ public class AppInfoConverter {
     public static AppStateInfo convertFromJson(JSONObject object){
         AppStateInfo appStateInfo = new AppStateInfo() ;
 
-        if(object.get("currentOrganism")!=null) {
-            appStateInfo.setCurrentOrganism(OrganismInfoConverter.convertFromJson(object.isObject().get("currentOrganism").isObject()));
+        JSONObject preferences = object.get(FeatureStringEnum.PREFERENCES.getValue()).isObject();
+
+        if(preferences.get(FeatureStringEnum.ORGANISM.getValue())!=null) {
+            appStateInfo.setCurrentOrganism(OrganismInfoConverter.convertFromJson(preferences.get(FeatureStringEnum.ORGANISM.getValue()).isObject()));
         }
 
-        if(object.get("currentSequence")!=null ){
-            appStateInfo.setCurrentSequence(SequenceInfoConverter.convertFromJson(object.isObject().get("currentSequence").isObject()));
+        if(preferences.get(FeatureStringEnum.SEQUENCE.getValue())!=null ){
+            SequenceInfo sequenceInfo = SequenceInfoConverter.convertFromJson(preferences.get(FeatureStringEnum.SEQUENCE.getValue()).isObject());
+            appStateInfo.setCurrentSequence(sequenceInfo);
+            appStateInfo.setCurrentStartBp(sequenceInfo.getStart());
+            appStateInfo.setCurrentEndBp(sequenceInfo.getEnd());
         }
+
         appStateInfo.setOrganismList(OrganismInfoConverter.convertFromJsonArray(object.get("organismList").isArray()));
-        if(object.containsKey("currentStartBp")){
-            appStateInfo.setCurrentStartBp((int) object.get("currentStartBp").isNumber().doubleValue());
-        }
-        if(object.containsKey("currentEndBp")) {
-            appStateInfo.setCurrentEndBp((int) object.get("currentEndBp").isNumber().doubleValue());
-        }
+        appStateInfo.setPreferenceInfo(PreferenceInfoConverter.convertFromJson(preferences));
 
         return appStateInfo ;
     }

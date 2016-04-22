@@ -15,6 +15,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.ListBox;
 import org.bbop.apollo.gwt.client.dto.*;
@@ -224,23 +225,30 @@ public class MainPanel extends Composite {
 
     private static void sendCurrentSequenceLocation(String sequenceNameString, final Integer start, final Integer end) {
 
-        RequestCallback requestCallback = new RequestCallback() {
-            @Override
-            public void onResponseReceived(Request request, Response response) {
-                currentStartBp = start;
-                currentEndBp = end;
-                handlingNavEvent = false;
-            }
+//        RequestCallback requestCallback = new RequestCallback() {
+//            @Override
+//            public void onResponseReceived(Request request, Response response) {
+//                currentStartBp = start;
+//                currentEndBp = end;
+//                handlingNavEvent = false;
+//            }
+//
+//            @Override
+//            public void onError(Request request, Throwable exception) {
+//                handlingNavEvent = false;
+//                Bootbox.alert("failed to set sequence location: " + exception);
+//            }
+//        };
 
-            @Override
-            public void onError(Request request, Throwable exception) {
-                handlingNavEvent = false;
-                Bootbox.alert("failed to set sequence location: " + exception);
-            }
-        };
-
+//        handlingNavEvent = true;
+//        currentStartBp = start;
+//        currentEndBp = end;
+        currentSequence.setName(sequenceNameString);
+        currentSequence.setStart(start);
+        currentSequence.setEnd(end);
         handlingNavEvent = true;
-        SequenceRestService.setCurrentSequenceAndLocation(requestCallback, sequenceNameString, start, end, true);
+//        SequenceRestService.setCurrentSequenceAndLocation(requestCallback, sequenceNameString, start, end, true);
+        PreferenceInfoService.getInstance().setPreference(currentOrganism,currentSequence);
 
     }
 
@@ -257,10 +265,11 @@ public class MainPanel extends Composite {
                 handlingNavEvent = false;
                 JSONObject sequenceInfoJson = JSONParser.parseStrict(response.getText()).isObject();
                 currentSequence = SequenceInfoConverter.convertFromJson(sequenceInfoJson);
-                currentStartBp = start != null ? start : 0;
-                currentEndBp = end != null ? end : currentSequence.getEnd();
+                currentSequence.setStart(start != null ? start : 0);
+                currentSequence.setEnd(end != null ? end : currentSequence.getEnd());
+//                currentStartBp = start != null ? start : 0;
+//                currentEndBp = end != null ? end : currentSequence.getEnd();
                 sequenceSuggestBox.setText(currentSequence.getName());
-
 
                 Annotator.eventBus.fireEvent(new OrganismChangeEvent(OrganismChangeEvent.Action.LOADED_ORGANISMS, currentSequence.getName()));
 
@@ -283,7 +292,8 @@ public class MainPanel extends Composite {
         };
 
         handlingNavEvent = true;
-        SequenceRestService.setCurrentSequenceAndLocation(requestCallback, sequenceNameString, start, end);
+        PreferenceInfoService.getInstance().setPreference(currentOrganism,currentSequence);
+//        SequenceRestService.setCurrentSequenceAndLocation(requestCallback, sequenceNameString, start, end);
 
     }
 
@@ -410,10 +420,10 @@ public class MainPanel extends Composite {
      */
     public static void updateGenomicViewerForLocation(String selectedSequence, Integer minRegion, Integer maxRegion, boolean forceReload) {
 
-        if (!forceReload && currentSequence != null && currentSequence.getName().equals(selectedSequence) && currentStartBp != null && currentEndBp != null && minRegion > 0 && maxRegion > 0 && frame.getUrl().startsWith("http")) {
+        if (!forceReload && currentSequence != null && currentSequence.getName().equals(selectedSequence) && currentSequence.getStart() != null && currentSequence.getEnd() != null && minRegion > 0 && maxRegion > 0 && frame.getUrl().startsWith("http")) {
             int oldLength = maxRegion - minRegion;
-            double diff1 = (Math.abs(currentStartBp - minRegion)) / (float) oldLength;
-            double diff2 = (Math.abs(currentEndBp - maxRegion)) / (float) oldLength;
+            double diff1 = (Math.abs(currentSequence.getStart()- minRegion)) / (float) oldLength;
+            double diff2 = (Math.abs(currentSequence.getEnd() - maxRegion)) / (float) oldLength;
             if (diff1 < UPDATE_DIFFERENCE_BUFFER && diff2 < UPDATE_DIFFERENCE_BUFFER) {
                 return;
             }
@@ -438,11 +448,11 @@ public class MainPanel extends Composite {
     }
 
     public static void updateGenomicViewer(boolean forceReload) {
-        if (currentStartBp != null && currentEndBp != null) {
-            updateGenomicViewerForLocation(currentSequence.getName(), currentStartBp, currentEndBp, forceReload);
-        } else {
+//        if (currentStartBp != null && currentEndBp != null) {
+//            updateGenomicViewerForLocation(currentSequence.getName(), currentStartBp, currentEndBp, forceReload);
+//        } else {
             updateGenomicViewerForLocation(currentSequence.getName(), currentSequence.getStart(), currentSequence.getEnd(), forceReload);
-        }
+//        }
     }
 
     public static void updateGenomicViewer() {
@@ -500,8 +510,9 @@ public class MainPanel extends Composite {
                     loadingDialog.hide();
                 } else {
                     loadingDialog.hide();
+                    Window.alert("input json: "+obj.toString());
                     AppStateInfo appStateInfo = AppInfoConverter.convertFromJson(obj);
-                    Annotator.getInstance().setPreferenceInfo(appStateInfo.getPreferenceInfo());
+                    PreferenceInfoService.getInstance().setPreferenceInfo(appStateInfo.getPreferenceInfo());
                     setAppState(appStateInfo);
                 }
             }
@@ -692,11 +703,11 @@ public class MainPanel extends Composite {
         String url2 = Annotator.getRootUrl();
         url2 += currentOrganism.getId()+"/";
         url2 += "jbrowse/index.html";
-        if (currentStartBp != null) {
-            url2 += "?loc=" + currentSequence.getName() + ":" + currentStartBp + ".." + currentEndBp;
-        } else {
+//        if (currentStartBp != null) {
+//            url2 += "?loc=" + currentSequence.getName() + ":" + currentStartBp + ".." + currentEndBp;
+//        } else {
             url2 += "?loc=" + currentSequence.getName() + ":" + currentSequence.getStart() + ".." + currentSequence.getEnd();
-        }
+//        }
 //        url2 += "&organism=" + currentOrganism.getId();
         url2 += "&tracks=";
 
@@ -713,11 +724,12 @@ public class MainPanel extends Composite {
     public String generateApolloUrl() {
         String url = Annotator.getRootUrl();
         url += "annotator/loadLink";
-        if (currentStartBp != null) {
-            url += "?loc=" + currentSequence.getName() + ":" + currentStartBp + ".." + currentEndBp;
-        } else {
-            url += "?loc=" + currentSequence.getName() + ":" + currentSequence.getStart() + ".." + currentSequence.getEnd();
-        }
+//        if (currentStartBp != null) {
+            url += "?loc=" + currentSequence.getName() + ":" + currentSequence.getStart()+ ".." + currentSequence.getEnd();
+//        }
+//        else {
+//            url += "?loc=" + currentSequence.getName() + ":" + currentSequence.getStart() + ".." + currentSequence.getEnd();
+//        }
         url += "&organism=" + currentOrganism.getId();
         url += "&tracks=";
 

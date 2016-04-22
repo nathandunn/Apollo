@@ -315,6 +315,7 @@ class PermissionService {
 //            organism = preferenceService.getOrganismFromPreferences(user,trackName,inputObject.getString(FeatureStringEnum.ORGANISM.value))
             organism = preferenceService.getOrganismByClientToken(inputObject.getString(FeatureStringEnum.ORGANISM.value))
         }
+        println "found the proper organism ${organism} and track name ${trackName}"
 
 //        Sequence sequence
 //        if(!trackName){
@@ -426,7 +427,8 @@ class PermissionService {
         }
 
 
-        Organism organism = getCurrentOrganismPreference(clientToken)?.organism
+        Organism organism = preferenceService.getOrganismByClientToken(clientToken)
+//        Organism organism = getCurrentOrganismPreference(clientToken)?.organism
         log.debug "passing in an organism ${jsonObject.organism}"
         if (jsonObject.organism) {
             Organism thisOrganism = null
@@ -453,39 +455,39 @@ class PermissionService {
 
     }
 
-    UserOrganismPreference getCurrentOrganismPreference(String token){
-        User currentUser = getCurrentUser()
-        UserOrganismPreference userOrganismPreference = UserOrganismPreference.findByUserAndCurrentOrganismAndClientToken(currentUser, true,token)
-        if (userOrganismPreference) {
-            return userOrganismPreference
-        }
-
-        // find another one
-        userOrganismPreference = UserOrganismPreference.findByUserAndCurrentOrganismAndClientToken(currentUser, false,token)
-        if (userOrganismPreference) {
-            userOrganismPreference.currentOrganism = true
-            userOrganismPreference.save(flush: true)
-            return userOrganismPreference
-        }
-
-        def organisms = getOrganisms(currentUser)
-        if(!organisms){
-            if(isAdmin()){
-                return null
-            }
-            else{
-                throw new PermissionException("User does not have permission for any organisms.")
-            }
-        }
-        Organism organism = organisms?.iterator()?.next()
-        userOrganismPreference = new UserOrganismPreference(
-                user: currentUser
-                , currentOrganism: true
-                , organism: organism
-//                , clientToken: token
-        ).save(insert: true, flush: true)
-        return userOrganismPreference
-    }
+//    UserOrganismPreference getCurrentOrganismPreference(String token){
+//        User currentUser = getCurrentUser()
+//        UserOrganismPreference userOrganismPreference = UserOrganismPreference.findByUserAndCurrentOrganismAndClientToken(currentUser, true,token)
+//        if (userOrganismPreference) {
+//            return userOrganismPreference
+//        }
+//
+//        // find another one
+//        userOrganismPreference = UserOrganismPreference.findByUserAndCurrentOrganismAndClientToken(currentUser, false,token)
+//        if (userOrganismPreference) {
+//            userOrganismPreference.currentOrganism = true
+//            userOrganismPreference.save(flush: true)
+//            return userOrganismPreference
+//        }
+//
+//        def organisms = getOrganisms(currentUser)
+//        if(!organisms){
+//            if(isAdmin()){
+//                return null
+//            }
+//            else{
+//                throw new PermissionException("User does not have permission for any organisms.")
+//            }
+//        }
+//        Organism organism = organisms?.iterator()?.next()
+//        userOrganismPreference = new UserOrganismPreference(
+//                user: currentUser
+//                , currentOrganism: true
+//                , organism: organism
+////                , clientToken: token
+//        ).save(insert: true, flush: true)
+//        return userOrganismPreference
+//    }
 
     Boolean hasAnyPermissions(User user) {
 

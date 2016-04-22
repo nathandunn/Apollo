@@ -13,7 +13,7 @@ class OverlapperServiceIntegrationSpec extends IntegrationSpec {
         Organism organism = new Organism(
                 directory: "test/integration/resources/sequences/honeybee-Group1.10/"
                 , commonName: "sampleAnimal"
-        ).save(flush: true)
+        ).save()
         Sequence sequence = new Sequence(
                 length: 1405242
                 , seqChunkSize: 20000
@@ -21,7 +21,7 @@ class OverlapperServiceIntegrationSpec extends IntegrationSpec {
                 , organism: organism
                 , end: 1405242
                 , name: "Group1.10"
-        ).save()
+        ).save(flush: true)
     }
     
     def cleanup() {

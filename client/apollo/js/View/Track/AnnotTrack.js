@@ -280,6 +280,7 @@ define([
                 else{
                     var returnItem = window.sessionStorage.getItem("organism");
                     if (!returnItem) {
+                        alert('not found for organism: '+returnItem + ' TODO . . get!'+location.href);
                         var randomNumber = this.generateRandomNumber(20);
                         //alert('AnnotTrack generating and storing random number: '+randomNumber);
                         window.sessionStorage.setItem("organism", randomNumber);
@@ -5491,7 +5492,7 @@ define([
             executeUpdateOperation: function (postData, loadCallback) {
                 if(postData.search('organism')<0){
                     var postObject = JSON.parse(postData);
-                    postObject.clientToken = this.getClientToken();
+                    postObject.organism = this.getClientToken();
                     postData = JSON.stringify(postObject);
                 }
                 console.log('connected and sending notifications');

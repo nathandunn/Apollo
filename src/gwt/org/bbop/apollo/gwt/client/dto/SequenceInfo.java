@@ -4,6 +4,7 @@ import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import org.bbop.apollo.gwt.client.comparators.AlphanumericSorter;
+import org.bbop.apollo.gwt.shared.FeatureStringEnum;
 
 /**
  * Created by ndunn on 12/18/14.
@@ -97,10 +98,12 @@ public class SequenceInfo implements Comparable<SequenceInfo>,HasJSON{
 
     public JSONObject toJSON() {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("id", new JSONNumber(id));
-        jsonObject.put("name", new JSONString(name));
+        jsonObject.put(FeatureStringEnum.ID.getValue(), new JSONNumber(id));
+        jsonObject.put(FeatureStringEnum.NAME.getValue(), new JSONString(name));
         jsonObject.put("start", new JSONNumber(start));
-        if(count != null) jsonObject.put("count", new JSONNumber(count));
+        if(count != null) {
+            jsonObject.put("count", new JSONNumber(count));
+        }
         jsonObject.put("end", new JSONNumber(end));
         jsonObject.put("length", new JSONNumber(length));
         return jsonObject;

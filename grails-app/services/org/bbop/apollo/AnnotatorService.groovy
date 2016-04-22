@@ -17,9 +17,16 @@ class AnnotatorService {
         try {
             appStateObject.preferences = preferenceService.getPreferences()
             def organismList = permissionService.getOrganismsForCurrentUser()
-            UserOrganismPreference userOrganismPreference = UserOrganismPreference.findByUserAndCurrentOrganismAndClientToken(permissionService.currentUser, true,token)
-            println "found organism preference: ${userOrganismPreference} for token ${token}"
-            Long defaultOrganismId = userOrganismPreference ? userOrganismPreference.organism.id : null
+
+            JSONObject defaultJsonOrganism = appStateObject.preferences.organism
+            Organism currentOrganism = null
+            if (defaultJsonOrganism) {
+                currentOrganism = Organism.findById(defaultJsonOrganism.id as Long)
+            }
+            // if the is no default organism just choose the first one
+            else if (!defaultJsonOrganism && organismList) {
+                currentOrganism = organismList.first()
+            }
 
 
             JSONArray organismArray = new JSONArray()
@@ -37,35 +44,33 @@ class AnnotatorService {
                         species        : organism.species,
                         valid          : organism.valid,
                         publicMode     : organism.publicMode,
-                        currentOrganism: defaultOrganismId != null ? organism.id == defaultOrganismId : false,
-                        editable       : permissionService.userHasOrganismPermission(organism,PermissionEnum.ADMINISTRATE)
+                        currentOrganism: organism.id == currentOrganism?.id,
+                        editable       : permissionService.userHasOrganismPermission(organism, PermissionEnum.ADMINISTRATE)
 
                 ] as JSONObject
                 organismArray.add(jsonObject)
             }
-            appStateObject.put("organismList", organismArray)
-            UserOrganismPreference currentUserOrganismPreference = permissionService.getCurrentOrganismPreference(token)
-            if(currentUserOrganismPreference){
-                Organism currentOrganism = currentUserOrganismPreference?.organism
-                appStateObject.put("currentOrganism", currentOrganism )
-
-
-                if (!currentUserOrganismPreference.sequence) {
-                    Sequence sequence = Sequence.findByOrganism(currentUserOrganismPreference.organism)
-                    currentUserOrganismPreference.sequence = sequence
-                    currentUserOrganismPreference.save()
-                }
-                appStateObject.put("currentSequence", currentUserOrganismPreference.sequence)
-
-
-                if (currentUserOrganismPreference.startbp && currentUserOrganismPreference.endbp) {
-                    appStateObject.put("currentStartBp", currentUserOrganismPreference.startbp)
-                    appStateObject.put("currentEndBp", currentUserOrganismPreference.endbp)
-                }
+            appStateObject.organismList = organismArray
+//            UserOrganismPreference currentUserOrganismPreference = permissionService.getCurrentOrganismPreference(token)
+            if (!appStateObject.preferences) {
+                appStateObject.preferences = new JSONObject()
             }
+            appStateObject.preferences.organism = currentOrganism
+
+
+            if (!appStateObject.preferences.sequence) {
+                Sequence sequence = Sequence.findByOrganism(currentOrganism)
+                appStateObject.preferences.sequence = sequence
+//                    currentUserOrganismPreference.sequence = sequence
+//                    currentUserOrganismPreference.save()
+            }
+//                appStateObject.preferences.sequence = currentUserOrganismPreference.sequence)
+
+            appStateObject.preferences.startBp = appStateObject.preferences.startBp ?: -1
+            appStateObject.preferences.endBp = appStateObject.preferences.endBp ?: 0
         }
-        catch(PermissionException e) {
-            def error=[error: "Error: "+e]
+        catch (PermissionException e) {
+            def error = [error: "Error: " + e]
             log.error(error.error)
             return error
         }

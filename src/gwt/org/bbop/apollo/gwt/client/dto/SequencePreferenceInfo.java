@@ -54,7 +54,6 @@ public class SequencePreferenceInfo {
         jsonObject.put(FeatureStringEnum.NAME.getValue(),new JSONString(name));
         jsonObject.put(FeatureStringEnum.START_BP.getValue(),new JSONNumber(startBp));
         jsonObject.put(FeatureStringEnum.END_BP.getValue(),new JSONNumber(endBp));
-
         return jsonObject;
     }
 }

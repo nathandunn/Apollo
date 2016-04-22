@@ -135,9 +135,9 @@ class SequenceController {
     }
 
 
-    def lookupSequenceByName(String q, String clientToken) {
-        Organism organism = preferenceService.getOrganismByClientToken(clientToken)
-        def sequences = Sequence.findAllByNameIlikeAndOrganism(q + "%", organism, ["sort": "name", "order": "asc", "max": 20]).collect() {
+    def lookupSequenceByName(String q, String organism) {
+        Organism currentOrganism = preferenceService.getOrganismByClientToken(organism)
+        def sequences = Sequence.findAllByNameIlikeAndOrganism(q + "%", currentOrganism, ["sort": "name", "order": "asc", "max": 20]).collect() {
             it.name
         }
         render sequences as JSON
@@ -165,11 +165,11 @@ class SequenceController {
     }
 
     @Transactional
-    def getSequences(String name, Integer start, Integer length, String sort, Boolean asc, Integer minFeatureLength, Integer maxFeatureLength, String clientToken) {
+    def getSequences(String name, Integer start, Integer length, String sort, Boolean asc, Integer minFeatureLength, Integer maxFeatureLength, String organism) {
         try {
-            Organism organism = preferenceService.getOrganismByClientToken(clientToken,request)
+            Organism currentOrganism = preferenceService.getOrganismByClientToken(organism,request)
 
-            if (!organism) {
+            if (!currentOrganism) {
                 render([] as JSON)
                 return
             }
@@ -177,7 +177,7 @@ class SequenceController {
                 if (name) {
                     ilike('name', '%' + name + '%')
                 }
-                eq('organism', organism)
+                eq('organism', currentOrganism)
                 gt('length', minFeatureLength ?: 0)
                 lt('length', maxFeatureLength ?: Integer.MAX_VALUE)
                 if (sort == "length") {
@@ -187,7 +187,7 @@ class SequenceController {
                     order('name', asc ? "asc" : "desc")
                 }
             }
-            def sequenceCounts = Feature.executeQuery("select fl.sequence.name, count(fl.sequence.id) from Feature f join f.featureLocations fl where fl.sequence.organism = :organism and fl.sequence.length < :maxFeatureLength and fl.sequence.length > :minFeatureLength and f.class in :viewableAnnotationList group by fl.sequence.name", [minFeatureLength: minFeatureLength ?: 0, maxFeatureLength: maxFeatureLength ?: Integer.MAX_VALUE, viewableAnnotationList: requestHandlingService.viewableAnnotationList, organism: organism])
+            def sequenceCounts = Feature.executeQuery("select fl.sequence.name, count(fl.sequence.id) from Feature f join f.featureLocations fl where fl.sequence.organism = :organism and fl.sequence.length < :maxFeatureLength and fl.sequence.length > :minFeatureLength and f.class in :viewableAnnotationList group by fl.sequence.name", [minFeatureLength: minFeatureLength ?: 0, maxFeatureLength: maxFeatureLength ?: Integer.MAX_VALUE, viewableAnnotationList: requestHandlingService.viewableAnnotationList, organism: currentOrganism])
             def map = [:]
             sequenceCounts.each {
                 map[it[0]] = it[1]
