@@ -17,4 +17,6 @@ class UserOrganismPreference extends UserPreference{
     Sequence sequence
     Integer startbp
     Integer endbp
+    Date dateCreated
+    Date lastUpdated
 }

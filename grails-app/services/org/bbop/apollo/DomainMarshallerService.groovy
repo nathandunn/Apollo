@@ -49,7 +49,7 @@ class DomainMarshallerService {
             returnArray['currentOrganism'] = it.currentOrganism
             returnArray['userName'] = it.user.username
             returnArray['userId'] = it.user.id
-            returnArray['lastUpdate'] = it.lastUpdate
+            returnArray['lastUpdated'] = it.lastUpdated
             returnArray['dateCreated'] = it.dateCreated
             returnArray['name'] = it.name
             returnArray['preferenceString'] = it.preferenceString

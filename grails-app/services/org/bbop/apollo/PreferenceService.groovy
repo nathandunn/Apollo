@@ -51,7 +51,7 @@ class PreferenceService {
             userOrganismPreference.user = User.findById(organismPreference.userId)
             assert userOrganismPreference.user == permissionService.currentUser
             userOrganismPreference.name = organismPreference.name
-            userOrganismPreference.preferencesString = organismPreference.preferenceString
+            userOrganismPreference.preferenceString = organismPreference.preferenceString
             if(i==organisms.size()-1){
                 userOrganismPreference.save(flush: true)
             }
