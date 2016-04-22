@@ -1,5 +1,6 @@
 package org.bbop.apollo.gwt.client.rest;
 
+import com.google.gwt.core.client.GWT;
 import org.bbop.apollo.gwt.client.dto.PreferenceInfo;
 
 /**
@@ -12,6 +13,7 @@ public class PreferenceRestService extends RestService{
      * @param preferenceInfo
      */
     public static PreferenceInfo savePreferences(PreferenceInfo preferenceInfo){
+        GWT.log("Saving preferences: "+preferenceInfo.toJSON().toString());
         return preferenceInfo ;
     }
 

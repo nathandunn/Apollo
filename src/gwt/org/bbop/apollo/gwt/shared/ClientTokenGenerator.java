@@ -12,17 +12,17 @@ public class ClientTokenGenerator {
     public static final int DEFAULT_LENGTH = 20 ;
     public static final int MIN_TOKEN_LENGTH = 10;
 
-    public static String generateRandomString() {
-        return generateRandomString(DEFAULT_LENGTH);
-    }
+//    public static String generateRandomString() {
+//        return generateRandomString(DEFAULT_LENGTH);
+//    }
 
-    public static String generateRandomString(int length) {
-        StringBuilder stringBuilder = new StringBuilder();
-        while(stringBuilder.length()<length){
-            stringBuilder.append(Math.abs(random.nextInt()));
-        }
-        return stringBuilder.toString();
-    }
+//    public static String generateRandomString(int length) {
+//        StringBuilder stringBuilder = new StringBuilder();
+//        while(stringBuilder.length()<length){
+//            stringBuilder.append(Math.abs(random.nextInt()));
+//        }
+//        return stringBuilder.toString();
+//    }
 
     public static boolean isValidToken(String clientID) {
         return (clientID!=null && clientID.length()>MIN_TOKEN_LENGTH);

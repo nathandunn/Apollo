@@ -8,7 +8,9 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.i18n.client.Dictionary;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import org.bbop.apollo.gwt.client.dto.OrganismInfo;
 import org.bbop.apollo.gwt.client.dto.PreferenceInfo;
+import org.bbop.apollo.gwt.client.rest.PreferenceRestService;
 import org.bbop.apollo.gwt.shared.ClientTokenGenerator;
 import org.bbop.apollo.gwt.shared.FeatureStringEnum;
 
@@ -17,18 +19,19 @@ import org.bbop.apollo.gwt.shared.FeatureStringEnum;
  */
 public class Annotator implements EntryPoint {
 
-    private static Annotator instance ;
+    private static Annotator instance;
 
-    public static Annotator getInstance(){
-        if(instance==null){
-            instance = new Annotator() ;
+    public static Annotator getInstance() {
+        if (instance == null) {
+            instance = new Annotator();
         }
         return instance;
     }
 
     public static EventBus eventBus = GWT.create(SimpleEventBus.class);
     private static Storage preferenceStore = Storage.getSessionStorageIfSupported();
-    private PreferenceInfo preferenceInfo;
+    private static PreferenceInfo preferenceInfo;
+
     /**
      * This is the entry point method.
      */
@@ -38,12 +41,12 @@ public class Annotator implements EntryPoint {
         rp.add(mainPanel);
 
         Dictionary optionsDictionary = Dictionary.getDictionary("Options");
-        if(optionsDictionary.keySet().contains(FeatureStringEnum.ORGANISM.getValue())){
-            String clientToken = optionsDictionary.get(FeatureStringEnum.ORGANISM.getValue());
-            if(ClientTokenGenerator.isValidToken(clientToken)){
-                setPreference(FeatureStringEnum.ORGANISM.getValue(),clientToken);
-            }
-        }
+//        if (optionsDictionary.keySet().contains(FeatureStringEnum.ORGANISM.getValue())) {
+//            String clientToken = optionsDictionary.get(FeatureStringEnum.ORGANISM.getValue());
+////            if (ClientTokenGenerator.isValidToken(clientToken)) {
+//            setPreference(FeatureStringEnum.ORGANISM.getValue(), clientToken);
+////            }
+//        }
         Double height = 100d;
         Style.Unit heightUnit = Style.Unit.PCT;
         Double top = 0d;
@@ -87,32 +90,44 @@ public class Annotator implements EntryPoint {
     }
 
 
-    public static String getRootUrl(){
-        String rootUrl = GWT.getModuleBaseURL().replace("annotator/","");
-        return rootUrl ;
+    public static String getRootUrl() {
+        String rootUrl = GWT.getModuleBaseURL().replace("annotator/", "");
+        return rootUrl;
     }
 
     public static String getClientToken() {
-        String token = getPreference(FeatureStringEnum.ORGANISM.getValue());
-        if (!ClientTokenGenerator.isValidToken(token)) {
-            token = ClientTokenGenerator.generateRandomString();
-            setPreference(FeatureStringEnum.ORGANISM.getValue(), token);
-        }
-        token = getPreference(FeatureStringEnum.ORGANISM.getValue());
-        return token ;
+        return MainPanel.getInstance().getCurrentOrganism().getId();
+//        String token = getPreference(FeatureStringEnum.ORGANISM.getValue());
+////        if (!ClientTokenGenerator.isValidToken(token)) {
+//        if (preferenceInfo.getCurrentOrganism() != null) {
+//            token = preferenceInfo.getCurrentOrganism().getId();
+//        } else if (preferenceInfo.getOrganismPreferenceInfos().size() > 0) {
+//            OrganismInfo currentOrganism = preferenceInfo.getOrganismPreferenceInfos().keySet().iterator().next();
+//            preferenceInfo.setCurrentOrganism(currentOrganism);
+//            token = preferenceInfo.getCurrentOrganism().getId();
+//        }
+////            token = ClientTokenGenerator.generateRandomString();
+//        setPreference(FeatureStringEnum.ORGANISM.getValue(), token);
+//        }
+//        token = getPreference(FeatureStringEnum.ORGANISM.getValue());
+//        return token;
 
     }
 
-    public PreferenceInfo getPreferenceInfo() {
+    public static PreferenceInfo getPreferenceInfo() {
         return preferenceInfo;
     }
 
-    public void setPreferenceInfo(PreferenceInfo preferenceInfo) {
-        setPreferenceInfo(preferenceInfo,false);
+    public static void setPreferenceInfo(PreferenceInfo preferenceInfo) {
+        setPreferenceInfo(preferenceInfo, false);
     }
-    public void setPreferenceInfo(PreferenceInfo preferenceInfo,Boolean saveLocal) {
-        this.preferenceInfo = preferenceInfo;
+
+    public static void setPreferenceInfo(PreferenceInfo preferenceInfo, Boolean saveLocal) {
+        preferenceInfo = preferenceInfo;
 //        setPreference("preference",this.preferenceInfo.toJSON());
-        setPreference(FeatureStringEnum.PREFERENCE.getValue(),this.preferenceInfo.toJSON().toString());
+        setPreference(FeatureStringEnum.PREFERENCE.getValue(), preferenceInfo.toJSON().toString());
+        if (saveLocal) {
+            PreferenceRestService.savePreferences(preferenceInfo);
+        }
     }
 }
