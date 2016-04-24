@@ -15,7 +15,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.ListBox;
 import org.bbop.apollo.gwt.client.dto.*;
@@ -185,7 +184,7 @@ public class MainPanel extends Composite {
         sequenceSuggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
             @Override
             public void onSelection(SelectionEvent<SuggestOracle.Suggestion> event) {
-                setCurrentSequence(sequenceSuggestBox.getText().trim(), null, null, true, false);
+                changeCurrentSequence(sequenceSuggestBox.getText().trim(), null, null, true, false);
             }
         });
 
@@ -270,12 +269,15 @@ public class MainPanel extends Composite {
         saveSequenceLocationPreference();
     }
 
-    private static void setCurrentSequence(String sequenceNameString, final Integer start, final Integer end, final boolean updateViewer, final boolean blocking) {
+    private static void changeCurrentSequence(String sequenceNameString, final Integer start, final Integer end, final boolean updateViewer, final boolean blocking) {
 
         final LoadingDialog loadingDialog = new LoadingDialog(false);
         if (blocking) {
             loadingDialog.show();
         }
+        saveCurrentLocationPreference();
+
+        // TODO: store multiple sequences in JSON per organism
 
         RequestCallback requestCallback = new RequestCallback() {
             @Override
@@ -619,6 +621,7 @@ public class MainPanel extends Composite {
 
     @UiHandler("organismListBox")
     void handleOrganismChange(ChangeEvent changeEvent) {
+        saveCurrentLocationPreference();
         OrganismRestService.switchOrganismById(organismListBox.getSelectedValue());
     }
 
@@ -824,7 +827,7 @@ public class MainPanel extends Composite {
 
         if (!sequenceNameString.equals(currentSequence.getName())) {
             saveCurrentLocationPreference();
-            setCurrentSequence(sequenceNameString, start, end, false, true);
+            changeCurrentSequence(sequenceNameString, start, end, false, true);
             saveCurrentLocationPreference();
             Scheduler.get().scheduleFixedPeriod(new Scheduler.RepeatingCommand() {
                 @Override
