@@ -32,7 +32,7 @@ class SequenceController {
     def setCurrentSequenceLocation(String name,Integer start, Integer end) {
 
         try {
-            UserOrganismPreference userOrganismPreference = preferenceService.setCurrentSequenceLocation(name, start, end,params[FeatureStringEnum.CLIENT_TOKEN.value])
+            UserOrganismPreference userOrganismPreference = preferenceService.setCurrentSequenceLocation(name, start, end,params.get[FeatureStringEnum.CLIENT_TOKEN.value].toString())
             if(params.suppressOutput){
                 render new JSONObject() as JSON
             }
@@ -62,9 +62,10 @@ class SequenceController {
     def setCurrentSequence(Sequence sequenceInstance) {
         log.debug "setting default sequences: ${params}"
         Organism organism = sequenceInstance.organism
+        String clientToken = params.get[FeatureStringEnum.CLIENT_TOKEN.value].toString()
 
         User currentUser = permissionService.currentUser
-        UserOrganismPreference userOrganismPreference = UserOrganismPreference.findByUserAndOrganism(currentUser, organism)
+        UserOrganismPreference userOrganismPreference = UserOrganismPreference.findByUserAndOrganismAndClientToken(currentUser, organism,clientToken)
 
         if (!userOrganismPreference) {
             userOrganismPreference = new UserOrganismPreference(
@@ -72,13 +73,24 @@ class SequenceController {
                     , organism: organism
                     , sequence: sequenceInstance
                     , currentOrganism: true
+                    , clientToken: clientToken
             ).save(insert: true, flush: true, failOnError: true)
         } else {
+//            JSONArray preferenceArray = JSON.parse(userOrganismPreference.preferencesString)
+            JSONObject preferenceObject = JSON.parse(userOrganismPreference.preferencesString) as JSONObject
+            JSONObject sequencesArray = preferenceObject.getJSONArray(FeatureStringEnum.SEQUENCES.value)
+            def sequenceObject = sequencesArray.getJSONObject(sequenceInstance.name)
+            if(sequenceObject){
+                userOrganismPreference.startbp = Integer.parseInt(sequenceObject.getString(FeatureStringEnum.START.value))
+                userOrganismPreference.endbp = Integer.parseInt(sequenceObject.getString(FeatureStringEnum.END.value))
+            }
+
+
             userOrganismPreference.sequence = sequenceInstance
             userOrganismPreference.currentOrganism = true
             userOrganismPreference.save(flush: true, failOnError: true)
         }
-        preferenceService.setOtherCurrentOrganismsFalse(userOrganismPreference, currentUser)
+        preferenceService.setOtherCurrentOrganismsFalse(userOrganismPreference, currentUser,clientToken)
 
         Session session = SecurityUtils.subject.getSession(false)
         session.setAttribute(FeatureStringEnum.DEFAULT_SEQUENCE_NAME.value, sequenceInstance.name)
