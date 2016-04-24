@@ -73,6 +73,8 @@ public class MainPanel extends Composite {
     private static final double UPDATE_DIFFERENCE_BUFFER = 0.3;
     private static final double GENE_VIEW_BUFFER = 0.4;
 
+    private static Boolean saveEvent = false ;
+
 
     @UiField
     Button dockOpenClose;
@@ -215,19 +217,28 @@ public class MainPanel extends Composite {
         setUserNameForCurrentUser();
 
         loginUser();
+
+        createPreferenceSaver();
     }
 
-    private static void setCurrentSequence(String sequenceNameString, final Integer start, final Integer end) {
-        setCurrentSequence(sequenceNameString, start, end, false, false);
+    private static void createPreferenceSaver() {
+
+        // every 30 seconds check the queue
+        Scheduler.get().scheduleFixedPeriod(new Scheduler.RepeatingCommand() {
+            @Override
+            public boolean execute() {
+                if(saveEvent){
+                    saveCurrentLocationPreference();
+                }
+                return true;
+            }
+        },30000);
     }
 
-    private static void sendCurrentSequenceLocation(String sequenceNameString, final Integer start, final Integer end) {
-
+    private static void saveCurrentLocationPreference() {
         RequestCallback requestCallback = new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
-                currentStartBp = start;
-                currentEndBp = end;
                 handlingNavEvent = false;
             }
 
@@ -239,8 +250,24 @@ public class MainPanel extends Composite {
         };
 
         handlingNavEvent = true;
-        SequenceRestService.setCurrentSequenceAndLocation(requestCallback, sequenceNameString, start, end, true);
+        SequenceRestService.setCurrentSequenceAndLocation(requestCallback, currentSequence.getName(), currentStartBp, currentEndBp, true);
+        saveEvent = false ;
+    }
 
+
+    private static void saveSequenceLocationPreference(){
+        saveEvent = true ;
+    }
+
+    private static void updateCurrentSequenceLocation(String sequenceNameString, final Integer start, final Integer end) {
+
+        currentStartBp = start;
+        currentEndBp = end;
+        currentSequence.setName(sequenceNameString);
+        currentSequence.setStart(start);
+        currentSequence.setEnd(end);
+
+        saveSequenceLocationPreference();
     }
 
     private static void setCurrentSequence(String sequenceNameString, final Integer start, final Integer end, final boolean updateViewer, final boolean blocking) {
@@ -796,7 +823,9 @@ public class MainPanel extends Composite {
         String sequenceNameString = navEvent.get("ref").isString().stringValue();
 
         if (!sequenceNameString.equals(currentSequence.getName())) {
+            saveCurrentLocationPreference();
             setCurrentSequence(sequenceNameString, start, end, false, true);
+            saveCurrentLocationPreference();
             Scheduler.get().scheduleFixedPeriod(new Scheduler.RepeatingCommand() {
                 @Override
                 public boolean execute() {
@@ -805,7 +834,7 @@ public class MainPanel extends Composite {
             }, 200);
 
         } else {
-            sendCurrentSequenceLocation(sequenceNameString, start, end);
+            updateCurrentSequenceLocation(sequenceNameString, start, end);
         }
 
     }

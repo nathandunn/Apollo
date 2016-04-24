@@ -136,9 +136,9 @@ class PreferenceService {
         userOrganismPreference.clientToken = clientToken
         userOrganismPreference.currentOrganism = true
         userOrganismPreference.sequence = sequence
-        userOrganismPreference.setStartbp(startBp ?: 0)
-        userOrganismPreference.setEndbp(endBp ?: sequence.end)
-        userOrganismPreference.save()
+        userOrganismPreference.setStartbp(startBp ?: (userOrganismPreference.startbp ?: 0))
+        userOrganismPreference.setEndbp(endBp ?: (userOrganismPreference.endbp ?: sequence.end))
+        userOrganismPreference.save(flush:true)
     }
 
     Organism getOrganismFromPreferences(User user, String trackName,String clientToken) {
