@@ -38,6 +38,7 @@ import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.extras.bootbox.client.Bootbox;
 import org.gwtbootstrap3.extras.bootbox.client.callback.ConfirmCallback;
+import org.gwtbootstrap3.extras.select.client.ui.MultipleSelect;
 import org.gwtbootstrap3.extras.select.client.ui.Option;
 import org.gwtbootstrap3.extras.select.client.ui.Select;
 
@@ -82,7 +83,7 @@ public class GroupPanel extends Composite {
     @UiField
     Button cancelUpdateButton;
     @UiField
-    Select availableUsers;
+    MultipleSelect availableUsers;
     @UiField
     Button updateUsers;
 
@@ -100,6 +101,7 @@ public class GroupPanel extends Composite {
 
     public GroupPanel() {
         initWidget(ourUiBinder.createAndBindUi(this));
+        availableUsers.setDropupAuto(false);
 
         TextColumn<GroupInfo> firstNameColumn = new TextColumn<GroupInfo>() {
             @Override
@@ -188,7 +190,7 @@ public class GroupPanel extends Composite {
 
     @UiHandler("updateUsers")
     public void updateUsers(ClickEvent clickEvent) {
-        List<String> selectedValues = availableUsers.getAllSelectedValues();
+        List<Option> selectedValues = availableUsers.getSelectedItems();
         RequestCallback requestCallback = new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
@@ -353,7 +355,11 @@ public class GroupPanel extends Composite {
 
 
             Option[] options = optionsList.toArray(new Option[optionsList.size()]);
-            availableUsers.setValues(options);
+            List<String> optionStrings = new ArrayList<>();
+            for(Option option : options){
+                optionStrings.add(option.getValue());
+            }
+            availableUsers.setValue(optionStrings);
             availableUsers.refresh();
 
             // only show organisms that this user is an admin on . . . https://github.com/GMOD/Apollo/issues/540
