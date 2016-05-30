@@ -124,13 +124,13 @@ grails.project.dependency.resolution = {
 //        runtime ":hibernate4:4.3.5.5" // or ":hibernate:3.6.10.17"
         runtime ':hibernate4:4.3.8.1' // or ':hibernate:3.6.10.19'
         runtime ":database-migration:1.4.1"
-        runtime ":jquery-ui:1.10.4"
-        runtime ":jquery:1.11.1"
+//        runtime ":jquery-ui:1.10.4"
+//        runtime ":jquery:1.11.1"
 
 
 
         // https://github.com/groovydev/twitter-bootstrap-grails-plugin/blob/master/README.md
-        runtime ':twitter-bootstrap:3.3.4'
+        runtime ':twitter-bootstrap:3.3.5'
         //compile ":angularjs:1.0.0"
         //compile ":dojo:1.7.2.0"
         //compile ":platform-core:1.0.0"
@@ -145,12 +145,6 @@ grails.project.dependency.resolution = {
         //}
         compile ":yammer-metrics:3.0.1-2"
 
-
-        //compile ":crypto:2.0"
-        //compile ":kickstart-with-bootstrap:1.1.0"
-        //compile ":twitter-bootstrap:3.1.1.3"
-        //compile ":jasypt-encryption:1.1.0"
-        //compile ":joda-time:1.4"
         // TODO: re-add when ready to install functional tests
 //        test    ":geb:$gebVersion"
 //        grails.plugin.location.'chado-grails' = "../chado-grails"
