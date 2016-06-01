@@ -122,6 +122,7 @@ public enum FeatureStringEnum {
         USER_ID("userId"),
         LOCKED,
         HISTORY,
+        REMOTE_USER("REMOTE_USER"),
         DOCK_OPEN("dockOpen"),
         DOCK_WIDTH("dockWidth"),
         ;
