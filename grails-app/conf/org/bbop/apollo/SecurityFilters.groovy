@@ -4,10 +4,13 @@ import grails.converters.JSON
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.UsernamePasswordToken
 import org.apache.shiro.subject.Subject
-import org.apache.shiro.web.util.SavedRequest
-import org.apache.shiro.web.util.WebUtils
+import org.bbop.apollo.gwt.shared.FeatureStringEnum;
 
 class SecurityFilters {
+
+    def configWrapperService
+    def permissionService
+
     def filters = {
 
         // TODO: this is the right way to do this as it uses proper forwarding, but
@@ -23,6 +26,26 @@ class SecurityFilters {
 
         all(controller: '*', action: '*') {
             before = {
+//                configWrapperService.useAlternateAuthentication()
+                if(controllerName!="auth"){
+                    String remoteUserHeader = request.getHeader(FeatureStringEnum.REMOTE_USER.value)
+                    if(!remoteUserHeader){
+                        remoteUserHeader = 'ndunn@me.com'
+                    }
+                    if(remoteUserHeader){
+                        User user = User.findByUsername(remoteUserHeader)
+                        if(user){
+                            return true
+                        }
+                        else{
+                            def targetUri = "/${controllerName}/${actionName}"
+                            redirect(uri: "/auth/login?targetUri=${targetUri}")
+                            return false
+                        }
+                    }
+                }
+
+
                 if (controllerName == "organism"
                         || controllerName == "home"
                         || actionName == "report"
@@ -32,13 +55,6 @@ class SecurityFilters {
                         log.debug "apollo filter ${controllerName}::${actionName}"
 
                         Subject subject = SecurityUtils.getSubject();
-                        String remoteUserHeader = request.getHeader(FeatureStringEnum.REMOTE_USER.value)
-                        if(!remoteUserHeader){
-                            remoteUserHeader = 'ndunn@me.com'
-                        }
-                        if(remoteUserHeader){
-//                            payloadJson.put(FeatureStringEnum.USERNAME.value,remoteUserHeader)
-                        }
 
                         if (!subject.isAuthenticated()) {
                             def req = request.JSON

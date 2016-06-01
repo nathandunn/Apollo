@@ -111,6 +111,7 @@ grails.project.dependency.resolution = {
         compile ':asset-pipeline:2.1.5'
         compile ":spring-websocket:1.2.0"
         compile ":shiro:1.2.1"
+//        compile ":shiro-cas:0.5.1"
         compile ":audit-logging:1.0.3"
 
 

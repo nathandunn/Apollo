@@ -20,6 +20,14 @@ class ConfigWrapperService {
     TranslationTable getTranslationTable() {
         return SequenceTranslationHandler.getTranslationTableForGeneticCode(getTranslationCode())
     }
+//
+//    Boolean hasAlternateAuthentication(){
+//        return (grailsApplication.config.apollo.authenticationProxy)
+//    }
+//
+//    def getAlternateAuthentication(){
+//        return grailsApplication.config.apollo.authenticationProxy
+//    }
 
     String getTranslationCode(){
         return grailsApplication.config.apollo.get_translation_code.toString()
