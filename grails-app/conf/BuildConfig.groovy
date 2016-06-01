@@ -130,7 +130,7 @@ grails.project.dependency.resolution = {
 
 
         // https://github.com/groovydev/twitter-bootstrap-grails-plugin/blob/master/README.md
-        runtime ':twitter-bootstrap:3.3.4'
+        runtime ':twitter-bootstrap:3.3.5'
         //compile ":angularjs:1.0.0"
         //compile ":dojo:1.7.2.0"
         //compile ":platform-core:1.0.0"
@@ -148,7 +148,6 @@ grails.project.dependency.resolution = {
 
         //compile ":crypto:2.0"
         //compile ":kickstart-with-bootstrap:1.1.0"
-        //compile ":twitter-bootstrap:3.1.1.3"
         //compile ":jasypt-encryption:1.1.0"
         //compile ":joda-time:1.4"
         // TODO: re-add when ready to install functional tests

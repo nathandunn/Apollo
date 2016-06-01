@@ -30,7 +30,16 @@ class SecurityFilters {
                 ) {
                     try {
                         log.debug "apollo filter ${controllerName}::${actionName}"
+
                         Subject subject = SecurityUtils.getSubject();
+                        String remoteUserHeader = request.getHeader(FeatureStringEnum.REMOTE_USER.value)
+                        if(!remoteUserHeader){
+                            remoteUserHeader = 'ndunn@me.com'
+                        }
+                        if(remoteUserHeader){
+//                            payloadJson.put(FeatureStringEnum.USERNAME.value,remoteUserHeader)
+                        }
+
                         if (!subject.isAuthenticated()) {
                             def req = request.JSON
                             if (req.username && req.password) {

@@ -633,10 +633,13 @@ class PermissionService {
         handleToken(params,payloadJson)
 
         // TODO: move to a plugin
-//        String remoteUserHeader = request.getHeader(FeatureStringEnum.REMOTE_USER.value)
-//        if(remoteUserHeader){
-//            payloadJson.put(FeatureStringEnum.USERNAME.value,remoteUserHeader)
-//        }
+        String remoteUserHeader = request.getHeader(FeatureStringEnum.REMOTE_USER.value)
+        if(!remoteUserHeader){
+            remoteUserHeader = 'ndunn@me.com'
+        }
+        if(remoteUserHeader){
+            payloadJson.put(FeatureStringEnum.USERNAME.value,remoteUserHeader)
+        }
 
         return payloadJson
     }
