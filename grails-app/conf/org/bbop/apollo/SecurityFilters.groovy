@@ -27,7 +27,8 @@ class SecurityFilters {
         all(controller: '*', action: '*') {
             before = {
 //                configWrapperService.useAlternateAuthentication()
-                if(controllerName!="auth"){
+                if(controllerName!="auth"
+                        || (controllerName=="user" && actionName=="login") ){
                     String remoteUserHeader = request.getHeader(FeatureStringEnum.REMOTE_USER.value)
                     if(!remoteUserHeader){
                         remoteUserHeader = 'ndunn@me.com'

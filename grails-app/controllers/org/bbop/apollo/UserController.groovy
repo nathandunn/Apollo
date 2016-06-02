@@ -143,7 +143,24 @@ class UserController {
 
     @Transactional
     def checkLogin() {
-        def currentUser = permissionService.currentUser
+
+        User currentUser
+        String remoteUserHeader = request.getHeader(FeatureStringEnum.REMOTE_USER.value)
+        if(!remoteUserHeader){
+            remoteUserHeader = 'ndunn@me.com'
+        }
+        if(remoteUserHeader){
+            currentUser = User.findByUsername(remoteUserHeader)
+            if(!currentUser){
+                def targetUri = "/${controllerName}/${actionName}"
+                redirect(uri: "/auth/login?targetUri=${targetUri}")
+                return
+            }
+        }
+
+//        currentUser = permissionService.currentUser
+
+
         if (currentUser) {
 
             UserOrganismPreference userOrganismPreference
