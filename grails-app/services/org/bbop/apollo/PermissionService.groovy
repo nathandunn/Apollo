@@ -6,11 +6,17 @@ import grails.transaction.Transactional
 import grails.util.Environment
 import org.apache.commons.lang.RandomStringUtils
 import org.apache.shiro.SecurityUtils
+import org.apache.shiro.authc.AuthenticationToken
 import org.apache.shiro.authc.UsernamePasswordToken
 import org.apache.shiro.session.Session
+import org.apache.shiro.subject.PrincipalCollection
+import org.apache.shiro.subject.SimplePrincipalCollection
 import org.apache.shiro.subject.Subject
+import org.apache.shiro.subject.SubjectContext
+import org.apache.shiro.subject.support.DefaultSubjectContext
 import org.bbop.apollo.gwt.shared.FeatureStringEnum
 import org.bbop.apollo.gwt.shared.PermissionEnum
+import org.bbop.apollo.security.RemoteUserAuthenticationToken
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
@@ -255,6 +261,22 @@ class PermissionService {
         return trackName
     }
 
+
+    User setCurrentUser(User newCurrentUser) {
+        SubjectContext subjectContext = new DefaultSubjectContext()
+        subjectContext.setAuthenticated(true)
+        PrincipalCollection principalCollection = new SimplePrincipalCollection()
+        principalCollection.add(newCurrentUser.username,"*")
+        subjectContext.setPrincipals(principalCollection)
+//        subjectContext.setSession(session)
+        Subject subject = SecurityUtils.getSecurityManager().createSubject(subjectContext)
+        RemoteUserAuthenticationToken remoteUserAuthenticationToken = new RemoteUserAuthenticationToken(newCurrentUser.username)
+        SecurityUtils.securityManager.login(subject,remoteUserAuthenticationToken)
+//        SecurityUtils.getSecurityManager().
+//        Session session = subject.getSession(true)
+
+        return newCurrentUser
+    }
 
     // get current user from session or input object
     User getCurrentUser(JSONObject inputObject = new JSONObject()) {

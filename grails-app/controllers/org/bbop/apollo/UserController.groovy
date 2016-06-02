@@ -3,6 +3,7 @@ package org.bbop.apollo
 import grails.converters.JSON
 import grails.transaction.Transactional
 import org.apache.shiro.crypto.hash.Sha256Hash
+import org.apache.shiro.session.Session
 import org.bbop.apollo.gwt.shared.FeatureStringEnum
 import org.bbop.apollo.gwt.shared.PermissionEnum
 import org.codehaus.groovy.grails.web.json.JSONArray
@@ -156,9 +157,13 @@ class UserController {
                 redirect(uri: "/auth/login?targetUri=${targetUri}")
                 return
             }
+            else{
+                currentUser = permissionService.setCurrentUser(currentUser)
+            }
         }
 
-//        currentUser = permissionService.currentUser
+
+        currentUser = permissionService.currentUser
 
 
         if (currentUser) {
