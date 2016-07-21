@@ -8,9 +8,8 @@ import org.apache.shiro.web.util.WebUtils
 
 class AuthController {
 
-
-//    def shiroSecurityManager
     def permissionService
+    def grailsApplication
 
     def index = { redirect(action: "login", params: params) }
 
@@ -34,17 +33,24 @@ class AuthController {
         SavedRequest savedRequest = WebUtils.getSavedRequest(request)
         if (savedRequest) {
             targetUri = savedRequest.requestURI - request.contextPath
-            if (savedRequest.queryString) targetUri = targetUri + '?' + savedRequest.queryString
+            if (savedRequest.queryString) {
+                targetUri = targetUri + '?' + savedRequest.queryString
+            }
         }
         
         try{
             // Perform the actual login. An AuthenticationException
             // will be thrown if the username is unrecognised or the
             // password is incorrect.
+            log.debug "servlet path: ${request.contextPath}"
+            log.debug "init target uri '${targetUri}'."
             permissionService.authenticateWithToken(authToken,request)
 //            SecurityUtils.subject.login(authToken)
             if(targetUri){
                 log.info "Redirecting to '${targetUri}'."
+                if(!targetUri.startsWith(request.contextPath)){
+                    targetUri = request.contextPath + targetUri
+                }
                 redirect(uri: targetUri)
             }
         }

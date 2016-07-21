@@ -36,10 +36,7 @@ import org.gwtbootstrap3.client.ui.constants.AlertType;
 import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.gwtbootstrap3.extras.bootbox.client.Bootbox;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by ndunn on 12/18/14.
@@ -61,8 +58,9 @@ public class MainPanel extends Composite {
     private static UserInfo currentUser;
     private static OrganismInfo currentOrganism;
     private static SequenceInfo currentSequence;
-    private static Integer currentStartBp; // list of organisms for user
-    private static Integer currentEndBp; // list of organisms for user
+    private static Integer currentStartBp; // start base pair
+    private static Integer currentEndBp; // end base pair
+    private static Map<String,List<String>> currentQueryParams ; // list of organisms for user
     public static boolean useNativeTracklist; // list of organisms for user
     private static List<OrganismInfo> organismInfoList = new ArrayList<>(); // list of organisms for user
 
@@ -73,6 +71,7 @@ public class MainPanel extends Composite {
     private int maxUsernameLength = 15;
     private static final double UPDATE_DIFFERENCE_BUFFER = 0.3;
     private static final double GENE_VIEW_BUFFER = 0.4;
+    private static List<String> reservedList = new ArrayList<>();
 
 
     @UiField
@@ -225,6 +224,12 @@ public class MainPanel extends Composite {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+
+        currentQueryParams = Window.Location.getParameterMap();
+
+        reservedList.add("loc");
+        reservedList.add("trackList");
 
         loginUser();
     }
@@ -440,13 +445,31 @@ public class MainPanel extends Composite {
         trackListString += "jbrowse/index.html?loc=";
         trackListString += selectedSequence;
         trackListString += URL.encodeQueryString(":") + minRegion + ".." + maxRegion;
-        trackListString += "&highlight=&tracklist=" + (MainPanel.useNativeTracklist ? "1" : "0");
-//        trackListString += "&clientToken=" + Annotator.getClientToken();
+        trackListString += "&tracklist=" + (MainPanel.useNativeTracklist ? "1" : "0");
+//        trackListString += "&highlight=&tracklist=" + (MainPanel.useNativeTracklist ? "1" : "0");
 
-        final String finalString = trackListString;
-//        Window.alert(finalString);
+        trackListString += getCurrentQueryParamsAsString();
 
-        frame.setUrl(finalString);
+        GWT.log(trackListString);
+
+        frame.setUrl(trackListString);
+    }
+
+
+    private static String getCurrentQueryParamsAsString() {
+        String returnString = "";
+        if(currentQueryParams==null){
+            return returnString;
+        }
+
+        for(String key : currentQueryParams.keySet()){
+            if(!reservedList.contains(key)){
+                for(String value : currentQueryParams.get(key)){
+                    returnString += "&"+key + "=" + value;
+                }
+            }
+        }
+        return returnString;
     }
 
     public static void updateGenomicViewer(boolean forceReload) {
