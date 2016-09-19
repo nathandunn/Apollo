@@ -6,11 +6,12 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.http.client.*;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -19,10 +20,12 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.ListBox;
 import org.bbop.apollo.gwt.client.dto.*;
+import org.bbop.apollo.gwt.client.dto.assemblage.*;
 import org.bbop.apollo.gwt.client.event.AnnotationInfoChangeEvent;
 import org.bbop.apollo.gwt.client.event.AnnotationInfoChangeEventHandler;
 import org.bbop.apollo.gwt.client.event.OrganismChangeEvent;
 import org.bbop.apollo.gwt.client.event.UserChangeEvent;
+import org.bbop.apollo.gwt.client.rest.AssemblageRestService;
 import org.bbop.apollo.gwt.client.rest.OrganismRestService;
 import org.bbop.apollo.gwt.client.rest.SequenceRestService;
 import org.bbop.apollo.gwt.client.rest.UserRestService;
@@ -31,12 +34,12 @@ import org.bbop.apollo.gwt.shared.PermissionEnum;
 import org.gwtbootstrap3.client.ui.*;
 import org.gwtbootstrap3.client.ui.Anchor;
 import org.gwtbootstrap3.client.ui.Button;
-import org.gwtbootstrap3.client.ui.SuggestBox;
 import org.gwtbootstrap3.client.ui.constants.AlertType;
 import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.gwtbootstrap3.extras.bootbox.client.Bootbox;
 
 import java.util.*;
+
 
 /**
  * Created by ndunn on 12/18/14.
@@ -57,9 +60,9 @@ public class MainPanel extends Composite {
     static PermissionEnum highestPermission = PermissionEnum.NONE; // the current logged-in user
     private static UserInfo currentUser;
     private static OrganismInfo currentOrganism;
-    private static SequenceInfo currentSequence;
-    private static Integer currentStartBp; // start base pair
-    private static Integer currentEndBp; // end base pair
+    private static AssemblageInfo currentAssemblage;
+    private static Long currentStartBp; // list of organisms for user
+    private static Long currentEndBp; // list of organisms for user
     private static Map<String,List<String>> currentQueryParams ; // list of organisms for user
     public static boolean useNativeTracklist; // list native tracks
     private static List<OrganismInfo> organismInfoList = new ArrayList<>(); // list of organisms for user
@@ -77,7 +80,7 @@ public class MainPanel extends Composite {
 
     @UiField
     Button dockOpenClose;
-    @UiField(provided = false)
+    @UiField
     static NamedFrame frame;
     @UiField
     static AnnotatorPanel annotatorPanel;
@@ -85,6 +88,8 @@ public class MainPanel extends Composite {
     static TrackPanel trackPanel;
     @UiField
     static SequencePanel sequencePanel;
+    @UiField
+    static AssemblagePanel assemblagePanel;
     @UiField
     static OrganismPanel organismPanel;
     @UiField
@@ -110,7 +115,7 @@ public class MainPanel extends Composite {
     @UiField
     ListBox organismListBox;
     @UiField(provided = true)
-    static SuggestBox sequenceSuggestBox;
+    static HTML currentSequenceLabel;
     @UiField
     Modal notificationModal;
     @UiField
@@ -149,7 +154,8 @@ public class MainPanel extends Composite {
 
     MainPanel() {
         instance = this;
-        sequenceSuggestBox = new SuggestBox(new ReferenceSequenceOracle());
+        currentSequenceLabel = new HTML();
+        currentSequenceLabel.setHTML("<H3>Loading...</H3>");
 
         mainSplitPanel = new SplitLayoutPanel() {
             @Override
@@ -169,24 +175,24 @@ public class MainPanel extends Composite {
                 switch (annotationInfoChangeEvent.getAction()) {
                     case SET_FOCUS:
                         AnnotationInfo annotationInfo = annotationInfoChangeEvent.getAnnotationInfo();
-                        int start = annotationInfo.getMin();
-                        int end = annotationInfo.getMax();
-                        int newLength = end - start;
+                        long start = annotationInfo.getMin();
+                        long end = annotationInfo.getMax();
+                        long newLength = end - start;
                         start -= newLength * GENE_VIEW_BUFFER;
                         end += newLength * GENE_VIEW_BUFFER;
                         start = start < 0 ? 0 : start;
-                        updateGenomicViewerForLocation(annotationInfo.getSequence(), start, end);
+                        updateGenomicViewerForAssemblage(annotationInfo.getSequence(), start, end);
                         break;
                 }
             }
         });
 
-        sequenceSuggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
-            @Override
-            public void onSelection(SelectionEvent<SuggestOracle.Suggestion> event) {
-                setCurrentSequence(sequenceSuggestBox.getText().trim(), null, null, true, false);
-            }
-        });
+//        currentSequenceLabel.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
+//            @Override
+//            public void onSelection(SelectionEvent<SuggestOracle.Suggestion> event) {
+//                setCurrentSequence(currentSequenceLabel.getText().trim(), null, null, true, false);
+//            }
+//        });
 
 
         try {
@@ -235,11 +241,11 @@ public class MainPanel extends Composite {
         loginUser();
     }
 
-    private static void setCurrentSequence(String sequenceNameString, final Integer start, final Integer end) {
-        setCurrentSequence(sequenceNameString, start, end, false, false);
-    }
+//    private static void setCurrentSequence(String sequenceNameString, final Integer start, final Integer end) {
+//        setCurrentSequence(sequenceNameString, start, end, false, false);
+//    }
 
-    private static void sendCurrentSequenceLocation(String sequenceNameString, final Integer start, final Integer end) {
+    private static void sendCurrentSequenceLocation(String sequenceNameString, final Long start, final Long end) {
 
         RequestCallback requestCallback = new RequestCallback() {
             @Override
@@ -261,7 +267,12 @@ public class MainPanel extends Composite {
 
     }
 
-    private static void setCurrentSequence(String sequenceNameString, final Integer start, final Integer end, final boolean updateViewer, final boolean blocking) {
+    private static void setLabelForcurrentAssemblage() {
+        SafeHtml labelHtml = SafeHtmlUtils.fromTrustedString(AssemblageInfoService.buildDescriptionWidget(currentAssemblage).getElement().getInnerHTML());
+        currentSequenceLabel.setHTML(labelHtml);
+    }
+
+    private static void setCurrentSequence(String sequenceNameString, final Long start, final Long end, final boolean updateViewer, final boolean blocking) {
 
         final LoadingDialog loadingDialog = new LoadingDialog(false);
         if (blocking) {
@@ -273,13 +284,13 @@ public class MainPanel extends Composite {
             public void onResponseReceived(Request request, Response response) {
                 handlingNavEvent = false;
                 JSONObject sequenceInfoJson = JSONParser.parseStrict(response.getText()).isObject();
-                currentSequence = SequenceInfoConverter.convertFromJson(sequenceInfoJson);
+                currentAssemblage = AssemblageInfoConverter.convertJSONObjectToAssemblageInfo(sequenceInfoJson);
                 currentStartBp = start != null ? start : 0;
-                currentEndBp = end != null ? end : currentSequence.getEnd();
-                sequenceSuggestBox.setText(currentSequence.getName());
+                currentEndBp = end != null ? end : currentAssemblage.getEnd().intValue();
+                setLabelForcurrentAssemblage();
 
 
-                Annotator.eventBus.fireEvent(new OrganismChangeEvent(OrganismChangeEvent.Action.LOADED_ORGANISMS, currentSequence.getName()));
+                Annotator.eventBus.fireEvent(new OrganismChangeEvent(OrganismChangeEvent.Action.LOADED_ORGANISMS, currentAssemblage.getDescription()));
 
                 if (updateViewer) {
                     updateGenomicViewer();
@@ -417,19 +428,50 @@ public class MainPanel extends Composite {
                 displayName.substring(0, maxUsernameLength - 1) + "..." : displayName);
     }
 
-    public static void updateGenomicViewerForLocation(String selectedSequence, Integer minRegion, Integer maxRegion) {
-        updateGenomicViewerForLocation(selectedSequence, minRegion, maxRegion, false);
+    public static void updateGenomicViewerForAssemblage(String selectedSequence, Long minRegion, Long maxRegion) {
+        updateGenomicViewerForAssemblage(selectedSequence, minRegion, maxRegion, false);
     }
 
     /**
-     * @param selectedSequence
+     * TODO: remove?
+     * <p/>
+     * Need to preserver the order
+     *
+     * @param assemblageInfo
+     */
+    public static void updateGenomicViewerForAssemblage(AssemblageInfo assemblageInfo) {
+
+        RequestCallback requestCallback = new RequestCallback() {
+            @Override
+            public void onResponseReceived(Request request, Response response) {
+                JSONObject returnValue = JSONParser.parseStrict(response.getText()).isObject();
+                currentAssemblage = AssemblageInfoConverter.convertJSONObjectToAssemblageInfo(returnValue);
+                updateGenomicViewer(true);
+
+            }
+
+            @Override
+            public void onError(Request request, Throwable exception) {
+                Bootbox.alert("Problem viewing assemblages: " + exception);
+            }
+        };
+
+        AssemblageRestService.getAssemblage(requestCallback, assemblageInfo);
+
+//        List<UserAssemblage> assemblages = UserAssemblage.findById(assemblageList);
+        // create an orderd list of features / sequences
+
+    }
+
+    /**
+     * @param assemblageInfo
      * @param minRegion
      * @param maxRegion
      */
-    public static void updateGenomicViewerForLocation(String selectedSequence, Integer minRegion, Integer maxRegion, boolean forceReload) {
+    public static void updateGenomicViewerForAssemblage(AssemblageInfo assemblageInfo, Long minRegion, Long maxRegion, Boolean forceReload) {
 
-        if (!forceReload && currentSequence != null && currentSequence.getName().equals(selectedSequence) && currentStartBp != null && currentEndBp != null && minRegion > 0 && maxRegion > 0 && frame.getUrl().startsWith("http")) {
-            int oldLength = maxRegion - minRegion;
+        if (!forceReload && currentAssemblage != null && currentAssemblage.getDescription().equals(assemblageInfo.getDescription()) && currentStartBp != null && currentEndBp != null && minRegion > 0 && maxRegion > 0 && frame.getUrl().startsWith("http")) {
+            long oldLength = maxRegion - minRegion;
             double diff1 = (Math.abs(currentStartBp - minRegion)) / (float) oldLength;
             double diff2 = (Math.abs(currentEndBp - maxRegion)) / (float) oldLength;
             if (diff1 < UPDATE_DIFFERENCE_BUFFER && diff2 < UPDATE_DIFFERENCE_BUFFER) {
@@ -441,10 +483,11 @@ public class MainPanel extends Composite {
         currentEndBp = maxRegion;
 
 
-        String trackListString = Annotator.getRootUrl() ;
-        trackListString +=  Annotator.getClientToken() +"/";
-        trackListString += "jbrowse/index.html?loc=";
-        trackListString += selectedSequence;
+        String trackListString = Annotator.getRootUrl() + Annotator.getClientToken() + "/jbrowse/index.html?loc=";
+        currentAssemblage = assemblageInfo;
+        minRegion = currentAssemblage.getStart() != null ? currentAssemblage.getStart() : -1;
+        maxRegion = currentAssemblage.getEnd() != null ? currentAssemblage.getEnd() : -1;
+        trackListString += URL.encodeQueryString(AssemblageInfoConverter.convertAssemblageInfoToJSONObject(currentAssemblage).toString());
         trackListString += URL.encodeQueryString(":") + minRegion + ".." + maxRegion;
 
         trackListString += getCurrentQueryParamsAsString();
@@ -476,6 +519,29 @@ public class MainPanel extends Composite {
     }
 
 
+    /**
+     * @param selectedSequence
+     * @param minRegion
+     * @param maxRegion
+     */
+    public static void updateGenomicViewerForAssemblage(String selectedSequence, Long minRegion, Long maxRegion, Boolean forceReload) {
+
+        AssemblageInfo assemblageInfo;
+        if (selectedSequence.startsWith("{")) {
+            GWT.log("calling string instead of assemblage for selected sequence");
+            assemblageInfo = AssemblageInfoConverter.convertJSONObjectToAssemblageInfo(JSONParser.parseStrict(selectedSequence).isObject());
+        } else {
+            assemblageInfo = new AssemblageInfo();
+            AssemblageSequenceList assemblageSequenceList = new AssemblageSequenceList();
+            AssemblageSequence assemblageSequence = new AssemblageSequence();
+            assemblageSequence.setName(selectedSequence);
+            assemblageSequenceList.addSequence(assemblageSequence);
+            assemblageInfo.setSequenceList(assemblageSequenceList);
+        }
+        updateGenomicViewerForAssemblage(assemblageInfo,minRegion,maxRegion,forceReload);
+    }
+
+
     private static String getCurrentQueryParamsAsString() {
         String returnString = "";
         if(currentQueryParams==null){
@@ -492,11 +558,12 @@ public class MainPanel extends Composite {
         return returnString;
     }
 
+
     public static void updateGenomicViewer(boolean forceReload) {
         if (currentStartBp != null && currentEndBp != null) {
-            updateGenomicViewerForLocation(currentSequence.getName(), currentStartBp, currentEndBp, forceReload);
+            updateGenomicViewerForAssemblage(currentAssemblage, currentStartBp, currentEndBp, forceReload);
         } else {
-            updateGenomicViewerForLocation(currentSequence.getName(), currentSequence.getStart(), currentSequence.getEnd(), forceReload);
+            updateGenomicViewerForAssemblage(currentAssemblage, currentAssemblage.getStart(), currentAssemblage.getEnd(), forceReload);
         }
     }
 
@@ -506,13 +573,14 @@ public class MainPanel extends Composite {
 
     public void setAppState(AppStateInfo appStateInfo) {
         organismInfoList = appStateInfo.getOrganismList();
-        currentSequence = appStateInfo.getCurrentSequence();
+        currentAssemblage = appStateInfo.getCurrentAssemblage();
         currentOrganism = appStateInfo.getCurrentOrganism();
         currentStartBp = appStateInfo.getCurrentStartBp();
         currentEndBp = appStateInfo.getCurrentEndBp();
 
-        if (currentSequence != null) {
-            sequenceSuggestBox.setText(currentSequence.getName());
+        if (currentAssemblage != null) {
+            setLabelForcurrentAssemblage();
+//            currentSequenceLabel.setText(currentAssemblage.getDescription());
         }
 
 
@@ -670,15 +738,18 @@ public class MainPanel extends Composite {
                 sequencePanel.reload();
                 break;
             case 3:
-                organismPanel.reload();
+                assemblagePanel.reload();
                 break;
             case 4:
-                userPanel.reload();
+                organismPanel.reload();
                 break;
             case 5:
-                userGroupPanel.reload();
+                userPanel.reload();
                 break;
             case 6:
+                userGroupPanel.reload();
+                break;
+            case 7:
                 preferencePanel.reload();
                 break;
             default:
@@ -719,7 +790,6 @@ public class MainPanel extends Composite {
         Annotator.setPreference(FeatureStringEnum.DOCK_OPEN.getValue(), toggleOpen);
     }
 
-
     public static void registerFunction(String name, JavaScriptObject javaScriptObject) {
         annotrackFunctionMap.put(name, javaScriptObject);
     }
@@ -748,9 +818,9 @@ public class MainPanel extends Composite {
         url2 += currentOrganism.getId()+"/";
         url2 += "jbrowse/index.html";
         if (currentStartBp != null) {
-            url2 += "?loc=" + currentSequence.getName() + ":" + currentStartBp + ".." + currentEndBp;
+            url2 += "?loc=" + currentAssemblage.getDescription() + ":" + currentStartBp + ".." + currentEndBp;
         } else {
-            url2 += "?loc=" + currentSequence.getName() + ":" + currentSequence.getStart() + ".." + currentSequence.getEnd();
+            url2 += "?loc=" + currentAssemblage.getDescription() + ":" + currentAssemblage.getStart() + ".." + currentAssemblage.getEnd();
         }
 //        url2 += "&organism=" + currentOrganism.getId();
         url2 += "&tracks=";
@@ -769,9 +839,9 @@ public class MainPanel extends Composite {
         String url = Annotator.getRootUrl();
         url += "annotator/loadLink";
         if (currentStartBp != null) {
-            url += "?loc=" + currentSequence.getName() + ":" + currentStartBp + ".." + currentEndBp;
+            url += "?loc=" + currentAssemblage.getSequenceList() + ":" + currentStartBp + ".." + currentEndBp;
         } else {
-            url += "?loc=" + currentSequence.getName() + ":" + currentSequence.getStart() + ".." + currentSequence.getEnd();
+            url += "?loc=" + currentAssemblage.getDescription() + ":" + currentAssemblage.getStart() + ".." + currentAssemblage.getEnd();
         }
         url += "&organism=" + currentOrganism.getId();
         url += "&tracks=";
@@ -795,6 +865,17 @@ public class MainPanel extends Composite {
     @UiHandler(value = {"logoutButton", "logoutButton2"})
     public void logout(ClickEvent clickEvent) {
         UserRestService.logout();
+    }
+
+    @UiHandler("currentSequenceLabel")
+    public void currentSequenceLabelClick(ClickEvent event) {
+        detailTabs.selectTab(TabPanelIndex.ASSEMBLAGE.getIndex());
+        Annotator.setPreference(FeatureStringEnum.CURRENT_TAB.getValue(), TabPanelIndex.ASSEMBLAGE.getIndex());
+        reloadTabPerIndex(TabPanelIndex.ASSEMBLAGE.getIndex());
+        assemblagePanel.setAssemableInfo(currentAssemblage);
+
+//        SelectionEvent<Integer> selectionEvent = SelectionEvent.getType();
+//        onSelection(selectionEvent);
     }
 
 
@@ -848,12 +929,13 @@ public class MainPanel extends Composite {
         handlingNavEvent = true;
         JSONObject navEvent = JSONParser.parseLenient(payload).isObject();
 
-        final Integer start = (int) navEvent.get("start").isNumber().doubleValue();
-        final Integer end = (int) navEvent.get("end").isNumber().doubleValue();
+        final Long start = (long) navEvent.get("start").isNumber().doubleValue();
+        final Long end = (long) navEvent.get("end").isNumber().doubleValue();
         String sequenceNameString = navEvent.get("ref").isString().stringValue();
 
-        if (!sequenceNameString.equals(currentSequence.getName())) {
-            setCurrentSequence(sequenceNameString, start, end, false, true);
+        if (!sequenceNameString.equals(currentAssemblage.getDescription())) {
+//            setCurrentSequence(sequenceNameString, start, end, false, true);
+            setCurrentSequence(sequenceNameString, start, end, false, false);
             Scheduler.get().scheduleFixedPeriod(new Scheduler.RepeatingCommand() {
                 @Override
                 public boolean execute() {
@@ -907,11 +989,11 @@ public class MainPanel extends Composite {
     }
 
 
-    public static String getCurrentSequenceAsJson() {
-        if (currentSequence == null) {
+    public static String getCurrentAssemblageAsJson() {
+        if (currentAssemblage == null) {
             return "{}";
         }
-        return currentSequence.toJSON().toString();
+        return AssemblageInfoConverter.convertAssemblageInfoToJSONObject(currentAssemblage).toString();
     }
 
     public static boolean hasCurrentUser() {
@@ -945,22 +1027,18 @@ public class MainPanel extends Composite {
         $wnd.handleFeatureUpdated = $entry(@org.bbop.apollo.gwt.client.MainPanel::handleFeatureUpdated(Ljava/lang/String;));
         $wnd.getCurrentOrganism = $entry(@org.bbop.apollo.gwt.client.MainPanel::getCurrentOrganismAsJson());
         $wnd.getCurrentUser = $entry(@org.bbop.apollo.gwt.client.MainPanel::getCurrentUserAsJson());
-        $wnd.getCurrentSequence = $entry(@org.bbop.apollo.gwt.client.MainPanel::getCurrentSequenceAsJson());
-        $wnd.getEmbeddedVersion = $entry(
-            function apolloEmbeddedVersion() {
-                return 'ApolloGwt-2.0';
-            }
-        );
+        $wnd.getCurrentAssemblage = $entry(@org.bbop.apollo.gwt.client.MainPanel::getCurrentAssemblageAsJson());
     }-*/;
 
-    private enum TabPanelIndex {
+    public enum TabPanelIndex {
         ANNOTATIONS(0),
         TRACKS(1),
         SEQUENCES(2),
-        ORGANISM(3),
-        USERS(4),
-        GROUPS(5),
-        PREFERENCES(6),;
+        ASSEMBLAGE(3),
+        ORGANISM(4),
+        USERS(5),
+        GROUPS(6),
+        PREFERENCES(7),;
 
         private int index;
 
@@ -968,6 +1046,9 @@ public class MainPanel extends Composite {
             this.index = index;
         }
 
+        public int getIndex() {
+            return index;
+        }
     }
 
     public boolean isCurrentUserAdmin() {
@@ -998,5 +1079,20 @@ public class MainPanel extends Composite {
         this.organismInfoList = organismInfoList;
     }
 
+    public void addAssemblage(RequestCallback requestCallback, AssemblageInfo assemblageInfo) {
+        assemblagePanel.addAssemblage(requestCallback, assemblageInfo);
+    }
 
+    public AssemblageInfo getCurrentAssemblage() {
+        return currentAssemblage;
+    }
+
+    public void setcurrentAssemblage(AssemblageInfo assemblage) {
+        currentAssemblage = assemblage;
+    }
+
+    public void setCurrentAssemblageAndView(AssemblageInfo assemblageInfo) {
+        setcurrentAssemblage(assemblageInfo);
+        updateGenomicViewerForAssemblage(assemblageInfo);
+    }
 }
