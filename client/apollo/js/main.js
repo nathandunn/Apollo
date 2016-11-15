@@ -733,9 +733,60 @@ return declare( [JBPlugin, HelpMixin],
         this.updateLabels();
     },
 
+    callAssemblageLocation: function(loc){
+        var browser =this.browser;
+        alert('trying to go to loc: '+loc) ;
+        var location = typeof loc == 'string' ? Util.parseLocString( loc ) :  loc;
+        alert('parsed loc string: '+location  );
+        // only call navigateToLocation() directly if location has start and end, otherwise try and fill in start/end from 'location' cookie
+        if( location && ("start" in location) && ("end" in location)) {
+            browser.navigateToLocation( location );
+            return false;
+        }
+        // otherwise, if it's just a word (or a location with only a ref property), try to figure out what it is
+        else {
+            if( typeof loc != 'string'){
+                loc = loc.ref;
+            }
+            // is it just the name of one of our ref seqs?
+            var ref = browser.findReferenceSequence( loc );
+            if( ref ) {
+                browser.navigateToLocation( { ref: ref.name } );
+                return false;
+            }
+        }
+    },
+
+    navigateToAssemblage: function(loc) {
+        var thisB = this ;
+        var browser = thisB.browser;
+        browser.afterMilestone( 'initView', function() {
+            // lastly, try to search our feature names for it
+            browser.searchNames( loc )
+                .then( function( found ) {
+                    alert('loc: '+loc + ' found: '+ found);
+                        if( found ){
+                            return;
+                        }
+
+                        // if it's a foo:123..456 location, go there
+                        if(!thisB.callAssemblageLocation(loc)){return;}
+
+                        new InfoDialog(
+                            {
+                                title: 'Not found',
+                                content: 'Not found: <span class="locString">'+loc+'</span>',
+                                className: 'notfound-dialog'
+                            }).show();
+                    },
+                    thisB.callAssemblageLocation(loc));
+        });
+    },
+
     addSearchBox: function(){
         // var navbox = dojo.create( 'div', { id: 'navbox', style: { 'text-align': align } }, parent );
-        var browser = this.browser ;
+        var thisB = this ;
+        var browser = thisB.browser ;
         browser.afterMilestone( 'initView', function() {
             var navbox = document.getElementById('navbox');
             var searchbox = dojo.create('span', {
@@ -768,7 +819,8 @@ return declare( [JBPlugin, HelpMixin],
                 }
                 else if (event.keyCode == keys.ENTER) {
                     locationBox.closeDropDown(false);
-                    browser.navigateTo( locationBox.get('value') );
+                    alert('navigating to: '+locationBox.get('value'));
+                    thisB.navigateToAssemblage( locationBox.get('value') );
                     dojo.stopEvent(event);
                 }
                 // else {
