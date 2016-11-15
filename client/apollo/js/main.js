@@ -760,6 +760,7 @@ return declare( [JBPlugin, HelpMixin],
                 }
             }));
             locationBox.focusNode.spellcheck = false;
+            locationBox.set('placeholder',"search features, IDs");
             dojo.query('div.dijitArrowButton', locationBox.domNode ).orphan();
             dojo.connect( locationBox.focusNode, "keydown", this, function(event) {
                 if( event.keyCode == keys.ESCAPE ) {
