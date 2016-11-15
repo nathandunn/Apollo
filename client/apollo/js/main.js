@@ -17,6 +17,7 @@ define([
            'dojo/query',
            'dojo/_base/window',
            'dojo/_base/array',
+           'dojo/keys',
            'dijit/registry',
            'dijit/Menu',
            'dijit/MenuItem',
@@ -53,6 +54,7 @@ define([
             query,
             win,
             array,
+            keys,
             dijitRegistry,
             dijitMenu,
             dijitMenuItem,
@@ -753,11 +755,46 @@ return declare( [JBPlugin, HelpMixin],
                 dojo.create('input', {}, searchbox)
             );
             browser.afterMilestone('loadNames', dojo.hitch(this, function () {
-                if (this.nameStore) {
-                    locationBox.set('store', this.nameStore);
+                if (browser.nameStore) {
+                    locationBox.set('store', browser.nameStore);
                 }
             }));
             locationBox.focusNode.spellcheck = false;
+            dojo.query('div.dijitArrowButton', locationBox.domNode ).orphan();
+            dojo.connect( locationBox.focusNode, "keydown", this, function(event) {
+                if( event.keyCode == keys.ESCAPE ) {
+                    locationBox.set('value','');
+                }
+                else if (event.keyCode == keys.ENTER) {
+                    locationBox.closeDropDown(false);
+                    browser.navigateTo( locationBox.get('value') );
+                    dojo.stopEvent(event);
+                }
+                // else {
+                //     this.goButton.set('disabled', false);
+                // }
+            });
+            dojo.connect( navbox, 'onselectstart', function(evt) { evt.stopPropagation(); return true; });
+            (function(){
+
+                // add a moreMatches class to our hacked-in "more options" option
+                var dropDownProto = eval(locationBox.dropDownClass).prototype;
+                var oldCreateOption = dropDownProto._createOption;
+                dropDownProto._createOption = function( item ) {
+                    var option = oldCreateOption.apply( this, arguments );
+                    if( item.hitLimit )
+                        dojo.addClass( option, 'moreMatches');
+                    return option;
+                };
+
+                // prevent the "more matches" option from being clicked
+                var oldOnClick = dropDownProto.onClick;
+                dropDownProto.onClick = function( node ) {
+                    if( dojo.hasClass(node, 'moreMatches' ) )
+                        return null;
+                    return oldOnClick.apply( this, arguments );
+                };
+            }).call(this);
         });
     }
     ,
