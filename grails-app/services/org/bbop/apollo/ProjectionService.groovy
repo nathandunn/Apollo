@@ -600,4 +600,12 @@ class ProjectionService {
         // add coordinates for the two regions
         return projection
     }
+
+    @NotTransactional
+    JSONArray fixProjectionName(JSONArray jsonArray) {
+        for(JSONObject obj in jsonArray){
+//            obj.name = "{"
+        }
+        return jsonArray
+    }
 }
