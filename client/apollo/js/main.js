@@ -733,28 +733,32 @@ return declare( [JBPlugin, HelpMixin],
 
     addSearchBox: function(){
         // var navbox = dojo.create( 'div', { id: 'navbox', style: { 'text-align': align } }, parent );
-        var navbox = document.getElementById('navbox');
-        var searchbox = dojo.create('span', {
-            'id':'apollo-search-box',
-            'class': "separate-location-box"
-        }, navbox );
+        var browser = this.browser ;
+        browser.afterMilestone( 'initView', function() {
+            var navbox = document.getElementById('navbox');
+            var searchbox = dojo.create('span', {
+                'id': 'apollo-search-box',
+                'class': "separate-location-box"
+            }, navbox);
 
-        var locationBox = new dijitComboBox(
-            {
-                id: "apollo-location",
-                name: "apollo-location",
-                style: { width: "200px"},
-                maxLength: 400,
-                searchAttr: "name",
-                title: 'Enter a symbol or ID to search'
-            },
-            dojo.create('input', {}, searchbox) );
-            this.browser.afterMilestone( 'loadNames', dojo.hitch(this, function() {
-                if( this.nameStore ) {
-                    locationBox.set( 'store', this.nameStore );
+            var locationBox = new dijitComboBox(
+                {
+                    id: "apollo-location",
+                    name: "apollo-location",
+                    style: {width: "200px"},
+                    maxLength: 400,
+                    searchAttr: "name",
+                    title: 'Enter a symbol or ID to search'
+                },
+                dojo.create('input', {}, searchbox)
+            );
+            browser.afterMilestone('loadNames', dojo.hitch(this, function () {
+                if (this.nameStore) {
+                    locationBox.set('store', this.nameStore);
                 }
             }));
-        locationBox.focusNode.spellcheck = false;
+            locationBox.focusNode.spellcheck = false;
+        });
     }
     ,
 
