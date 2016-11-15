@@ -26,6 +26,7 @@ define([
            'dijit/form/DropDownButton',
            'dijit/DropDownMenu',
            'dijit/form/Button',
+           'dijit/form/ComboBox',
            'JBrowse/Plugin',
            'WebApollo/FeatureEdgeMatchManager',
            'WebApollo/FeatureSelectionManager',
@@ -61,6 +62,7 @@ define([
             dijitDropDownButton,
             dijitDropDownMenu,
             dijitButton,
+            dijitComboBox,
             JBPlugin,
             FeatureEdgeMatchManager,
             FeatureSelectionManager,
@@ -205,6 +207,7 @@ return declare( [JBPlugin, HelpMixin],
         }
 
         // this.replaceSearchBoxes();
+        this.addSearchBox();
 
 
 
@@ -728,42 +731,69 @@ return declare( [JBPlugin, HelpMixin],
         this.updateLabels();
     },
 
+    addSearchBox: function(){
+        // var navbox = dojo.create( 'div', { id: 'navbox', style: { 'text-align': align } }, parent );
+        var navbox = document.getElementById('navbox');
+        var searchbox = dojo.create('span', {
+            'id':'apollo-search-box',
+            'class': "separate-location-box"
+        }, navbox );
+
+        var locationBox = new dijitComboBox(
+            {
+                id: "apollo-location",
+                name: "apollo-location",
+                style: { width: "200px"},
+                maxLength: 400,
+                searchAttr: "name",
+                title: 'Enter a symbol or ID to search'
+            },
+            dojo.create('input', {}, searchbox) );
+            this.browser.afterMilestone( 'loadNames', dojo.hitch(this, function() {
+                if( this.nameStore ) {
+                    locationBox.set( 'store', this.nameStore );
+                }
+            }));
+        locationBox.focusNode.spellcheck = false;
+    }
+    ,
+
     replaceSearchBoxes: function () {
         var thisB = this ;
-        var currentBookmark ;
+        // var currentBookmark ;
         // integrate ApolloLabelProc fix
         // this traps the event that happens directly after onCoarseMove function, where the label gets updates.
         dojo.subscribe("/jbrowse/v1/n/navigate", function(currRegion){
-            var locationStr = Util.assembleLocStringWithLength( currRegion );
+            // var locationStr = Util.assembleLocStringWithLength( currRegion );
             //console.log("locationStr="+locationStr);
 
             // is locationStr JSON?
-            if (locationStr.charAt(0)=='{') {
-                locationStr = locationStr.substring(0,locationStr.lastIndexOf('}')+1);
-                var obj = JSON.parse(locationStr);
+            // if (locationStr.charAt(0)=='{') {
+            //     locationStr = locationStr.substring(0,locationStr.lastIndexOf('}')+1);
+            //     var obj = JSON.parse(locationStr);
 
-                // look for the "sequenceList" property
-                if(obj.hasOwnProperty('sequenceList')) {
-                    //console.log("label="+obj.label);
-                    var counter = 0 ;
-                    currentBookmark = obj ;
+            // // look for the "sequenceList" property
+            // if(obj.hasOwnProperty('sequenceList')) {
+            //     //console.log("label="+obj.label);
+            //     var counter = 0 ;
+            //     currentBookmark = obj ;
 
-                    dojo.addOnLoad(function() {
-                        if(!thisB.replaceSearchBox){
-                            //dojo.style(dojo.byId('search-refseq'), "display", "none");
-                            var searchBox = dojo.byId('search-box');
-                            dojo.style(searchBox, "display", "none");
-                            var borderContainer = dijit.byId('GenomeBrowser');
-                            borderContainer.resize();
-                            thisB.replaceSearchBox = true ;
-                        }
-                    });
+            // dojo.addOnLoad(function() {
+                // if(!thisB.replaceSearchBox){
+                    //dojo.style(dojo.byId('search-refseq'), "display", "none");
+                    var searchBox = dojo.byId('search-box');
+                    dojo.style(searchBox, "display", "separate-location-box");
+                    // var borderContainer = dijit.byId('GenomeBrowser');
+                    // borderContainer.resize();
+                    // thisB.replaceSearchBox = true ;
+                // }
+            // });
 
-                }
-                else{
-                    currentBookmark = null ;
-                }
-            }
+            // }
+            // else{
+            //     currentBookmark = null ;
+            // }
+            // }
         });
     }
 
