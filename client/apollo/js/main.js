@@ -210,9 +210,7 @@ return declare( [JBPlugin, HelpMixin],
             this.createMenus();
         }
 
-        // this.replaceSearchBoxes();
         this.addSearchBox();
-
 
 
         // put the WebApollo logo in the powered_by place in the main JBrowse bar
@@ -735,8 +733,30 @@ return declare( [JBPlugin, HelpMixin],
         this.updateLabels();
     },
 
+
+    findReferenceSequence: function( name ) {
+        var thisB = this ;
+        var browser =thisB.browser;
+        for( var n in browser.allRefs ) {
+            if(n.startsWith("{")){
+                var nameObj = JSON.parse(n);
+                alert(nameObj);
+                if( ! browser.compareReferenceNames( nameObj.name, name ) ){
+                    return browser.allRefs[n];
+                }
+            }
+            else{
+                if( ! browser.compareReferenceNames( n, name ) ){
+                    return browser.allRefs[n];
+                }
+            }
+        }
+        return null;
+    },
+
     callAssemblageLocation: function(loc){
-        var browser =this.browser;
+        var thisB = this ;
+        var browser =thisB.browser;
         alert('trying to go to loc: '+loc) ;
         var location = typeof loc == 'string' ? Util.parseLocString( loc ) :  loc;
         alert('parsed loc string: '+location  );
@@ -751,7 +771,7 @@ return declare( [JBPlugin, HelpMixin],
                 loc = loc.ref;
             }
             // is it just the name of one of our ref seqs?
-            var ref = browser.findReferenceSequence( loc );
+            var ref = thisB.findReferenceSequence( loc );
             if( ref ) {
                 browser.navigateToLocation( { ref: ref.name } );
                 return false;
@@ -852,46 +872,7 @@ return declare( [JBPlugin, HelpMixin],
             }).call(this);
         });
     }
-    ,
 
-    replaceSearchBoxes: function () {
-        var thisB = this ;
-        // var currentBookmark ;
-        // integrate ApolloLabelProc fix
-        // this traps the event that happens directly after onCoarseMove function, where the label gets updates.
-        dojo.subscribe("/jbrowse/v1/n/navigate", function(currRegion){
-            // var locationStr = Util.assembleLocStringWithLength( currRegion );
-            //console.log("locationStr="+locationStr);
-
-            // is locationStr JSON?
-            // if (locationStr.charAt(0)=='{') {
-            //     locationStr = locationStr.substring(0,locationStr.lastIndexOf('}')+1);
-            //     var obj = JSON.parse(locationStr);
-
-            // // look for the "sequenceList" property
-            // if(obj.hasOwnProperty('sequenceList')) {
-            //     //console.log("label="+obj.label);
-            //     var counter = 0 ;
-            //     currentBookmark = obj ;
-
-            // dojo.addOnLoad(function() {
-                // if(!thisB.replaceSearchBox){
-                    //dojo.style(dojo.byId('search-refseq'), "display", "none");
-                    var searchBox = dojo.byId('search-box');
-                    dojo.style(searchBox, "display", "separate-location-box");
-                    // var borderContainer = dijit.byId('GenomeBrowser');
-                    // borderContainer.resize();
-                    // thisB.replaceSearchBox = true ;
-                // }
-            // });
-
-            // }
-            // else{
-            //     currentBookmark = null ;
-            // }
-            // }
-        });
-    }
 
 });
 
