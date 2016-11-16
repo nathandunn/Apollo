@@ -736,18 +736,28 @@ return declare( [JBPlugin, HelpMixin],
 
     findReferenceSequence: function( name ) {
         var thisB = this ;
-        var browser =thisB.browser;
-        for( var n in browser.allRefs ) {
+        // var browser =thisB.browser;
+        for( var n in thisB.allRefs ) {
             if(n.startsWith("{")){
-                var nameObj = JSON.parse(n);
-                alert(nameObj);
-                if( ! browser.compareReferenceNames( nameObj.name, name ) ){
-                    return browser.allRefs[n];
+                // alert(n) ;
+                var nameObj
+                if(!n.endsWith("}")){
+                    var substr = n.substr(0,n.lastIndexOf(":"));
+                    // alert(substr);
+                    nameObj = JSON.parse(substr);
+                }
+                else{
+                    nameObj = JSON.parse(n);
+                }
+
+                // (nameObj);
+                if( ! thisB.compareReferenceNames( nameObj.name, name ) ){
+                    return thisB.allRefs[n];
                 }
             }
             else{
-                if( ! browser.compareReferenceNames( n, name ) ){
-                    return browser.allRefs[n];
+                if( ! thisB.compareReferenceNames( n, name ) ){
+                    return thisB.allRefs[n];
                 }
             }
         }
@@ -779,6 +789,7 @@ return declare( [JBPlugin, HelpMixin],
         }
     },
 
+
     navigateToAssemblage: function(loc) {
         var thisB = this ;
         var browser = thisB.browser;
@@ -809,12 +820,18 @@ return declare( [JBPlugin, HelpMixin],
         // var navbox = dojo.create( 'div', { id: 'navbox', style: { 'text-align': align } }, parent );
         var thisB = this ;
         var browser = thisB.browser ;
+
+        browser.oldFindReferenceSequence = browser.findReferenceSequence ;
+        browser.findReferenceSequence = thisB.findReferenceSequence ;
+
         browser.afterMilestone( 'initView', function() {
             var navbox = document.getElementById('navbox');
             var searchbox = dojo.create('span', {
                 'id': 'apollo-search-box',
                 'class': "separate-location-box"
             }, navbox);
+
+
 
             var locationBox = new dijitComboBox(
                 {
