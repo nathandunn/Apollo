@@ -40,6 +40,7 @@ import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
+import org.bbop.apollo.Assemblage;
 import org.bbop.apollo.gwt.client.dto.AnnotationInfo;
 import org.bbop.apollo.gwt.client.dto.AnnotationInfoConverter;
 import org.bbop.apollo.gwt.client.dto.UserInfo;
@@ -368,13 +369,28 @@ public class AnnotatorPanel extends Composite {
 
     @UiHandler("gotoAnnotation")
     void gotoAnnotation(ClickEvent clickEvent) {
-        AssemblageInfo assemblageInfo = MainPanel.getInstance().getCurrentAssemblage();
+
+        Window.alert("Call navigation TOOD for the sequence value");
+//        AssemblageInfo assemblageInfo = MainPanel.getInstance().getCurrentAssemblage();
 
         Long min = currentAnnotationInfo.getMin() - ProjectionDefaults.DEFAULT_PADDING;
         Long max = currentAnnotationInfo.getMax() + ProjectionDefaults.DEFAULT_PADDING;
         min = min < 0 ? 0L : min;
+
+        String sequenceName = currentAnnotationInfo.getSequence();
+
+
+        AssemblageInfo assemblageInfo = new AssemblageInfo();
         assemblageInfo.setStart(min);
         assemblageInfo.setEnd(max);
+
+        AssemblageSequence assemblageSequence = new AssemblageSequence();
+        assemblageSequence.setName(sequenceName);
+        AssemblageSequenceList assemblageSequenceList = new AssemblageSequenceList();
+        assemblageSequenceList.addSequence(assemblageSequence);
+        assemblageInfo.setSequenceList(assemblageSequenceList);
+
+
 
         MainPanel.updateGenomicViewerForAssemblage(assemblageInfo, min, max,false);
     }

@@ -734,95 +734,95 @@ return declare( [JBPlugin, HelpMixin],
     },
 
 
-    findReferenceSequence: function( name ) {
-        var thisB = this ;
-        // var browser =thisB.browser;
-        for( var n in thisB.allRefs ) {
-            if(n.startsWith("{")){
-                // alert(n) ;
-                var nameObj
-                if(!n.endsWith("}")){
-                    var substr = n.substr(0,n.lastIndexOf(":"));
-                    // alert(substr);
-                    nameObj = JSON.parse(substr);
-                }
-                else{
-                    nameObj = JSON.parse(n);
-                }
+    // findReferenceSequence: function( name ) {
+    //     var thisB = this ;
+    //     // var browser =thisB.browser;
+    //     for( var n in thisB.allRefs ) {
+    //         if(n.startsWith("{")){
+    //             // alert(n) ;
+    //             var nameObj = {};
+    //             if(!n.endsWith("}")){
+    //                 var substr = n.substr(0,n.lastIndexOf(":"));
+    //                 // alert(substr);
+    //                 nameObj = JSON.parse(substr);
+    //             }
+    //             else{
+    //                 nameObj = JSON.parse(n);
+    //             }
+    //
+    //             // (nameObj);
+    //             if( ! thisB.compareReferenceNames( nameObj.name, name ) ){
+    //                 return thisB.allRefs[n];
+    //             }
+    //         }
+    //         else{
+    //             if( ! thisB.compareReferenceNames( n, name ) ){
+    //                 return thisB.allRefs[n];
+    //             }
+    //         }
+    //     }
+    //     return null;
+    // },
 
-                // (nameObj);
-                if( ! thisB.compareReferenceNames( nameObj.name, name ) ){
-                    return thisB.allRefs[n];
-                }
-            }
-            else{
-                if( ! thisB.compareReferenceNames( n, name ) ){
-                    return thisB.allRefs[n];
-                }
-            }
-        }
-        return null;
-    },
-
-    callAssemblageLocation: function(loc){
-        var thisB = this ;
-        var browser =thisB.browser;
-        alert('trying to go to loc: '+loc) ;
-        var location = typeof loc == 'string' ? Util.parseLocString( loc ) :  loc;
-        alert('parsed loc string: '+location  );
-        // only call navigateToLocation() directly if location has start and end, otherwise try and fill in start/end from 'location' cookie
-        if( location && ("start" in location) && ("end" in location)) {
-            browser.navigateToLocation( location );
-            return false;
-        }
-        // otherwise, if it's just a word (or a location with only a ref property), try to figure out what it is
-        else {
-            if( typeof loc != 'string'){
-                loc = loc.ref;
-            }
-            // is it just the name of one of our ref seqs?
-            var ref = thisB.findReferenceSequence( loc );
-            if( ref ) {
-                browser.navigateToLocation( { ref: ref.name } );
-                return false;
-            }
-        }
-    },
-
-
-    navigateToAssemblage: function(loc) {
-        var thisB = this ;
-        var browser = thisB.browser;
-        browser.afterMilestone( 'initView', function() {
-            // lastly, try to search our feature names for it
-            browser.searchNames( loc )
-                .then( function( found ) {
-                    alert('loc: '+loc + ' found: '+ found);
-                        if( found ){
-                            return;
-                        }
-
-                        // if it's a foo:123..456 location, go there
-                        if(!thisB.callAssemblageLocation(loc)){return;}
-
-                        new InfoDialog(
-                            {
-                                title: 'Not found',
-                                content: 'Not found: <span class="locString">'+loc+'</span>',
-                                className: 'notfound-dialog'
-                            }).show();
-                    },
-                    thisB.callAssemblageLocation(loc));
-        });
-    },
+    // callAssemblageLocation: function(loc){
+    //     var thisB = this ;
+    //     var browser =thisB.browser;
+    //     alert('trying to go to loc: '+loc) ;
+    //     var location = typeof loc == 'string' ? Util.parseLocString( loc ) :  loc;
+    //     alert('parsed loc string: '+location  );
+    //     // only call navigateToLocation() directly if location has start and end, otherwise try and fill in start/end from 'location' cookie
+    //     if( location && ("start" in location) && ("end" in location)) {
+    //         browser.navigateToLocation( location );
+    //         return false;
+    //     }
+    //     // otherwise, if it's just a word (or a location with only a ref property), try to figure out what it is
+    //     else {
+    //         if( typeof loc != 'string'){
+    //             loc = loc.ref;
+    //         }
+    //         // is it just the name of one of our ref seqs?
+    //         var ref = thisB.findReferenceSequence( loc );
+    //         if( ref ) {
+    //             browser.navigateToLocation( { ref: ref.name } );
+    //             return false;
+    //         }
+    //     }
+    // },
+    //
+    //
+    // navigateToAssemblage: function(loc) {
+    //     var thisB = this ;
+    //     var browser = thisB.browser;
+    //     browser.afterMilestone( 'initView', function() {
+    //         // lastly, try to search our feature names for it
+    //         browser.searchNames( loc )
+    //             .then( function( found ) {
+    //                 alert('loc: '+loc + ' found: '+ found);
+    //                     if( found ){
+    //                         return;
+    //                     }
+    //
+    //                     // if it's a foo:123..456 location, go there
+    //                     if(!thisB.callAssemblageLocation(loc)){return;}
+    //
+    //                     new InfoDialog(
+    //                         {
+    //                             title: 'Not found',
+    //                             content: 'Not found: <span class="locString">'+loc+'</span>',
+    //                             className: 'notfound-dialog'
+    //                         }).show();
+    //                 },
+    //                 thisB.callAssemblageLocation(loc));
+    //     });
+    // },
 
     addSearchBox: function(){
         // var navbox = dojo.create( 'div', { id: 'navbox', style: { 'text-align': align } }, parent );
         var thisB = this ;
         var browser = thisB.browser ;
 
-        browser.oldFindReferenceSequence = browser.findReferenceSequence ;
-        browser.findReferenceSequence = thisB.findReferenceSequence ;
+        // browser.oldFindReferenceSequence = browser.findReferenceSequence ;
+        // browser.findReferenceSequence = thisB.findReferenceSequence ;
 
         browser.afterMilestone( 'initView', function() {
             var navbox = document.getElementById('navbox');
@@ -859,7 +859,8 @@ return declare( [JBPlugin, HelpMixin],
                 else if (event.keyCode == keys.ENTER) {
                     locationBox.closeDropDown(false);
                     alert('navigating to: '+locationBox.get('value'));
-                    thisB.navigateToAssemblage( locationBox.get('value') );
+                    // thisB.navigateToAssemblage( locationBox.get('value') );
+                    browser.navigateTo( locationBox.get('value') );
                     dojo.stopEvent(event);
                 }
                 // else {
