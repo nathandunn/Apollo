@@ -73,7 +73,7 @@ class SecurityFilters {
                                 println "Number of start params: ${numberOfStartParams} "
                                 println "fixing?: ${paramString} "
                                 if (indexOfLoc > 0 && numberOfStartParams>1) {
-                                    println "fixing?: ${paramString} "
+                                    println "fixing!!: ${paramString} "
                                     paramString = paramString.substring(indexOfLoc)
                                 }
                                 println "target Uri: ${targetUri} AND ${paramString}"
