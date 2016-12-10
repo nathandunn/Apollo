@@ -543,17 +543,12 @@ public class AnnotatorPanel extends Composite {
         geneDetailPanel.setVisible(false);
         transcriptDetailPanel.setVisible(false);
         repeatRegionDetailPanel.setVisible(false);
-        exonDetailPanel.setVisible(false);
+//        exonDetailPanel.setVisible(false);
     }
 
     private static void updateAnnotationInfo(AnnotationInfo annotationInfo) {
-        currentAnnotationInfo = annotationInfo;
-        addNewAssemblage.setEnabled(currentAnnotationInfo != null);
-        viewAnnotation.setEnabled(currentAnnotationInfo != null);
-        gotoAnnotation.setEnabled(currentAnnotationInfo != null);
-        addToView.setEnabled(currentAnnotationInfo != null);
-        if (currentAnnotationInfo == null) {
-            return;
+        if(annotationInfo==null){
+            return ;
         }
 
         String type = annotationInfo.getType();
@@ -564,11 +559,11 @@ public class AnnotatorPanel extends Composite {
             case "pseudogene":
                 geneDetailPanel.updateData(annotationInfo);
                 tabPanel.getTabWidget(1).getParent().setVisible(false);
-                tabPanel.selectTab(0);
+                break;
             case "Transcript":
                 transcriptDetailPanel.updateData(annotationInfo);
                 tabPanel.getTabWidget(1).getParent().setVisible(true);
-                exonDetailPanel.updateData(annotationInfo);
+                exonDetailPanel.updateData(annotationInfo,selectedAnnotationInfo);
                 break;
             case "mRNA":
             case "miRNA":
@@ -579,7 +574,7 @@ public class AnnotatorPanel extends Composite {
             case "ncRNA":
                 transcriptDetailPanel.updateData(annotationInfo);
                 tabPanel.getTabWidget(1).getParent().setVisible(true);
-                exonDetailPanel.updateData(annotationInfo);
+                exonDetailPanel.updateData(annotationInfo,selectedAnnotationInfo);
                 break;
             case "transposable_element":
             case "repeat_region":
@@ -719,13 +714,9 @@ public class AnnotatorPanel extends Composite {
                     exonDetailPanel.updateData(selectedAnnotationInfo);
                     gotoAnnotation.setEnabled(true);
                 } else {
-                    exonDetailPanel.updateData(null);
+                    exonDetailPanel.updateData();
                     gotoAnnotation.setEnabled(false);
                 }
-//                AnnotationInfo annotationInfo = dataGrid.getVisibleItem(Math.abs(dataGrid.getVisibleRange().getStart() - geneInt));
-//                selectedAnnotationInfo = getChildAnnotation(annotationInfo,uniqueName);
-//                exonDetailPanel.updateData(selectedAnnotationInfo);
-//                gotoAnnotation.setEnabled(true);
             }
         });
 
