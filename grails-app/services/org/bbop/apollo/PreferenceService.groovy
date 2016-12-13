@@ -149,7 +149,7 @@ class PreferenceService {
         if(user && assemblage){
             user.addToAssemblages(assemblage)
         }
-        def userOrganismPreferences = UserOrganismPreference.findAllByUserAndOrganismAndClientTokenAndSequence(user, organism, clientToken, sequence, [sort: "lastUpdated", order: "desc"])
+        def userOrganismPreferences = UserOrganismPreference.findAllByUserAndOrganismAndClientTokenAndAssemblage(user, organism, clientToken, assemblage, [sort: "lastUpdated", order: "desc"])
         if (userOrganismPreferences.size() > 1) {
             log.warn("Multiple preferences for sequence and organism: " + userOrganismPreferences.size())
             setOtherCurrentOrganismsFalse(userOrganismPreferences.first(), user, clientToken)
