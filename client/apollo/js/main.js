@@ -750,7 +750,6 @@ return declare( [JBPlugin, HelpMixin],
                 }
                 else if (event.keyCode == keys.ENTER) {
                     locationBox.closeDropDown(false);
-                    console.log('navigating to: '+locationBox.get('value'));
                     // thisB.navigateToAssemblage( locationBox.get('value') );
                     browser.navigateTo( locationBox.get('value') );
                     dojo.stopEvent(event);

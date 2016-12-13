@@ -72,7 +72,6 @@ public class AssemblageInfoConverter {
         JSONArray sequenceListArray = jsonObject.containsKey("sequenceList") ? jsonObject.get("sequenceList").isArray() : null ;
         // some weird stuff here
         if (sequenceListArray == null) {
-            GWT.log(jsonObject.toString());
             String sequenceArrayString = jsonObject.get("sequenceList").isString().stringValue();
             sequenceArrayString = sequenceArrayString.replaceAll("\\\\", "");
             sequenceListArray = JSONParser.parseStrict(sequenceArrayString).isArray();
