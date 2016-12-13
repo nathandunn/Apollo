@@ -267,7 +267,8 @@ return declare( [JBPlugin, HelpMixin],
 
         browser.afterMilestone( 'completely initialized', function() {
             var view  = browser.view ;
-            var projectionString = view.ref.name ;
+            // var projectionString = view.ref.name;
+            var projectionString = JSON.stringify(view.ref) ;
             var projectionLength = window.parent.getProjectionLength(projectionString);
             var ratio = view.elem.clientWidth  / projectionLength  ;
 

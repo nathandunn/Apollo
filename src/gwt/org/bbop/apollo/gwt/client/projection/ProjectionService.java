@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.json.client.*;
+import com.google.gwt.user.client.Window;
 import org.bbop.apollo.gwt.client.assemblage.FeatureLocationInfo;
 import org.bbop.apollo.gwt.client.assemblage.FeatureLocations;
 import org.bbop.apollo.gwt.client.dto.assemblage.*;
@@ -113,11 +114,15 @@ public class ProjectionService {
      */
     public static MultiSequenceProjection getProjectionForString(String projectionString) {
         Integer index = projectionString.lastIndexOf(":");
-        if (index > 0) {
+        GWT.log("projection string: "+projectionString);
+        if (!projectionString.endsWith("}") && index > 0) {
             projectionString = projectionString.substring(0, index);
         }
+        GWT.log("modified projection string: "+projectionString);
         JSONObject projectionObject = JSONParser.parseStrict(projectionString).isObject();
+        GWT.log("projection object: "+projectionObject.toString());
         AssemblageInfo assemblageInfo = AssemblageInfoConverter.convertJSONObjectToAssemblageInfo(projectionObject);
+        GWT.log("pulled in: " + assemblageInfo.getSequenceList().toString());
         return createProjectionFromAssemblageInfo(assemblageInfo);
     }
 
