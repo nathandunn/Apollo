@@ -114,15 +114,11 @@ public class ProjectionService {
      */
     public static MultiSequenceProjection getProjectionForString(String projectionString) {
         Integer index = projectionString.lastIndexOf(":");
-        GWT.log("projection string: "+projectionString);
         if (!projectionString.endsWith("}") && index > 0) {
             projectionString = projectionString.substring(0, index);
         }
-        GWT.log("modified projection string: "+projectionString);
         JSONObject projectionObject = JSONParser.parseStrict(projectionString).isObject();
-        GWT.log("projection object: "+projectionObject.toString());
         AssemblageInfo assemblageInfo = AssemblageInfoConverter.convertJSONObjectToAssemblageInfo(projectionObject);
-        GWT.log("pulled in: " + assemblageInfo.getSequenceList().toString());
         return createProjectionFromAssemblageInfo(assemblageInfo);
     }
 

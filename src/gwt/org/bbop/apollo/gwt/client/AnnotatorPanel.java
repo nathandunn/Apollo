@@ -419,6 +419,7 @@ public class AnnotatorPanel extends Composite {
         AssemblageInfo assemblageInfo = new AssemblageInfo();
         assemblageInfo.setStart(min);
         assemblageInfo.setEnd(max);
+        assemblageInfo.setName(sequenceName);
 
         AssemblageSequence assemblageSequence = new AssemblageSequence();
         assemblageSequence.setName(sequenceName);
