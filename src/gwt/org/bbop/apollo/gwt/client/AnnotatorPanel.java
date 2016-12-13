@@ -137,7 +137,6 @@ public class AnnotatorPanel extends Composite {
     private MultiWordSuggestOracle sequenceOracle = new ReferenceSequenceOracle();
 
     private static AsyncDataProvider<AnnotationInfo> dataProvider;
-    private static AnnotationInfo currentAnnotationInfo = null;
     private SingleSelectionModel<AnnotationInfo> singleSelectionModel = new SingleSelectionModel<>();
     private final Set<String> showingTranscripts = new HashSet<String>();
 
@@ -393,7 +392,7 @@ public class AnnotatorPanel extends Composite {
 
     @UiHandler("addToView")
     void addToView(ClickEvent clickEvent) {
-        AssemblageInfo assemblageInfo = collectAssemblageFromSelectedFeature(currentAnnotationInfo);
+        AssemblageInfo assemblageInfo = collectAssemblageFromSelectedFeature(selectedAnnotationInfo);
         AssemblageInfo currentAssemblage = MainPanel.getInstance().getCurrentAssemblage();
         currentAssemblage = currentAssemblage.addAssemblageToEnd(assemblageInfo);
         AssemblageRestService.addAssemblageAndView(currentAssemblage);
@@ -401,7 +400,7 @@ public class AnnotatorPanel extends Composite {
 
     @UiHandler("viewAnnotation")
     void viewAnnotation(ClickEvent clickEvent) {
-        AssemblageInfo assemblageInfo = collectAssemblageFromSelectedFeature(currentAnnotationInfo);
+        AssemblageInfo assemblageInfo = collectAssemblageFromSelectedFeature(selectedAnnotationInfo);
         expandAssemblage(assemblageInfo, 2d);
         AssemblageRestService.addAssemblageAndView(assemblageInfo);
     }
@@ -409,14 +408,12 @@ public class AnnotatorPanel extends Composite {
     @UiHandler("gotoAnnotation")
     void gotoAnnotation(ClickEvent clickEvent) {
 
-        Window.alert("Call navigation TOOD for the sequence value");
 //        AssemblageInfo assemblageInfo = MainPanel.getInstance().getCurrentAssemblage();
-
-        Long min = currentAnnotationInfo.getMin() - ProjectionDefaults.DEFAULT_PADDING;
-        Long max = currentAnnotationInfo.getMax() + ProjectionDefaults.DEFAULT_PADDING;
+        Long min = selectedAnnotationInfo.getMin() - ProjectionDefaults.DEFAULT_PADDING;
+        Long max = selectedAnnotationInfo.getMax() + ProjectionDefaults.DEFAULT_PADDING;
         min = min < 0 ? 0L : min;
 
-        String sequenceName = currentAnnotationInfo.getSequence();
+        String sequenceName = selectedAnnotationInfo.getSequence();
 
 
         AssemblageInfo assemblageInfo = new AssemblageInfo();
@@ -484,14 +481,14 @@ public class AnnotatorPanel extends Composite {
 
     @UiHandler("addNewAssemblage")
     void addNewAssemblage(ClickEvent clickEvent) {
-        AssemblageInfo assemblageInfo = collectAssemblageFromSelectedFeature(currentAnnotationInfo);
+        AssemblageInfo assemblageInfo = collectAssemblageFromSelectedFeature(selectedAnnotationInfo);
         expandAssemblage(assemblageInfo, 2d);
 
 
         RequestCallback requestCallback = new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
-                new InfoDialog("Added Assemblage", "Added assemblage for " + currentAnnotationInfo.getName(), true);
+                new InfoDialog("Added Assemblage", "Added assemblage for " + selectedAnnotationInfo.getName(), true);
             }
 
             @Override
@@ -713,9 +710,15 @@ public class AnnotatorPanel extends Composite {
                 if (selectedAnnotationInfo != null) {
                     exonDetailPanel.updateData(selectedAnnotationInfo);
                     gotoAnnotation.setEnabled(true);
+                    viewAnnotation.setEnabled(true);
+                    addNewAssemblage.setEnabled(true);
+                    addToView.setEnabled(true);
                 } else {
                     exonDetailPanel.updateData();
                     gotoAnnotation.setEnabled(false);
+                    viewAnnotation.setEnabled(false);
+                    addNewAssemblage.setEnabled(false);
+                    addToView.setEnabled(false);
                 }
             }
         });
@@ -808,8 +811,8 @@ public class AnnotatorPanel extends Composite {
         // for some reason doesn't like call gotoAnnotation
         AssemblageInfo assemblageInfo = MainPanel.getInstance().getCurrentAssemblage();
 
-        Long min = currentAnnotationInfo.getMin() - ProjectionDefaults.DEFAULT_PADDING;
-        Long max = currentAnnotationInfo.getMax() + ProjectionDefaults.DEFAULT_PADDING;
+        Long min = selectedAnnotationInfo.getMin() - ProjectionDefaults.DEFAULT_PADDING;
+        Long max = selectedAnnotationInfo.getMax() + ProjectionDefaults.DEFAULT_PADDING;
         min = min < 0 ? 0L : min;
         assemblageInfo.setStart(min);
         assemblageInfo.setEnd(max);
