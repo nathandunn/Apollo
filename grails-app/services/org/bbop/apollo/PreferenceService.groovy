@@ -195,15 +195,16 @@ class PreferenceService {
 //            throw new AnnotationException("Sequence name is invalid ${sequenceName}")
 //        }
 
-        def userOrganismPreferences = UserOrganismPreference.findAllByUserAndCurrentOrganismAndClientToken(currentUser, true, clientToken,[sort: "lastUpdated", order: "desc"])
-//        def userOrganismPreferences = UserOrganismPreference.createCriteria().list {
-//            createAlias('sequence', 'sequence', org.hibernate.criterion.CriteriaSpecification.LEFT_JOIN)
-//            and {
-//                eq("user", currentUser)
-//                eq("clientToken", clientToken)
-//                eq("assemblage.name", sequenceName)
-//            }
-//        }
+//        def userOrganismPreferences = UserOrganismPreference.findAllByUserAndCurrentOrganismAndClientToken(currentUser, true, clientToken,[sort: "lastUpdated", order: "desc"])
+        def userOrganismPreferences = UserOrganismPreference.createCriteria().list {
+            createAlias('sequence', 'sequence', org.hibernate.criterion.CriteriaSpecification.LEFT_JOIN)
+            and {
+                eq("user", currentUser)
+                eq("clientToken", clientToken)
+                eq("sequence.name", sequenceName)
+                eq("organism", currentOrganism)
+            }
+        }
         if (userOrganismPreferences.size() > 1) {
             log.warn("Multiple preferences found: " + userOrganismPreferences.size())
             setOtherCurrentOrganismsFalse(userOrganismPreferences.first(), currentUser, clientToken)
