@@ -15,6 +15,7 @@ constructor: function( args )  {
     this.overridePlugins=browser.config.overridePlugins;
     this.transformers["JBrowse/View/Track/HTMLFeatures"] = function(trackConfig) {
         trackConfig.type = "WebApollo/View/Track/DraggableHTMLFeatures";
+        trackConfig.storeClass = "WebApollo/Store/SeqFeature/Projection/ProjectionNCList";
     };
 
     this.transformers["JBrowse/View/Track/CanvasFeatures"] = function(trackConfig) {

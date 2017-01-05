@@ -318,40 +318,44 @@ class JbrowseController {
                     }
                     return
                 }
-
-
                 String putativeSequencePathName = trackService.getSequencePathName(dataFileName)
-                println "putative sequence path name ${dataFileName} -> ${putativeSequencePathName} "
-
-                JSONObject projectionSequenceObject = (JSONObject) JSON.parse(putativeSequencePathName)
-                JSONArray sequenceArray = projectionSequenceObject.getJSONArray(FeatureStringEnum.SEQUENCE_LIST.value)
-
-                if (fileName.endsWith("trackData.json")) {
+                String sequencePathName = trackService.generateTrackNameForSequence(dataFileName,putativeSequencePathName)
+                println "putative sequence path name ${dataFileName} -> ${putativeSequencePathName} -> ${sequencePathName} "
+                render new File(sequencePathName).text
+                return
 
 
-                    JSONObject trackObject = trackService.projectTrackData(sequenceArray, dataFileName, refererLoc, currentOrganism)
-                    if (trackObject.getJSONObject(FeatureStringEnum.INTERVALS.value).getJSONArray(FeatureStringEnum.NCLIST.value).size() == 0) {
-                        cache = new SequenceCache(key: dataFileName, value: HttpServletResponse.SC_NOT_FOUND).save(insert: true)
-                        response.setStatus(HttpServletResponse.SC_NOT_FOUND)
-                    } else {
-                        cache = new SequenceCache(key: dataFileName, value: trackObject.toString()).save(insert: true)
-                        sequenceCacheService.generateCacheTags(response, cache, dataFileName, cache.value.bytes.length)
-                        response.outputStream << trackObject.toString()
-                    }
-                    return
-                } else if (fileName.startsWith("lf-")) {
-                    String trackName = projectionService.getTrackName(dataFileName)
-                    JSONArray trackArray = trackService.projectTrackChunk(fileName, dataFileName, refererLoc, currentOrganism, trackName)
-                    if (trackArray.size() == 0) {
-                        cache = new SequenceCache(key: dataFileName, value: HttpServletResponse.SC_NOT_FOUND).save(insert: true)
-                        response.setStatus(HttpServletResponse.SC_NOT_FOUND)
-                    } else {
-                        cache = new SequenceCache(key: dataFileName, value: trackArray.toString()).save(insert: true)
-                        sequenceCacheService.generateCacheTags(response, cache, dataFileName, cache.value.bytes.length)
-                        response.outputStream << trackArray.toString()
-                    }
-                    return
-                }
+
+
+//                JSONObject projectionSequenceObject = (JSONObject) JSON.parse(putativeSequencePathName)
+//                JSONArray sequenceArray = projectionSequenceObject.getJSONArray(FeatureStringEnum.SEQUENCE_LIST.value)
+//
+//                if (fileName.endsWith("trackData.json")) {
+//
+//
+//                    JSONObject trackObject = trackService.projectTrackData(sequenceArray, dataFileName, refererLoc, currentOrganism)
+//                    if (trackObject.getJSONObject(FeatureStringEnum.INTERVALS.value).getJSONArray(FeatureStringEnum.NCLIST.value).size() == 0) {
+//                        cache = new SequenceCache(key: dataFileName, value: HttpServletResponse.SC_NOT_FOUND).save(insert: true)
+//                        response.setStatus(HttpServletResponse.SC_NOT_FOUND)
+//                    } else {
+//                        cache = new SequenceCache(key: dataFileName, value: trackObject.toString()).save(insert: true)
+//                        sequenceCacheService.generateCacheTags(response, cache, dataFileName, cache.value.bytes.length)
+//                        response.outputStream << trackObject.toString()
+//                    }
+//                    return
+//                } else if (fileName.startsWith("lf-")) {
+//                    String trackName = projectionService.getTrackName(dataFileName)
+//                    JSONArray trackArray = trackService.projectTrackChunk(fileName, dataFileName, refererLoc, currentOrganism, trackName)
+//                    if (trackArray.size() == 0) {
+//                        cache = new SequenceCache(key: dataFileName, value: HttpServletResponse.SC_NOT_FOUND).save(insert: true)
+//                        response.setStatus(HttpServletResponse.SC_NOT_FOUND)
+//                    } else {
+//                        cache = new SequenceCache(key: dataFileName, value: trackArray.toString()).save(insert: true)
+//                        sequenceCacheService.generateCacheTags(response, cache, dataFileName, cache.value.bytes.length)
+//                        response.outputStream << trackArray.toString()
+//                    }
+//                    return
+//                }
 
             } else if (fileName.endsWith(".txt") && params.path.toString().startsWith("seq")) {
                 String sequencePath = sequenceService.calculatePath(params.path)
