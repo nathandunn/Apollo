@@ -306,7 +306,7 @@ class JbrowseController {
         String refererLoc = trackService.extractLocation(referer)
         Organism currentOrganism = preferenceService.getCurrentOrganismForCurrentUser(clientToken)
         if (refererLoc.contains("sequenceList")) {
-            if (fileName.endsWith("trackData.json") || fileName.startsWith("lf-")) {
+            if (fileName.endsWith("trackData.json") || fileName.startsWith("lf-") || fileName.matches("hist-.*\\.json")) {
 
                 SequenceCache cache = SequenceCache.findByKey(dataFileName)
                 if (cache && false ) {
