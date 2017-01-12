@@ -147,9 +147,9 @@
                 </gwt:north>
                 <gwt:west size="25">
                     <gwt:FlowPanel ui:field="westPanel" styleName="{style.emptyPanel}">
-                        <b:Button icon="LINK" ui:field="generateLink" styleName="{style.details-button}"/>
+                        <b:Button icon="LINK" ui:field="generateLink" addStyleNames="{style.details-button}" />
                         <b:Button icon="LIST_UL" ui:field="trackListToggle"
-                                  title="Show JBrowse Track Selector" styleName="{style.trackButton}"/>
+                                  title="Show JBrowse Track Selector" addStyleNames="{style.trackButton}"/>
                     </gwt:FlowPanel>
                 </gwt:west>
                 <gwt:center>
