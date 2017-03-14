@@ -2,6 +2,9 @@ package org.bbop.apollo.gwt.client.dto;
 
 import com.google.gwt.json.client.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by ndunn on 12/18/14.
  */
@@ -90,6 +93,14 @@ public class TrackInfo implements Comparable<TrackInfo> {
             }
             return  categoryString.substring(0,categoryString.length()-1);
         }
+    }
+
+    public List<String> getCategoryAsList(){
+        List<String> categoryList = new ArrayList<>();
+        for(String s : getStandardCategory().split("\\/")){
+            categoryList.add(s);
+        }
+        return categoryList ;
     }
 
     @Override

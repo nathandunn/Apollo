@@ -40,7 +40,7 @@
         </gwt:north>
         <gwt:center>
             <gwt:ScrollPanel>
-                <b:PanelGroup ui:field="dataGrid"/>
+                <gwt:Tree ui:field="dataGrid"/>
             </gwt:ScrollPanel>
             <!--<cellview:DataGrid ui:field="dataGrid" styleName="{style.cellTable}"/>-->
         </gwt:center>
