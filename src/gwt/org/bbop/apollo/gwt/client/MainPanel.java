@@ -46,7 +46,7 @@ import java.util.Map;
 public class MainPanel extends Composite {
 
 
-    private static final int DEFAULT_TAB_COUNT = 7;
+    private static final int DEFAULT_TAB_COUNT = 4;
 
     interface MainPanelUiBinder extends UiBinder<Widget, MainPanel> {
     }
@@ -416,9 +416,9 @@ public class MainPanel extends Composite {
         switch (highestPermission) {
             case ADMINISTRATE:
                 GWT.log("setting to ADMINISTRATE permissions");
-                detailTabs.getTabWidget(TabPanelIndex.USERS.index).getParent().setVisible(true);
-                detailTabs.getTabWidget(TabPanelIndex.GROUPS.index).getParent().setVisible(true);
-                detailTabs.getTabWidget(TabPanelIndex.ORGANISM.index).getParent().setVisible(true);
+//                detailTabs.getTabWidget(TabPanelIndex.USERS.index).getParent().setVisible(true);
+//                detailTabs.getTabWidget(TabPanelIndex.GROUPS.index).getParent().setVisible(true);
+//                detailTabs.getTabWidget(TabPanelIndex.ORGANISM.index).getParent().setVisible(true);
                 detailTabs.getTabWidget(TabPanelIndex.PREFERENCES.index).getParent().setVisible(true);
                 break;
             case WRITE:
@@ -432,9 +432,9 @@ public class MainPanel extends Composite {
             default:
                 GWT.log("setting to no permissions");
                 // let's set the view
-                detailTabs.getTabWidget(TabPanelIndex.USERS.index).getParent().setVisible(false);
-                detailTabs.getTabWidget(TabPanelIndex.GROUPS.index).getParent().setVisible(false);
-                detailTabs.getTabWidget(TabPanelIndex.ORGANISM.index).getParent().setVisible(false);
+//                detailTabs.getTabWidget(TabPanelIndex.USERS.index).getParent().setVisible(false);
+//                detailTabs.getTabWidget(TabPanelIndex.GROUPS.index).getParent().setVisible(false);
+//                detailTabs.getTabWidget(TabPanelIndex.ORGANISM.index).getParent().setVisible(false);
                 detailTabs.getTabWidget(TabPanelIndex.PREFERENCES.index).getParent().setVisible(false);
 
                 break;
@@ -1086,10 +1086,10 @@ public class MainPanel extends Composite {
         ANNOTATIONS(0),
         TRACKS(1),
         SEQUENCES(2),
-        ORGANISM(3),
-        USERS(4),
-        GROUPS(5),
-        PREFERENCES(6),;
+//        ORGANISM(3),
+//        USERS(4),
+//        GROUPS(5),
+        PREFERENCES(4),;
 
         private int index;
 

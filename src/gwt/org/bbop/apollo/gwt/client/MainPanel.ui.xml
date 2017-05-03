@@ -168,20 +168,28 @@
                             <apollo:SequencePanel ui:field="sequencePanel"/>
                         </gwt:tab>
                         <gwt:tab>
-                            <gwt:header>Organism</gwt:header>
-                            <apollo:OrganismPanel ui:field="organismPanel"/>
-                        </gwt:tab>
-                        <gwt:tab>
-                            <gwt:header>Users</gwt:header>
-                            <apollo:UserPanel ui:field="userPanel" visible="false"/>
-                        </gwt:tab>
-                        <gwt:tab>
-                            <gwt:header>Groups</gwt:header>
-                            <apollo:GroupPanel ui:field="userGroupPanel" visible="false"/>
-                        </gwt:tab>
-                        <gwt:tab>
                             <gwt:header>Admin</gwt:header>
-                            <apollo:PreferencePanel ui:field="preferencePanel" visible="false"/>
+                            <gwt:FlowPanel>
+                                <gwt:TabLayoutPanel barHeight="30">
+                                    <gwt:tab>
+                                        <gwt:header>Organism</gwt:header>
+                                        <apollo:OrganismPanel ui:field="organismPanel"/>
+                                    </gwt:tab>
+                                    <gwt:tab>
+                                        <gwt:header>Users</gwt:header>
+                                        <apollo:UserPanel ui:field="userPanel" visible="false"/>
+                                    </gwt:tab>
+                                    <gwt:tab>
+                                        <gwt:header>Groups</gwt:header>
+                                        <apollo:GroupPanel ui:field="userGroupPanel" visible="false"/>
+                                    </gwt:tab>
+                                    <gwt:tab>
+                                        <gwt:header>System</gwt:header>
+                                        <apollo:PreferencePanel ui:field="preferencePanel" visible="false"/>
+                                    </gwt:tab>
+                                </gwt:TabLayoutPanel>
+
+                            </gwt:FlowPanel>
                         </gwt:tab>
                     </gwt:TabLayoutPanel>
                 </gwt:center>
