@@ -86,11 +86,11 @@ public class MainPanel extends Composite {
     static TrackPanel trackPanel;
     @UiField
     static SequencePanel sequencePanel;
-    @UiField
+    @UiField(provided = true)
     static OrganismPanel organismPanel;
-    @UiField
+    @UiField(provided = true)
     static UserPanel userPanel;
-    @UiField
+    @UiField(provided = true)
     static GroupPanel userGroupPanel;
     @UiField
     static DockLayoutPanel eastDockPanel;
@@ -100,7 +100,7 @@ public class MainPanel extends Composite {
     static TabLayoutPanel detailTabs;
     @UiField
     FlowPanel westPanel;
-    @UiField
+    @UiField(provided = true)
     PreferencePanel preferencePanel;
     @UiField
     Button logoutButton;
@@ -163,8 +163,16 @@ public class MainPanel extends Composite {
 
         exportStaticMethod();
 
+        organismPanel = new OrganismPanel();
+        userPanel = new UserPanel();
+        userGroupPanel = new GroupPanel();
+        preferencePanel = new PreferencePanel();
         initWidget(ourUiBinder.createAndBindUi(this));
         frame.getElement().setAttribute("id", frame.getName());
+        organismPanel.reload();
+        userPanel.reload();
+        userGroupPanel.reload();
+        preferencePanel.reload();
 
         trackListToggle.setWidth(isCurrentUserAdmin() ? "20px" : "25px");
 
@@ -807,6 +815,7 @@ public class MainPanel extends Composite {
     }
 
     private void reloadTabPerIndex(Integer selectedItem) {
+        Window.alert("reloading tab for "+selectedItem);
         switch (selectedItem) {
             case 0:
                 annotatorPanel.reload(true);
@@ -819,14 +828,8 @@ public class MainPanel extends Composite {
                 break;
             case 3:
                 organismPanel.reload();
-                break;
-            case 4:
                 userPanel.reload();
-                break;
-            case 5:
                 userGroupPanel.reload();
-                break;
-            case 6:
                 preferencePanel.reload();
                 break;
             default:
