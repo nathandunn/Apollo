@@ -2,7 +2,7 @@
              xmlns:gwt="urn:import:com.google.gwt.user.client.ui"
              xmlns:b="urn:import:org.gwtbootstrap3.client.ui"
              xmlns:apollo="urn:import:org.bbop.apollo.gwt.client"
-        >
+>
     <ui:style>
 
 
@@ -82,8 +82,9 @@
         .buffer {
             margin-top: 5px;
         }
-        .trackButton{
-            outline:none !important;
+
+        .trackButton {
+            outline: none !important;
             margin-left: 0;
             margin-right: 0;
             padding-left: 0;
@@ -106,9 +107,10 @@
                         <gwt:SuggestBox ui:field="sequenceSuggestBox" stylePrimaryName="{style.lookup-display}"/>
                         <b:Panel styleName="pull-right">
                             <b:Button ui:field="userName" icon="USER"/>
-                            <b:Button ui:field="logoutButton" styleName="{style.logout-button}" icon="SIGN_OUT" title="Logout"/>
+                            <b:Button ui:field="logoutButton" styleName="{style.logout-button}" icon="SIGN_OUT"
+                                      title="Logout"/>
                         </b:Panel>
-                        <b:Modal ui:field="notificationModal" closable="true" fade="true"  dataBackdrop="FALSE">
+                        <b:Modal ui:field="notificationModal" closable="true" fade="true" dataBackdrop="FALSE">
                             <b:ModalHeader>
                                 <gwt:HTML>
                                     <b>Error</b>
@@ -150,40 +152,45 @@
                 </gwt:north>
                 <gwt:west size="25">
                     <gwt:FlowPanel ui:field="westPanel" styleName="{style.emptyPanel}">
-                            <b:Button icon="LIST_UL" ui:field="trackListToggle" dataToggle="BUTTON" title="Show JBrowse Track Selector" addStyleNames="{style.trackButton}"/>
+                        <b:Button icon="LIST_UL" ui:field="trackListToggle" dataToggle="BUTTON"
+                                  title="Show JBrowse Track Selector" addStyleNames="{style.trackButton}"/>
                     </gwt:FlowPanel>
                 </gwt:west>
                 <gwt:center>
-                    <gwt:TabLayoutPanel barHeight="30" ui:field="detailTabs" addStyleNames="{style.title-tab-headers}">
-                        <gwt:tab>
-                            <gwt:header>Annotations</gwt:header>
-                            <apollo:AnnotatorPanel ui:field="annotatorPanel"/>
-                        </gwt:tab>
-                        <gwt:tab>
-                            <gwt:header>Tracks</gwt:header>
-                            <apollo:TrackPanel ui:field="trackPanel"/>
-                        </gwt:tab>
-                        <gwt:tab>
-                            <gwt:header>Ref Sequence</gwt:header>
-                            <apollo:SequencePanel ui:field="sequencePanel"/>
-                        </gwt:tab>
-                        <gwt:tab>
-                            <gwt:header>Organism</gwt:header>
-                            <apollo:OrganismPanel ui:field="organismPanel"/>
-                        </gwt:tab>
-                        <gwt:tab>
-                            <gwt:header>Users</gwt:header>
-                            <apollo:UserPanel ui:field="userPanel" visible="false"/>
-                        </gwt:tab>
-                        <gwt:tab>
-                            <gwt:header>Groups</gwt:header>
-                            <apollo:GroupPanel ui:field="userGroupPanel" visible="false"/>
-                        </gwt:tab>
-                        <gwt:tab>
-                            <gwt:header>Admin</gwt:header>
-                            <apollo:PreferencePanel ui:field="preferencePanel" visible="false"/>
-                        </gwt:tab>
-                    </gwt:TabLayoutPanel>
+                    <b:Panel>
+                        <b:NavTabs ui:field="detailTabs" addStyleNames="{style.title-tab-headers}">
+                            <b:TabListItem dataTarget="#annotatorPanel" text="Annotations"/>
+                            <b:TabListItem dataTarget="#trackPanel" text="Track"/>
+                            <b:TabListItem dataTarget="#sequencePanel" text="Sequence"/>
+                            <b:TabListItem dataTarget="#organismPanel" text="Organism"/>
+                            <b:TabListItem dataTarget="#userPanel" text="User"/>
+                            <b:TabListItem dataTarget="#groupPanel" text="Group"/>
+                            <b:TabListItem dataTarget="#preferencePanel" text="Preference"/>
+                        </b:NavTabs>
+                        <b:TabContent>
+                            <b:TabPane active="true" b:id="annotatorPanel">
+                                <apollo:AnnotatorPanel ui:field="annotatorPanel"/>
+                            </b:TabPane>
+                            <b:TabPane active="true" b:id="trackPanel">
+                                <apollo:TrackPanel ui:field="trackPanel"/>
+                            </b:TabPane>
+                            <b:TabPane active="true" b:id="sequencePanel">
+                                <apollo:SequencePanel ui:field="sequencePanel"/>
+                            </b:TabPane>
+                            <b:TabPane active="true" b:id="organismPanel">
+                                <apollo:OrganismPanel ui:field="organismPanel"/>
+                            </b:TabPane>
+                            <b:TabPane active="true" b:id="userPanel">
+                                <apollo:UserPanel ui:field="userPanel"/>
+                            </b:TabPane>
+                            <b:TabPane active="true" b:id="groupPanel">
+                                <apollo:GroupPanel ui:field="userGroupPanel"/>
+                            </b:TabPane>
+                            <b:TabPane active="true" b:id="preferencePanel">
+                                <apollo:PreferencePanel ui:field="preferencePanel"/>
+                            </b:TabPane>
+                        </b:TabContent>
+                    </b:Panel>
                 </gwt:center>
             </gwt:DockLayoutPanel>
         </gwt:east>

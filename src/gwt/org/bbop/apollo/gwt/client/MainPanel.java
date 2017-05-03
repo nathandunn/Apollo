@@ -97,7 +97,7 @@ public class MainPanel extends Composite {
     @UiField(provided = true)
     static SplitLayoutPanel mainSplitPanel;
     @UiField
-    static TabLayoutPanel detailTabs;
+    static NavTabs detailTabs;
     @UiField
     FlowPanel westPanel;
     @UiField
@@ -224,7 +224,7 @@ public class MainPanel extends Composite {
         try {
             int selectedTab = Integer.parseInt(tabPreferenceString);
             if(selectedTab<detailTabs.getWidgetCount()){
-                detailTabs.selectTab(selectedTab);
+//                detailTabs.selectTab(selectedTab);
                 if (selectedTab == TabPanelIndex.TRACKS.index) {
                     trackPanel.reloadIfEmpty();
                 }
@@ -257,14 +257,21 @@ public class MainPanel extends Composite {
                     JSONObject jsonObject = jsonArray.get(i).isObject();
                     final String title = jsonObject.get("title").isString().stringValue();
                     if (jsonObject.containsKey("content")) {
+                        TabContent tabContent = new TabContent();
                         HTML htmlContent = new HTML(jsonObject.get("content").isString().stringValue());
-                        detailTabs.add(htmlContent, title);
+                        tabContent.add(htmlContent);
+                        tabContent.setTitle(title);
+//                        detailTabs.add(htmlContent, title);
+                        detailTabs.add(htmlContent);
                     } else if (jsonObject.containsKey("url")) {
                         final String url = jsonObject.get("url").isString().stringValue();
                         Frame frame = new Frame(url);
                         frame.setWidth("100%");
                         frame.setHeight("100%");
-                        detailTabs.add(frame,title);
+                        TabContent tabContent = new TabContent();
+                        tabContent.add(frame);
+                        tabContent.setTitle(title);
+                        detailTabs.add(frame);
 //                        detailTabs.add(,title);
 //                        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(url));
 //                        try {
@@ -296,7 +303,7 @@ public class MainPanel extends Composite {
                 String tabPreferenceString = Annotator.getPreference(FeatureStringEnum.CURRENT_TAB.getValue());
                 int selectedTab = Integer.parseInt(tabPreferenceString);
                 if(selectedTab < detailTabs.getWidgetCount()){
-                    detailTabs.selectTab(selectedTab);
+//                    detailTabs.selectTab(selectedTab);
                 }
                 else{
                     selectedTab = 0 ;
@@ -416,10 +423,10 @@ public class MainPanel extends Composite {
         switch (highestPermission) {
             case ADMINISTRATE:
                 GWT.log("setting to ADMINISTRATE permissions");
-                detailTabs.getTabWidget(TabPanelIndex.USERS.index).getParent().setVisible(true);
-                detailTabs.getTabWidget(TabPanelIndex.GROUPS.index).getParent().setVisible(true);
-                detailTabs.getTabWidget(TabPanelIndex.ORGANISM.index).getParent().setVisible(true);
-                detailTabs.getTabWidget(TabPanelIndex.PREFERENCES.index).getParent().setVisible(true);
+                detailTabs.getWidget(TabPanelIndex.USERS.index).getParent().setVisible(true);
+                detailTabs.getWidget(TabPanelIndex.GROUPS.index).getParent().setVisible(true);
+                detailTabs.getWidget(TabPanelIndex.ORGANISM.index).getParent().setVisible(true);
+                detailTabs.getWidget(TabPanelIndex.PREFERENCES.index).getParent().setVisible(true);
                 break;
             case WRITE:
                 GWT.log("setting to WRITE permissions");
@@ -432,10 +439,10 @@ public class MainPanel extends Composite {
             default:
                 GWT.log("setting to no permissions");
                 // let's set the view
-                detailTabs.getTabWidget(TabPanelIndex.USERS.index).getParent().setVisible(false);
-                detailTabs.getTabWidget(TabPanelIndex.GROUPS.index).getParent().setVisible(false);
-                detailTabs.getTabWidget(TabPanelIndex.ORGANISM.index).getParent().setVisible(false);
-                detailTabs.getTabWidget(TabPanelIndex.PREFERENCES.index).getParent().setVisible(false);
+                detailTabs.getWidget(TabPanelIndex.USERS.index).getParent().setVisible(false);
+                detailTabs.getWidget(TabPanelIndex.GROUPS.index).getParent().setVisible(false);
+                detailTabs.getWidget(TabPanelIndex.ORGANISM.index).getParent().setVisible(false);
+                detailTabs.getWidget(TabPanelIndex.PREFERENCES.index).getParent().setVisible(false);
 
                 break;
         }
@@ -800,11 +807,11 @@ public class MainPanel extends Composite {
     }
 
 
-    @UiHandler("detailTabs")
-    public void onSelection(SelectionEvent<Integer> event) {
-        Annotator.setPreference(FeatureStringEnum.CURRENT_TAB.getValue(), event.getSelectedItem());
-        reloadTabPerIndex(event.getSelectedItem());
-    }
+//    @UiHandler("detailTabs")
+//    public void onSelection(SelectionEvent<Integer> event) {
+//        Annotator.setPreference(FeatureStringEnum.CURRENT_TAB.getValue(), event.getSelectedItem());
+//        reloadTabPerIndex(event.getSelectedItem());
+//    }
 
     private void reloadTabPerIndex(Integer selectedItem) {
         switch (selectedItem) {
@@ -996,9 +1003,9 @@ public class MainPanel extends Composite {
      * @param payload
      */
     public static void handleFeatureAdded(String payload) {
-        if (detailTabs.getSelectedIndex() == 0) {
-            annotatorPanel.reload();
-        }
+//        if (detailTabs.getSelectedIndex() == 0) {
+//            annotatorPanel.reload();
+//        }
     }
 
     /**
@@ -1007,14 +1014,14 @@ public class MainPanel extends Composite {
      * @param payload
      */
     public static void handleFeatureDeleted(String payload) {
-        if (detailTabs.getSelectedIndex() == 0) {
-            Scheduler.get().scheduleDeferred(new Command() {
-                @Override
-                public void execute() {
-                    annotatorPanel.reload();
-                }
-            });
-        }
+//        if (detailTabs.getSelectedIndex() == 0) {
+//            Scheduler.get().scheduleDeferred(new Command() {
+//                @Override
+//                public void execute() {
+//                    annotatorPanel.reload();
+//                }
+//            });
+//        }
 
     }
 
@@ -1024,9 +1031,9 @@ public class MainPanel extends Composite {
      * @param payload
      */
     public static void handleFeatureUpdated(String payload) {
-        if (detailTabs.getSelectedIndex() == 0) {
-            annotatorPanel.reload();
-        }
+//        if (detailTabs.getSelectedIndex() == 0) {
+//            annotatorPanel.reload();
+//        }
     }
 
 
