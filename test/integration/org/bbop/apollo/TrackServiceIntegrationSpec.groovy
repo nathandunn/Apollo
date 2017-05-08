@@ -267,6 +267,7 @@ class TrackServiceIntegrationSpec extends AbstractIntegrationSpec {
 
     }
 
+//    @IgnoreRest
     void "get two large scaffold chunks, 1.10::11.6"() {
 
         given: "proper input"
@@ -279,14 +280,13 @@ class TrackServiceIntegrationSpec extends AbstractIntegrationSpec {
         when: "we ingest the data"
         println "# of sequences ${Sequence.count}"
         JSONObject trackObject = trackService.projectTrackData(sequenceArray, dataFileName, refererLoc, Organism.first())
-
-        then: "we expect stuff not to blow up"
-        assert trackObject != null
-
-        when: "when we get the nclist"
+        MultiSequenceProjection multiSequenceProjection = projectionService.getCachedProjection(refererLoc)
+        def projectionChunkList = multiSequenceProjection.projectionChunkList.projectionChunkList
         JSONArray nclistArray = trackObject.getJSONObject(FeatureStringEnum.INTERVALS.value).getJSONArray(FeatureStringEnum.NCLIST.value)
 
         then: "we expect the start and the stop to be in order "
+        assert projectionChunkList.size()==5
+        assert trackObject != null
         assert nclistArray.size() == 5
         assert nclistArray[0][1] < nclistArray[0][2]
         assert nclistArray[0][2] < nclistArray[1][1]
@@ -940,9 +940,9 @@ class TrackServiceIntegrationSpec extends AbstractIntegrationSpec {
         assert ncListArray[1][3] == 2 // not sure if this is correct
         assert projectionChunkList.size() == 2
         assert projectionChunkList[0].sequenceOffset == 0
-        assert projectionChunkList[0].chunkArrayOffset == 0
+        assert projectionChunkList[0].originalChunkIndex == 0
         assert projectionChunkList[1].sequenceOffset == 29463
-        assert projectionChunkList[1].chunkArrayOffset == 1
+        assert projectionChunkList[1].originalChunkIndex == 1
 
         when: "we project the first chunk lf-1.json"
         String fileName1 = "lf-1.json"

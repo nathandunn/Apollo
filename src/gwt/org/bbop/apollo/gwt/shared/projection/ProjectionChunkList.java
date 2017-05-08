@@ -14,8 +14,22 @@ public class ProjectionChunkList {
 
     public List<ProjectionChunk> projectionChunkList = new ArrayList<>();
 
-    public void addChunk(ProjectionChunk projectionChunk){
+    /**
+     * Add this chunk
+     * @param projectionChunk
+     * @return
+     */
+    public Integer addThisChunk(ProjectionChunk projectionChunk){
         projectionChunkList.add(projectionChunk);
+        return projectionChunk.getOriginalChunkIndex();
+    }
+
+    public Integer addChunk(ProjectionChunk projectionChunk){
+        ProjectionChunk duplicateChunk = projectionChunk.copy();
+        duplicateChunk.setProjectedChunkIndex(projectionChunk.getProjectedChunkIndex()+1);
+        duplicateChunk.setOriginalChunkIndex(projectionChunk.getOriginalChunkIndex()+1);
+        projectionChunkList.add(duplicateChunk);
+        return duplicateChunk.getOriginalChunkIndex();
     }
 
     /**
@@ -25,20 +39,13 @@ public class ProjectionChunkList {
      * @return a ProjectionChunk that represents the chunk being requested.
      */
     public ProjectionChunk findProjectChunkForIndex(Integer index){
-        for(ProjectionChunk projectionChunk : projectionChunkList){
-            if(index >= projectionChunk.getChunkArrayOffset() && index <= projectionChunk.getNumChunks()+ projectionChunk.getChunkArrayOffset()){
-                return projectionChunk;
-            }
-            if(projectionChunk.getChunkID().equals(index)){
-                return projectionChunk;
-            }
-        }
-        return null;
+        return projectionChunkList.get(index);
     }
 
-    ProjectionChunk findProjectChunkForName(String sequenceName) {
+
+    ProjectionChunk findFirstProjectChunkForSequenceName(String sequenceName) {
         for(ProjectionChunk projectionChunk : projectionChunkList){
-            if(projectionChunk.getSequence().equals(sequenceName)){
+            if(projectionChunk.getSequenceName().equals(sequenceName)){
                 return projectionChunk;
             }
         }

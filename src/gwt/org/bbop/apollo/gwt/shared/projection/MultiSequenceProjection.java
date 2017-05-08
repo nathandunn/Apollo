@@ -471,9 +471,14 @@ public class MultiSequenceProjection extends AbstractProjection {
         return sequenceDiscontinuousProjectionMap.get(projectionSequence).minMap.firstEntry().getValue();
     }
 
+    /**
+     * @deprecated  Should figure a way to do this without relying on the sequence name
+     * @param sequenceName
+     * @return
+     */
     public Long getOffsetForSequence(String sequenceName) {
         if (projectionChunkList != null) {
-            ProjectionChunk projectionChunk = projectionChunkList.findProjectChunkForName(sequenceName);
+            ProjectionChunk projectionChunk = projectionChunkList.findFirstProjectChunkForSequenceName(sequenceName);
             if (projectionChunk != null) {
                 return projectionChunk.getSequenceOffset();
             }

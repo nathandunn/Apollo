@@ -699,7 +699,7 @@ class JbrowseController {
 
     private String calculateOriginalChunkName(List<ProjectionChunk> projectionChunks, String finalSequenceString, Integer chunkIndex) {
         for (int i = 0; i < projectionChunks.size(); i++) {
-            if (projectionChunks.get(i).sequence == finalSequenceString) {
+            if (projectionChunks.get(i).sequenceName == finalSequenceString) {
                 return "lf-${chunkIndex - i + 1}.json"
             }
         }

@@ -12,16 +12,14 @@ public class ProjectionChunk {
     /**
      * what is the sequence name
      */
-    private String sequence = null;
-    /**
-     * how many chunks are there in this group (e.g., if I request a single chunk starting at 3, if the offset is 2, and the numChunks = 3, then I would request 1,2,3 on the backend.
-     */
-    private Integer numChunks = 0;
+    private String sequenceName = null;
 
     /**
      * The original ID.
      */
-    private Integer chunkID = null ;
+    private Integer originalChunkIndex = null ;
+
+    private Integer projectedChunkIndex = null ;
 
     /**
      * what is the LAST bp of the prior sequence.
@@ -31,34 +29,30 @@ public class ProjectionChunk {
     /**
      *  if I have chunks 50 and 52 . . . they are probably 1 and 3 . . but have to map to the right sequence
      */
-    private Integer chunkArrayOffset = 0;
+//    private Integer chunkArrayOffset = 0;
 
-    public Integer getChunkID() {
-        return chunkID;
+    public Integer getOriginalChunkIndex() {
+        return originalChunkIndex;
     }
 
-    public void setChunkID(Integer chunkID) {
-        this.chunkID = chunkID;
+    public void setOriginalChunkIndex(Integer originalChunkIndex) {
+        this.originalChunkIndex = originalChunkIndex;
     }
 
-    public void addChunk(){
-        ++numChunks;
+    public Integer getProjectedChunkIndex() {
+        return projectedChunkIndex;
     }
 
-    public String getSequence() {
-        return sequence;
+    public void setProjectedChunkIndex(Integer projectedChunkIndex) {
+        this.projectedChunkIndex = projectedChunkIndex;
     }
 
-    public void setSequence(String sequence) {
-        this.sequence = sequence;
+    public String getSequenceName() {
+        return sequenceName;
     }
 
-    public Integer getNumChunks() {
-        return numChunks;
-    }
-
-    public void setNumChunks(Integer numChunks) {
-        this.numChunks = numChunks;
+    public void setSequenceName(String sequenceName) {
+        this.sequenceName = sequenceName;
     }
 
     public Long getSequenceOffset() {
@@ -69,11 +63,12 @@ public class ProjectionChunk {
         this.sequenceOffset = sequenceOffset;
     }
 
-    public Integer getChunkArrayOffset() {
-        return chunkArrayOffset;
-    }
-
-    public void setChunkArrayOffset(Integer chunkArrayOffset) {
-        this.chunkArrayOffset = chunkArrayOffset;
+    public ProjectionChunk copy() {
+        ProjectionChunk projectionChunk = new ProjectionChunk();
+        projectionChunk.sequenceName = this.sequenceName ;
+        projectionChunk.originalChunkIndex = this.projectedChunkIndex;
+        projectionChunk.projectedChunkIndex = this.projectedChunkIndex;
+        projectionChunk.sequenceOffset = this.sequenceOffset ;
+        return projectionChunk;
     }
 }

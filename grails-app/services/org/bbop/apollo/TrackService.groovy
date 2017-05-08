@@ -74,7 +74,7 @@ class TrackService {
         return returnMap
     }
 
-    public Map<String, Boolean> getTracksVisibleForOrganismAndGroup(Organism organism, UserGroup userGroup) {
+    Map<String, Boolean> getTracksVisibleForOrganismAndGroup(Organism organism, UserGroup userGroup) {
         Map<String, Boolean> trackVisibilityMap = new HashMap<>()
 
         List<GroupTrackPermission> groupPermissions = GroupTrackPermission.findAllByOrganismAndGroup(organism, userGroup)
@@ -100,11 +100,11 @@ class TrackService {
      * @param user
      * @param organism
      */
-    public void setTracksVisibleForOrganismAndUser(Map<String, Boolean> trackVisibilityMap, Organism organism, User user) {
+    void setTracksVisibleForOrganismAndUser(Map<String, Boolean> trackVisibilityMap, Organism organism, User user) {
         UserTrackPermission userTrackPermission = UserTrackPermission.findByOrganismAndUser(organism, user)
         String jsonString = convertHashMapToJsonString(trackVisibilityMap)
         if (!userTrackPermission) {
-            userTrackPermission = new UserTrackPermission(
+            new UserTrackPermission(
                     user: user
                     , organism: organism
                     , trackVisibilities: jsonString
@@ -121,12 +121,12 @@ class TrackService {
      * @param group
      * @param organism
      */
-    public void setTracksVisibleForOrganismAndGroup(Map<String, Boolean> trackVisibilityMap, Organism organism, UserGroup group) {
+    void setTracksVisibleForOrganismAndGroup(Map<String, Boolean> trackVisibilityMap, Organism organism, UserGroup group) {
 
         GroupTrackPermission groupTrackPermission = GroupTrackPermission.findByOrganismAndGroup(organism, group)
         String jsonString = convertHashMapToJsonString(trackVisibilityMap)
         if (!groupTrackPermission) {
-            groupTrackPermission = new GroupTrackPermission(
+            new GroupTrackPermission(
                     group: group
                     , organism: organism
                     , trackVisibilities: jsonString
@@ -139,7 +139,7 @@ class TrackService {
 
     }
 
-    public Map<String, Boolean> getTracksVisibleForOrganismAndUser(Organism organism, User user) {
+    Map<String, Boolean> getTracksVisibleForOrganismAndUser(Organism organism, User user) {
         Map<String, Boolean> trackVisibilityMap = new HashMap<>()
 
         List<UserTrackPermission> userPermissionList = UserTrackPermission.findAllByOrganismAndUser(organism, user)
@@ -150,7 +150,7 @@ class TrackService {
                 Boolean visible = trackVisibilityMap.get(it)
                 // if null or false, can over-ride to true
                 if (!visible) {
-                    trackVisibilityMap.put(it, jsonObject.get(it))
+                    trackVisibilityMap.put(it, jsonObject.getBoolean(it))
                 }
             }
         }
@@ -173,7 +173,7 @@ class TrackService {
     }
 
 
-    def String getSequencePathName(String inputName) {
+    String getSequencePathName(String inputName) {
         if (inputName.contains("/")) {
             String[] tokens = inputName.split("/")
             return tokens.length >= 2 ? tokens[tokens.length - 2] : null
@@ -285,7 +285,6 @@ class TrackService {
             }
             // at this point do a sanity check on the projected coordinateJsonArray
             sanitizeCoordinateArray(coordinateJsonArray, sequenceDTO)
-
         }
 
         return trackDataJsonObject
@@ -400,11 +399,6 @@ class TrackService {
             )
             TrackIndex trackIndex = trackMapperService.getIndices(sequenceDTO, coordinate.getInt(0))
             // TODO: uncomment this to get 408011 to work and set the projectionSequence.offset to 0
-//            List<ProjectionSequence> projectionSequenceList = projection.getProjectionSequences(coordinate.getInt(trackIndex.getStart()),coordinate.getInt(trackIndex.getEnd()))
-//            if(projectionSequenceList){
-//                projectionSequence = projectionSequenceList.first()
-////                offset = projectionSequence.offset
-//            }
 
             Integer oldMin = coordinate.getInt(trackIndex.start) + projectionSequence.originalOffset
             Integer oldMax = coordinate.getInt(trackIndex.end) + projectionSequence.originalOffset
@@ -490,7 +484,7 @@ class TrackService {
         JSONObject finalObject = null
         int endSize = 0
         multiSequenceProjection.projectionChunkList.projectionChunkList.each { chunk ->
-            String chunkSequenceName = chunk.sequence.contains("{") ? JSON.parse(chunk.sequence).name : chunk.sequence
+            String chunkSequenceName = chunk.sequenceName.contains("{") ? JSON.parse(chunk.sequenceName).name : chunk.sequenceName
             JSONObject jsonObject = trackList.get(chunkSequenceName)
             SequenceDTO sequenceDTO = new SequenceDTO(
                     organismCommonName: organism.commonName
@@ -707,7 +701,6 @@ class TrackService {
 
         // can probably store the projection chunks
         Integer priorSequenceLength = 0
-        Integer priorChunkArrayOffset = 0
         String trackName = null
 
         // a sequence name
@@ -773,9 +766,11 @@ class TrackService {
         }
 
         Map<JSONObject, ProjectionChunk> previousTrackMap = new HashMap<>()
+        int projectedChunkId = 1;
         for (JSONObject sequenceArrayObject in sequenceArray) {
             ProjectionChunk projectionChunk = new ProjectionChunk(
-                    sequence: sequenceArrayObject,
+                    sequenceName: sequenceArrayObject,
+                    projectedChunkIndex: projectedChunkId
             )
             String sequencePathName = generateTrackNameForSequence(dataFileName, sequenceArrayObject.name)
             trackName = getTrackPathName(sequencePathName)
@@ -795,7 +790,6 @@ class TrackService {
                 )
                 trackMapperService.storeTrack(sequenceDTO, intervalsObject.getJSONArray("classes"))
                 Integer lastLength = 0
-                Integer lastChunkArrayOffset = 0
                 JSONObject sequenceKey = sequenceMap.keySet().find() {
                     it.name == sequenceArrayObject.name && it.start == sequenceArrayObject.start && it.end == sequenceArrayObject.end
                 }
@@ -804,32 +798,28 @@ class TrackService {
                     JSONArray internalArray = ncListArray.getJSONArray(i)
                     TrackIndex trackIndex = trackMapperService.getIndices(sequenceDTO, internalArray.getInt(0))
                     if (trackIndex.hasChunk()) {
-                        projectionChunk.addChunk()
                         Integer chunkIndex = trackIndex.getChunk()
                         Integer chunkID = internalArray.getInt(chunkIndex)
-                        projectionChunk.setChunkID(chunkID)
+                        projectionChunk.setOriginalChunkIndex(chunkID)
+                        projectedChunkId = projectionChunkList.addChunk(projectionChunk)
                     }
                     // only take if its greater
                     lastLength = sequenceLength > lastLength ? sequenceLength : lastLength
-                    ++lastChunkArrayOffset
                 }
 
-                projectionChunk.chunkArrayOffset = priorChunkArrayOffset
                 projectionChunk.sequenceOffset = priorSequenceLength
 
                 priorSequenceLength = priorSequenceLength + lastLength
-                priorChunkArrayOffset = priorChunkArrayOffset + lastChunkArrayOffset
 
-                // if we are projecting the same object, we don't a
-                if (previousTrackMap.containsKey(trackObject)) {
-                    --priorChunkArrayOffset
-                } else {
-                    projectionChunkList.addChunk(projectionChunk)
+                // if we are projecting the same object, we don't add it
+                if (!previousTrackMap.containsKey(trackObject)) {
+                    projectionChunkList.addThisChunk(projectionChunk)
                 }
 
                 trackObjectList.put(sequenceArrayObject.name, trackObject)
                 previousTrackMap.put(trackObject, projectionChunk)
             }
+            ++projectedChunkId ;
         }
 
         multiSequenceProjection.projectionChunkList = projectionChunkList
@@ -904,11 +894,12 @@ class TrackService {
         Integer chunkIndex = getChunkIndex(fileName)
         ProjectionChunk projectionChunk = multiSequenceProjection.projectionChunkList.findProjectChunkForIndex(chunkIndex)
         println "chunk index: ${chunkIndex}"
-        String sequenceString = projectionChunk.sequence
+        String sequenceString = projectionChunk.sequenceName
         Integer sequenceOffset = projectionChunk.sequenceOffset
         // calculate offset for chunk and replace the filename
         // should be the start of the string
-        String originalFileName = "lf-${chunkIndex - projectionChunk.chunkArrayOffset}.json"
+//        String originalFileName = "lf-${chunkIndex - projectionChunk.chunkArrayOffset}.json"
+        String originalFileName = "lf-${projectionChunk.originalChunkIndex}.json"
         dataFileName = dataFileName.replaceAll(fileName, originalFileName)
 
         // next we want to load tracks from the REAL paths . .  .
