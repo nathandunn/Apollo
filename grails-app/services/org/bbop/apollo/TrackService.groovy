@@ -558,6 +558,7 @@ class TrackService {
  "basesPerBin": "200000"}]}* @param o
  * @param o
  */
+    @NotTransactional
     JSONObject mergeHistograms(JSONObject first, JSONObject second) {
         // for stats . . just always take the higher between the two
         JSONObject firstStat = first.getJSONArray("stats").getJSONObject(0)
@@ -606,12 +607,12 @@ class TrackService {
             coordinate.set(trackIndex.getStart(), coordinate.getInt(trackIndex.getStart()) + nudgeAmount)
             coordinate.set(trackIndex.getEnd(), coordinate.getInt(trackIndex.getEnd()) + nudgeAmount)
 //            if(coordinate.get(0)==4){
-            if (trackIndex.hasChunk()) {
-//                trackIndex.sublistColumn
-                // sublist column is the last one?
-                Integer arrayIndex = coordinate.size() - 1
-                coordinate.set(arrayIndex, coordinate.getInt(arrayIndex) + nudgeIndex)
-            }
+//            if (trackIndex.hasChunk()) {
+////                trackIndex.sublistColumn
+//                // sublist column is the last one?
+//                Integer arrayIndex = coordinate.size() - 1
+//                coordinate.set(arrayIndex, coordinate.getInt(arrayIndex) + nudgeIndex)
+//            }
         }
 
         return coordinate
@@ -627,6 +628,7 @@ class TrackService {
      * @param second
      * @return
      */
+    @NotTransactional
     JSONObject mergeIntervals(JSONObject first, JSONObject second, Long endSize, SequenceDTO sequenceDTO) {
         first.put("minStart", first.getInt("minStart") + endSize)
         first.put("maxEnd", first.getInt("maxEnd") + endSize)
@@ -769,8 +771,10 @@ class TrackService {
         int projectedChunkId = 1;
         for (JSONObject sequenceArrayObject in sequenceArray) {
             ProjectionChunk projectionChunk = new ProjectionChunk(
-                    sequenceName: sequenceArrayObject,
-                    projectedChunkIndex: projectedChunkId
+                    sequenceName: sequenceArrayObject
+                    ,projectedChunkIndex: projectedChunkId
+                    ,sequenceOffset: priorSequenceLength
+
             )
             String sequencePathName = generateTrackNameForSequence(dataFileName, sequenceArrayObject.name)
             trackName = getTrackPathName(sequencePathName)
@@ -808,13 +812,12 @@ class TrackService {
                 }
 
                 projectionChunk.sequenceOffset = priorSequenceLength
-
                 priorSequenceLength = priorSequenceLength + lastLength
 
                 // if we are projecting the same object, we don't add it
-                if (!previousTrackMap.containsKey(trackObject)) {
-                    projectionChunkList.addThisChunk(projectionChunk)
-                }
+//                if (!previousTrackMap.containsKey(trackObject)) {
+//                    projectionChunkList.addThisChunk(projectionChunk)
+//                }
 
                 trackObjectList.put(sequenceArrayObject.name, trackObject)
                 previousTrackMap.put(trackObject, projectionChunk)

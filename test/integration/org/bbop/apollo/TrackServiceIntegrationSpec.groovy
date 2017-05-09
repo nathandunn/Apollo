@@ -286,6 +286,25 @@ class TrackServiceIntegrationSpec extends AbstractIntegrationSpec {
 
         then: "we expect the start and the stop to be in order "
         assert projectionChunkList.size()==5
+        assert projectionChunkList[0].sequenceName=='{"name":"Group1.10","start":0,"end":1405242,"reverse":false}'
+        assert projectionChunkList[0].sequenceOffset==0
+        assert projectionChunkList[0].projectedChunkIndex==1
+        assert projectionChunkList[0].originalChunkIndex==1
+        assert projectionChunkList[2].sequenceName=='{"name":"Group1.10","start":0,"end":1405242,"reverse":false}'
+        assert projectionChunkList[2].sequenceOffset==0
+        assert projectionChunkList[2].projectedChunkIndex==3
+        assert projectionChunkList[2].originalChunkIndex==3
+
+
+        assert projectionChunkList[3].sequenceName=="Group11.6"
+        assert projectionChunkList[3].sequenceOffset==1405242
+        assert projectionChunkList[3].projectedChunkIndex==4
+        assert projectionChunkList[3].originalChunkIndex==1
+        assert projectionChunkList[4].sequenceName=="Group11.6"
+        assert projectionChunkList[4].sequenceOffset==1405242
+        assert projectionChunkList[4].projectedChunkIndex==5
+        assert projectionChunkList[4].originalChunkIndex==2
+
         assert trackObject != null
         assert nclistArray.size() == 5
         assert nclistArray[0][1] < nclistArray[0][2]

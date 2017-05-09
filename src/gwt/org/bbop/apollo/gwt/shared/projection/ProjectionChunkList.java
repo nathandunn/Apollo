@@ -12,6 +12,7 @@ import java.util.List;
 
 public class ProjectionChunkList {
 
+    Integer currentProjectedChunkIndex = 1 ;
     public List<ProjectionChunk> projectionChunkList = new ArrayList<>();
 
     /**
@@ -26,8 +27,9 @@ public class ProjectionChunkList {
 
     public Integer addChunk(ProjectionChunk projectionChunk){
         ProjectionChunk duplicateChunk = projectionChunk.copy();
-        duplicateChunk.setProjectedChunkIndex(projectionChunk.getProjectedChunkIndex()+1);
-        duplicateChunk.setOriginalChunkIndex(projectionChunk.getOriginalChunkIndex()+1);
+        duplicateChunk.setProjectedChunkIndex(currentProjectedChunkIndex);
+        ++currentProjectedChunkIndex ;
+        duplicateChunk.setOriginalChunkIndex(projectionChunk.getOriginalChunkIndex());
         projectionChunkList.add(duplicateChunk);
         return duplicateChunk.getOriginalChunkIndex();
     }

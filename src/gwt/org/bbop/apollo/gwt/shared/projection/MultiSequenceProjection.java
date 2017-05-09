@@ -17,7 +17,6 @@ public class MultiSequenceProjection extends AbstractProjection {
     public static int DEFAULT_SCAFFOLD_BORDER_LENGTH = 0;
 
     /**
-     *
      * @param input
      * @return
      */
@@ -49,11 +48,14 @@ public class MultiSequenceProjection extends AbstractProjection {
         List<ProjectionSequence> projectionSequenceList = getProjectedSequences();
         for (int i = 0; i < projectionSequenceList.size(); i++) {
             ProjectionSequence projectionSequence = projectionSequenceList.get(i);
-            if (!orderedSequences.contains(projectionSequence)) {
-                if (minInput <= projectionSequence.getStart() && maxInput > projectionSequence.getStart() // left-edge
-                        || minInput < projectionSequence.getEnd() && maxInput >= projectionSequence.getEnd() // right-edge
-                        || minInput <= projectionSequence.getStart() && maxInput >= projectionSequence.getEnd() // outside
-                        || minInput >= projectionSequence.getStart() && maxInput <= projectionSequence.getEnd() // inside
+            long offset = projectionSequence.getOriginalOffset();
+            long min = minInput - offset;
+            long max = maxInput - offset;
+            if (!orderedSequences.contains(projectionSequence) && min >= 0 && max >= 0) {
+                if ((min <= projectionSequence.getStart() && max > projectionSequence.getStart()) // left-edge
+                        || (min < projectionSequence.getEnd() && max >= projectionSequence.getEnd()) // right-edge
+                        || (min <= projectionSequence.getStart() && max >= projectionSequence.getEnd()) // outside
+                        || (min >= projectionSequence.getStart() && max <= projectionSequence.getEnd()) // inside
                         ) {
                     orderedSequences.add(projectionSequence);
                 }
@@ -64,6 +66,7 @@ public class MultiSequenceProjection extends AbstractProjection {
 
     /**
      * Finds Project Sequences for projected min and max.
+     *
      * @param minInput
      * @param maxInput
      * @return
@@ -472,9 +475,9 @@ public class MultiSequenceProjection extends AbstractProjection {
     }
 
     /**
-     * @deprecated  Should figure a way to do this without relying on the sequence name
      * @param sequenceName
      * @return
+     * @deprecated Should figure a way to do this without relying on the sequence name
      */
     public Long getOffsetForSequence(String sequenceName) {
         if (projectionChunkList != null) {
