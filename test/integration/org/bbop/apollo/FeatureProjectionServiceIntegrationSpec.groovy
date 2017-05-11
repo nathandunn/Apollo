@@ -190,80 +190,6 @@ class FeatureProjectionServiceIntegrationSpec extends AbstractIntegrationSpec {
 
     }
 
-//    void "add transcript to second contiguous sequence with folding"(){
-//        given: "a transcript add operation"
-//        Integer start = 15734
-//        Integer end = 15947  // this is what is sent . . . , but this is "exclusive"
-//        Integer padding = 0
-//        String addTranscriptString = "{\"track\":{\"padding\":${padding}, \"projection\":\"Exon\", \"referenceTrack\":[\"Official Gene Set v3.2\"], \"sequenceList\":[{\"name\":\"Group11.4\"},{\"name\":\"GroupUn87\"}], \"label\":\"Group11.4::GroupUn87\"},\"features\":[{\"location\":{\"fmin\":${start},\"fmax\":${end},\"strand\":1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"mRNA\"},\"name\":\"GB53496-RA\",\"children\":[{\"location\":{\"fmin\":${start},\"fmax\":${end},\"strand\":1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}}]}],\"operation\":\"add_transcript\"}"
-//        String getFeaturesString = "{\"track\":{\"padding\":${padding}, \"projection\":\"Exon\", \"referenceTrack\":[\"Official Gene Set v3.2\"], \"sequenceList\":[{\"name\":\"Group11.4\"},{\"name\":\"GroupUn87\"}], \"label\":\"Group11.4::GroupUn87\"},\"operation\":\"get_features\"}"
-//
-//        when: "we add the transcript "
-//        JSONObject returnObject = requestHandlingService.addTranscript(JSON.parse(addTranscriptString) as JSONObject)
-//        JSONObject otherReturnObject = requestHandlingService.getFeatures(JSON.parse(getFeaturesString) as JSONObject)
-//        JSONArray featuresArray = otherReturnObject.getJSONArray(FeatureStringEnum.FEATURES.value)
-//        JSONObject locationObject = featuresArray.getJSONObject(0).getJSONObject(FeatureStringEnum.LOCATION.value)
-//        def features = Feature.all
-//        def featureLocations = FeatureLocation.all
-//        MRNA firstMRNA = MRNA.first()
-//
-//
-//        then: "we should get a gene added to the appropriate space"
-//        assert featuresArray.size()==1
-//        assert Gene.count == 1
-//        assert MRNA.count == 1
-//        assert CDS.count == 1
-//        assert Exon.count == 1
-//        MRNA.countByName("GB53496-RA-00001")==1
-//        assert locationObject.sequence == "GroupUn87"
-//        // the features array should be relative to the contiguous sequences
-//        // 9966   (shows up as 9967, but this is the stored coordinate)
-//        assert 9966 == 85051 - Sequence.findByName("Group11.4").length
-//        assert firstMRNA.featureLocations.first().fmin == 85051 - Sequence.findByName("Group11.4").length
-//        // 9966 + 213 = 10179 (inclusive), stored this way, returned this way, sent this way
-//        assert 10179 == 85264 - Sequence.findByName("Group11.4").length  // add one for exclusive max
-//        assert firstMRNA.featureLocations.first().fmax == 85264 - Sequence.findByName("Group11.4").length  // add one for exclusive max
-//        assert locationObject.fmin == start
-//        assert locationObject.fmax == end
-//
-//    }
-//
-//    void "add transcript to second contiguous sequence with folding and padding"(){
-//        given: "a transcript add operation"
-//        Integer start = 16974
-//        Integer end = 17187
-//        Integer padding = 20
-//        String addTranscriptString = "{\"track\":{\"padding\":${padding}, \"projection\":\"Exon\", \"referenceTrack\":[\"Official Gene Set v3.2\"], \"sequenceList\":[{\"name\":\"Group11.4\"},{\"name\":\"GroupUn87\"}], \"label\":\"Group11.4::GroupUn87\"},\"features\":[{\"location\":{\"fmin\":${start},\"fmax\":${end},\"strand\":1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"mRNA\"},\"name\":\"GB53496-RA\",\"children\":[{\"location\":{\"fmin\":${start},\"fmax\":${end},\"strand\":1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}}]}],\"operation\":\"add_transcript\"}"
-//        String getFeaturesString = "{\"track\":{\"padding\":${padding}, \"projection\":\"Exon\", \"referenceTrack\":[\"Official Gene Set v3.2\"], \"sequenceList\":[{\"name\":\"Group11.4\"},{\"name\":\"GroupUn87\"}], \"label\":\"Group11.4::GroupUn87\"},\"operation\":\"get_features\"}"
-//
-//        when: "we add the transcript "
-//        JSONObject returnObject = requestHandlingService.addTranscript(JSON.parse(addTranscriptString) as JSONObject)
-//        JSONObject otherReturnObject = requestHandlingService.getFeatures(JSON.parse(getFeaturesString) as JSONObject)
-//        JSONArray featuresArray = otherReturnObject.getJSONArray(FeatureStringEnum.FEATURES.value)
-//        JSONObject locationObject = featuresArray.getJSONObject(0).getJSONObject(FeatureStringEnum.LOCATION.value)
-//        def features = Feature.all
-//        def featureLocations = FeatureLocation.all
-//
-//
-//        then: "we should get a gene added to the appropriate space"
-//        assert featuresArray.size()==1
-//        assert Gene.count == 1
-//        assert MRNA.count == 1
-//        assert CDS.count == 1
-//        assert Exon.count == 1
-//        MRNA.countByName("GB53496-RA-00001")==1
-//        assert locationObject.sequence == "GroupUn87"
-//        // the features array should be relative to the contiguous sequences
-//        assert locationObject.fmin == 16974
-//        assert locationObject.fmax == 17187
-//
-//        assert MRNA.first().featureLocations.first().fmin == 85051 - Sequence.findByName("Group11.4").length - 1
-//        assert MRNA.first().featureLocations.first().fmax == 85264 - Sequence.findByName("Group11.4").length - 1
-//
-//
-//
-//    }
-
 //    @IgnoreRest
     void "Add a transcript to the three prime side side and correctly calculate splice sites and then set the exon boundaries and return them"() {
 
@@ -338,16 +264,6 @@ class FeatureProjectionServiceIntegrationSpec extends AbstractIntegrationSpec {
         then: "we should only see locations on Group11.4"
         assert locationJsonObject.fmin == 0
         assert locationJsonObject.fmax + MultiSequenceProjection.DEFAULT_SCAFFOLD_BORDER_LENGTH == 79565 - 78258
-
-//        when: "we retrieve features on the reverse group"
-//        retrievedFeatures = requestHandlingService.getFeatures(JSON.parse(getFeaturesStringReverse) as JSONObject).features
-//        JSONObject locationJsonObject1 = retrievedFeatures.getJSONObject(0).getJSONObject(FeatureStringEnum.LOCATION.value)
-//        JSONObject locationJsonObject2 = retrievedFeatures.getJSONObject(1).getJSONObject(FeatureStringEnum.LOCATION.value)
-//
-//        then: "we should see features on the reverse group"
-//        assert retrievedFeatures.size()==2
-//        assert locationJsonObject.fmin==0
-//        assert locationJsonObject.fmax==79565-78258
 
         when: "we move the exon boundary BACK across a scaffold"
         setExonBoundaryCommand2 = setExonBoundaryCommand2.replaceAll("@EXON_UNIQUE_NAME@", exonUniqueName)
@@ -1906,6 +1822,73 @@ class FeatureProjectionServiceIntegrationSpec extends AbstractIntegrationSpec {
         assert firstGeneLength == Gene.first().firstFeatureLocation.calculateLength()
 
 
+    }
+
+    // NOTE: for 1600
+    void "if we create a transcript in an assemblage and flip the first one, we should see normal results"(){
+
+        given: "if we create a transcript in the latter half of a combined scaffold it should not have any non-canonical splice sites"
+
+        when: "we add a transcript"
+//        requestHandlingService.addTranscript(JSON.parse(addTranscriptString) as JSONObject)
+//        Sequence sequenceGroupUn87 = Sequence.findByName("GroupUn87")
+////        Sequence sequenceGroup11_4 = Sequence.findByName("Group11.4")
+//        MRNA mrnaGb53499 = MRNA.findByName("GB53499-RA-00001")
+//        String exonUniqueName = Exon.first().uniqueName
+
+        then: "we should have a gene  with NO NonCanonical splice sites"
+//        assert MRNA.count == 1
+//        assert Gene.count == 1
+//        assert CDS.count == 1
+//        assert Exon.count == 1
+//        assert NonCanonicalFivePrimeSpliceSite.count == 0
+//        assert NonCanonicalThreePrimeSpliceSite.count == 0
+//        assert FeatureLocation.count == 1 + 1 + 1 + 1
+//        assert mrnaGb53499.featureLocations[0].sequence == sequenceGroupUn87
+
+        when: "we set the exon boundary across a scaffold"
+//        setExonBoundaryCommand1 = setExonBoundaryCommand1.replaceAll("@EXON_UNIQUE_NAME@", exonUniqueName)
+//        requestHandlingService.setExonBoundaries(JSON.parse(setExonBoundaryCommand1) as JSONObject)
+//        JSONArray retrievedFeatures = requestHandlingService.getFeatures(JSON.parse(getFeaturesString) as JSONObject).features
+//        JSONObject locationJsonObject = retrievedFeatures.getJSONObject(0).getJSONObject(FeatureStringEnum.LOCATION.value)
+
+        then: "we should have one transcript across two sequences"
+        assert MRNA.count == 1
+        assert Gene.count == 1
+        assert CDS.count == 1
+        assert Exon.count == 1
+        assert NonCanonicalFivePrimeSpliceSite.count == 0
+        assert NonCanonicalThreePrimeSpliceSite.count == 0
+        assert Exon.first().featureLocations.size() == 2
+        assert MRNA.first().featureLocations.size() == 2
+        assert Gene.first().featureLocations.size() == 2
+        assert CDS.first().featureLocations.size() == 1  // is just in the first sequence
+        assert FeatureLocation.count == (1 + 1 + 1) * 2 + 1   // same as above , but they are all split into two
+        assert Exon.first().featureLocations.sort() { it.rank }[0].sequence.name == "Group11.4"
+        assert Exon.first().featureLocations.sort() { it.rank }[1].sequence.name == "GroupUn87"
+        assert CDS.first().featureLocations[0].sequence.name == "GroupUn87"
+        // should be the same for all
+        assert Gene.first().featureLocations.sort() { it.rank }[0].sequence.name == "Group11.4"
+        assert Gene.first().featureLocations.sort() { it.rank }[1].sequence.name == "GroupUn87"
+//        assert locationJsonObject.fmin == 45455
+//        assert locationJsonObject.fmax == 79565
+
+        when: "we retrieve features on one Un87"
+//        retrievedFeatures = requestHandlingService.getFeatures(JSON.parse(getFeaturesStringUn87) as JSONObject).features
+//        locationJsonObject = retrievedFeatures.getJSONObject(0).getJSONObject(FeatureStringEnum.LOCATION.value)
+
+
+        then: "we should only see locations on Un87"
+//        assert locationJsonObject.fmin == 45455
+//        assert locationJsonObject.fmax == 78258
+
+        when: "we retrieve features on one Group11.4"
+//        retrievedFeatures = requestHandlingService.getFeatures(JSON.parse(getFeaturesString11_4) as JSONObject).features
+//        locationJsonObject = retrievedFeatures.getJSONObject(0).getJSONObject(FeatureStringEnum.LOCATION.value)
+
+        then: "we should only see locations on Group11.4"
+//        assert locationJsonObject.fmin == 0
+//        assert locationJsonObject.fmax + MultiSequenceProjection.DEFAULT_SCAFFOLD_BORDER_LENGTH == 79565 - 78258
     }
 
 }
