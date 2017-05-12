@@ -1824,41 +1824,48 @@ class FeatureProjectionServiceIntegrationSpec extends AbstractIntegrationSpec {
 
     }
 
+    @IgnoreRest
     // NOTE: for 1600
     void "if we create a transcript in an assemblage and flip the first one, we should see normal results"(){
 
-        given: "if we create a transcript in the latter half of a combined scaffold it should not have any non-canonical splice sites"
+        given: "adding transcript Group11.4::GroupUn87"
+        // adds transcripts GB52234-RA
+        String addTranscriptReverseFirstString = "{ ${testCredentials} \"track\":{\"sequenceList\":[{\"name\":\"Group11.4\",\"start\":0,\"end\":75085,\"reverse\":true,\"organism\":\"Honeybee\",\"location\":[{\"fmin\":0,\"fmax\":75085}]},{\"name\":\"GroupUn87\",\"start\":0,\"end\":78258,\"reverse\":false,\"organism\":\"Honeybee\",\"location\":[{\"fmin\":0,\"fmax\":78258}]}]},\"features\":[{\"location\":{\"fmin\":56489,\"fmax\":64828,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"mRNA\"},\"name\":\"GB52238-RA\",\"children\":[{\"location\":{\"fmin\":64783,\"fmax\":64828,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}},{\"location\":{\"fmin\":62032,\"fmax\":62364,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}},{\"location\":{\"fmin\":61724,\"fmax\":61852,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}},{\"location\":{\"fmin\":60713,\"fmax\":61380,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}},{\"location\":{\"fmin\":58858,\"fmax\":59669,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}},{\"location\":{\"fmin\":58608,\"fmax\":58686,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}},{\"location\":{\"fmin\":57599,\"fmax\":57805,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}},{\"location\":{\"fmin\":56631,\"fmax\":56867,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}},{\"location\":{\"fmin\":56489,\"fmax\":56524,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}},{\"location\":{\"fmin\":56489,\"fmax\":64828,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"CDS\"}}]}],\"operation\":\"add_transcript\" }"
+        String setExonBoundaryString = "{ ${testCredentials} \"track\":{\"sequenceList\":[{\"name\":\"Group11.4\",\"start\":0,\"end\":75085,\"reverse\":true,\"organism\":\"Honeybee\",\"location\":[{\"fmin\":0,\"fmax\":75085}]},{\"name\":\"GroupUn87\",\"start\":0,\"end\":78258,\"reverse\":false,\"organism\":\"Honeybee\",\"location\":[{\"fmin\":0,\"fmax\":78258}]}]},\"features\":[{\"uniquename\":\"@EXON_UNIQUE_NAME@\",\"location\":{\"fmin\":64783,\"fmax\":77508}}],\"operation\":\"set_exon_boundaries\"}"
+        String getFeatureString = "{ ${testCredentials} \"track\":{\"sequenceList\":[{\"name\":\"Group11.4\",\"start\":0,\"end\":75085,\"reverse\":true,\"organism\":\"Honeybee\",\"location\":[{\"fmin\":0,\"fmax\":75085}]},{\"name\":\"GroupUn87\",\"start\":0,\"end\":78258,\"reverse\":false,\"organism\":\"Honeybee\",\"location\":[{\"fmin\":0,\"fmax\":78258}]}]},\"operation\":\"get_features\"}"
 
         when: "we add a transcript"
-//        requestHandlingService.addTranscript(JSON.parse(addTranscriptString) as JSONObject)
-//        Sequence sequenceGroupUn87 = Sequence.findByName("GroupUn87")
-////        Sequence sequenceGroup11_4 = Sequence.findByName("Group11.4")
-//        MRNA mrnaGb53499 = MRNA.findByName("GB53499-RA-00001")
-//        String exonUniqueName = Exon.first().uniqueName
+        requestHandlingService.addTranscript(JSON.parse(addTranscriptReverseFirstString) as JSONObject)
+        Sequence sequenceGroupUn87 = Sequence.findByName("GroupUn87")
+        Sequence sequenceGroup11_4 = Sequence.findByName("Group11.4")
+        MRNA mrnaGb52238 = MRNA.findByName("GB52238-RA-00001")
+        String exonUniqueName = Exon.first().uniqueName
 
         then: "we should have a gene  with NO NonCanonical splice sites"
-//        assert MRNA.count == 1
-//        assert Gene.count == 1
-//        assert CDS.count == 1
-//        assert Exon.count == 1
-//        assert NonCanonicalFivePrimeSpliceSite.count == 0
-//        assert NonCanonicalThreePrimeSpliceSite.count == 0
-//        assert FeatureLocation.count == 1 + 1 + 1 + 1
-//        assert mrnaGb53499.featureLocations[0].sequence == sequenceGroupUn87
+        assert MRNA.count == 1
+        assert Gene.count == 1
+        assert CDS.count == 1
+        assert Exon.count == 9
+        assert NonCanonicalFivePrimeSpliceSite.count == 0
+        assert NonCanonicalThreePrimeSpliceSite.count == 0
+        assert FeatureLocation.count == 1 + 1 + 1 + 1*9
+        assert mrnaGb52238.featureLocations[0].sequence == sequenceGroup11_4
 
         when: "we set the exon boundary across a scaffold"
-//        setExonBoundaryCommand1 = setExonBoundaryCommand1.replaceAll("@EXON_UNIQUE_NAME@", exonUniqueName)
-//        requestHandlingService.setExonBoundaries(JSON.parse(setExonBoundaryCommand1) as JSONObject)
-//        JSONArray retrievedFeatures = requestHandlingService.getFeatures(JSON.parse(getFeaturesString) as JSONObject).features
-//        JSONObject locationJsonObject = retrievedFeatures.getJSONObject(0).getJSONObject(FeatureStringEnum.LOCATION.value)
+        println "exon unique name ${exonUniqueName}"
+        setExonBoundaryString = setExonBoundaryString.replaceAll("@EXON_UNIQUE_NAME@", exonUniqueName)
+        println "string ${exonUniqueName}"
+        requestHandlingService.setExonBoundaries(JSON.parse(setExonBoundaryString) as JSONObject)
+        JSONArray retrievedFeatures = requestHandlingService.getFeatures(JSON.parse(getFeatureString) as JSONObject).features
+        JSONObject locationJsonObject = retrievedFeatures.getJSONObject(0).getJSONObject(FeatureStringEnum.LOCATION.value)
 
         then: "we should have one transcript across two sequences"
         assert MRNA.count == 1
         assert Gene.count == 1
         assert CDS.count == 1
-        assert Exon.count == 1
-        assert NonCanonicalFivePrimeSpliceSite.count == 0
-        assert NonCanonicalThreePrimeSpliceSite.count == 0
+        assert Exon.count == 9
+//        assert NonCanonicalFivePrimeSpliceSite.count == 0
+//        assert NonCanonicalThreePrimeSpliceSite.count == 0
         assert Exon.first().featureLocations.size() == 2
         assert MRNA.first().featureLocations.size() == 2
         assert Gene.first().featureLocations.size() == 2
@@ -1866,29 +1873,16 @@ class FeatureProjectionServiceIntegrationSpec extends AbstractIntegrationSpec {
         assert FeatureLocation.count == (1 + 1 + 1) * 2 + 1   // same as above , but they are all split into two
         assert Exon.first().featureLocations.sort() { it.rank }[0].sequence.name == "Group11.4"
         assert Exon.first().featureLocations.sort() { it.rank }[1].sequence.name == "GroupUn87"
-        assert CDS.first().featureLocations[0].sequence.name == "GroupUn87"
+//        assert CDS.first().featureLocations[0].sequence.name == "GroupUn87"
         // should be the same for all
         assert Gene.first().featureLocations.sort() { it.rank }[0].sequence.name == "Group11.4"
         assert Gene.first().featureLocations.sort() { it.rank }[1].sequence.name == "GroupUn87"
-//        assert locationJsonObject.fmin == 45455
-//        assert locationJsonObject.fmax == 79565
 
-        when: "we retrieve features on one Un87"
-//        retrievedFeatures = requestHandlingService.getFeatures(JSON.parse(getFeaturesStringUn87) as JSONObject).features
-//        locationJsonObject = retrievedFeatures.getJSONObject(0).getJSONObject(FeatureStringEnum.LOCATION.value)
+        // 77508 (vs 11:4 max of 75085)
+        assert locationJsonObject.fmin == 10258
+        // 64783 = 75085 - 18596
+        assert locationJsonObject.fmax == 18596
 
-
-        then: "we should only see locations on Un87"
-//        assert locationJsonObject.fmin == 45455
-//        assert locationJsonObject.fmax == 78258
-
-        when: "we retrieve features on one Group11.4"
-//        retrievedFeatures = requestHandlingService.getFeatures(JSON.parse(getFeaturesString11_4) as JSONObject).features
-//        locationJsonObject = retrievedFeatures.getJSONObject(0).getJSONObject(FeatureStringEnum.LOCATION.value)
-
-        then: "we should only see locations on Group11.4"
-//        assert locationJsonObject.fmin == 0
-//        assert locationJsonObject.fmax + MultiSequenceProjection.DEFAULT_SCAFFOLD_BORDER_LENGTH == 79565 - 78258
     }
 
 }
