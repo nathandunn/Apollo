@@ -1829,7 +1829,7 @@ class FeatureProjectionServiceIntegrationSpec extends AbstractIntegrationSpec {
     void "if we create a transcript in an assemblage and flip the first one, we should see normal results"(){
 
         given: "adding transcript Group11.4::GroupUn87"
-        // adds transcripts GB52234-RA
+        // adds transcripts GB52238-RA
         String addTranscriptReverseFirstString = "{ ${testCredentials} \"track\":{\"sequenceList\":[{\"name\":\"Group11.4\",\"start\":0,\"end\":75085,\"reverse\":true,\"organism\":\"Honeybee\",\"location\":[{\"fmin\":0,\"fmax\":75085}]},{\"name\":\"GroupUn87\",\"start\":0,\"end\":78258,\"reverse\":false,\"organism\":\"Honeybee\",\"location\":[{\"fmin\":0,\"fmax\":78258}]}]},\"features\":[{\"location\":{\"fmin\":56489,\"fmax\":64828,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"mRNA\"},\"name\":\"GB52238-RA\",\"children\":[{\"location\":{\"fmin\":64783,\"fmax\":64828,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}},{\"location\":{\"fmin\":62032,\"fmax\":62364,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}},{\"location\":{\"fmin\":61724,\"fmax\":61852,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}},{\"location\":{\"fmin\":60713,\"fmax\":61380,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}},{\"location\":{\"fmin\":58858,\"fmax\":59669,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}},{\"location\":{\"fmin\":58608,\"fmax\":58686,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}},{\"location\":{\"fmin\":57599,\"fmax\":57805,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}},{\"location\":{\"fmin\":56631,\"fmax\":56867,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}},{\"location\":{\"fmin\":56489,\"fmax\":56524,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"exon\"}},{\"location\":{\"fmin\":56489,\"fmax\":64828,\"strand\":-1},\"type\":{\"cv\":{\"name\":\"sequence\"},\"name\":\"CDS\"}}]}],\"operation\":\"add_transcript\" }"
         String setExonBoundaryString = "{ ${testCredentials} \"track\":{\"sequenceList\":[{\"name\":\"Group11.4\",\"start\":0,\"end\":75085,\"reverse\":true,\"organism\":\"Honeybee\",\"location\":[{\"fmin\":0,\"fmax\":75085}]},{\"name\":\"GroupUn87\",\"start\":0,\"end\":78258,\"reverse\":false,\"organism\":\"Honeybee\",\"location\":[{\"fmin\":0,\"fmax\":78258}]}]},\"features\":[{\"uniquename\":\"@EXON_UNIQUE_NAME@\",\"location\":{\"fmin\":64783,\"fmax\":77508}}],\"operation\":\"set_exon_boundaries\"}"
         String getFeatureString = "{ ${testCredentials} \"track\":{\"sequenceList\":[{\"name\":\"Group11.4\",\"start\":0,\"end\":75085,\"reverse\":true,\"organism\":\"Honeybee\",\"location\":[{\"fmin\":0,\"fmax\":75085}]},{\"name\":\"GroupUn87\",\"start\":0,\"end\":78258,\"reverse\":false,\"organism\":\"Honeybee\",\"location\":[{\"fmin\":0,\"fmax\":78258}]}]},\"operation\":\"get_features\"}"
@@ -1840,9 +1840,13 @@ class FeatureProjectionServiceIntegrationSpec extends AbstractIntegrationSpec {
         Sequence sequenceGroup11_4 = Sequence.findByName("Group11.4")
         MRNA mrnaGb52238 = MRNA.findByName("GB52238-RA-00001")
         String exonUniqueName = Exon.first().uniqueName
+        def mrnaFeatureLocations = FeatureLocation.findAllByFeature(mrnaGb52238)
 
         then: "we should have a gene  with NO NonCanonical splice sites"
         assert MRNA.count == 1
+        assert mrnaFeatureLocations.size()==1
+        assert mrnaFeatureLocations.first().fmin == 10257
+        assert mrnaFeatureLocations.first().fmax == 18596
         assert Gene.count == 1
         assert CDS.count == 1
         assert Exon.count == 9
@@ -1858,19 +1862,33 @@ class FeatureProjectionServiceIntegrationSpec extends AbstractIntegrationSpec {
         requestHandlingService.setExonBoundaries(JSON.parse(setExonBoundaryString) as JSONObject)
         JSONArray retrievedFeatures = requestHandlingService.getFeatures(JSON.parse(getFeatureString) as JSONObject).features
         JSONObject locationJsonObject = retrievedFeatures.getJSONObject(0).getJSONObject(FeatureStringEnum.LOCATION.value)
+        mrnaGb52238 = MRNA.findByName("GB52238-RA-00001")
+        mrnaFeatureLocations = FeatureLocation.findAllByFeature(mrnaGb52238)
+        def allFeatures = Feature.all
+//        def firstFeatureLication = mrnaFeatureLocations.first()
+//        def lastFeatureLication = mrnaFeatureLocations.last()
 
         then: "we should have one transcript across two sequences"
         assert MRNA.count == 1
+        assert mrnaFeatureLocations.size()==2
+        assert mrnaFeatureLocations.first().sequence.name=="Group11.4"
+        assert mrnaFeatureLocations.last().sequence.name=="GroupUn87"
+        assert mrnaFeatureLocations.first().fmin == 75085 - 18596
+        assert mrnaFeatureLocations.first().fmax == 75085
+        assert mrnaFeatureLocations.last().fmin  == 0
+        assert mrnaFeatureLocations.last().fmax > 0
+        assert mrnaFeatureLocations.last().fmax == 77508 - 75085 // 2423
         assert Gene.count == 1
         assert CDS.count == 1
         assert Exon.count == 9
 //        assert NonCanonicalFivePrimeSpliceSite.count == 0
 //        assert NonCanonicalThreePrimeSpliceSite.count == 0
-        assert Exon.first().featureLocations.size() == 2
         assert MRNA.first().featureLocations.size() == 2
         assert Gene.first().featureLocations.size() == 2
         assert CDS.first().featureLocations.size() == 1  // is just in the first sequence
-        assert FeatureLocation.count == (1 + 1 + 1) * 2 + 1   // same as above , but they are all split into two
+//        assert FeatureLocation.count == (1 + 1 + 1) * 2 + 1   // same as above , but they are all split into two
+        assert FeatureLocation.count == 1*2 + 1*2 + 1 + 1*(9+1)
+        assert Exon.first().featureLocations.size() == 2
         assert Exon.first().featureLocations.sort() { it.rank }[0].sequence.name == "Group11.4"
         assert Exon.first().featureLocations.sort() { it.rank }[1].sequence.name == "GroupUn87"
 //        assert CDS.first().featureLocations[0].sequence.name == "GroupUn87"
