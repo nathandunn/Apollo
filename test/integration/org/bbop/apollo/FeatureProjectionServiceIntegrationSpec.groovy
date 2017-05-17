@@ -1873,8 +1873,9 @@ class FeatureProjectionServiceIntegrationSpec extends AbstractIntegrationSpec {
         assert mrnaFeatureLocations.size()==2
         assert mrnaFeatureLocations.first().sequence.name=="Group11.4"
         assert mrnaFeatureLocations.last().sequence.name=="GroupUn87"
-        assert mrnaFeatureLocations.first().fmin == 75085 - 18596
-        assert mrnaFeatureLocations.first().fmax == 75085
+        assert mrnaFeatureLocations.first().fmin == 0
+        // 75085 - 64783?
+        assert mrnaFeatureLocations.first().fmax == 18596
         assert mrnaFeatureLocations.last().fmin  == 0
         assert mrnaFeatureLocations.last().fmax > 0
         assert mrnaFeatureLocations.last().fmax == 77508 - 75085 // 2423
