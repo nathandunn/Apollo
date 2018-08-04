@@ -20,7 +20,7 @@ buildscript {
 
 plugins {
 //    id "com.eriwen.gradle.js" version "1.12.1"
-//    id "com.moowork.node" version "0.12"
+    id "com.moowork.node" version "1.2.0"
 }
 
 // In this section you declare where to find the dependencies of your project
